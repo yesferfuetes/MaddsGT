@@ -1,0 +1,817 @@
+/*
+ * websupport.js
+ * ~~~~~~~~~~~~~
+ *
+ * sphinx.websupport utilities for all documentation.
+ *
+ * :copyright: Copyright 2007-2019 by the Sphinx team, see AUTHORS.
+ * :license: BSD, see LICENSE for details.
+ *
+ */
+
+(function($) {
+  $.fn.autogrow = function() {
+    return this.each(function() {
+    var textarea = this;
+
+    $.fn.autogrow.resize(textarea);
+
+    $(textarea)
+      .focus(function() {
+        textarea.interval = setInterval(function() {
+          $.fn.autogrow.resize(textarea);
+        }, 500);
+      })
+      .blur(function() {
+        clearInterval(textarea.interval);
+      });
+    });
+  };
+
+  $.fn.autogrow.resize = function(textarea) {
+    var lineHeight = parseInt($(textarea).css('line-height'), 10);
+    var lines = textarea.value.split('\n');
+    var columns = textarea.cols;
+    var lineCount = 0;
+    $.each(lines, function() {
+      lineCount += Math.ceil(this.length / columns) || 1;
+    });
+    var height = lineHeight * (lineCount + 1);
+    $(textarea).css('height', height);
+  };
+})(jQuery);
+
+(function($) {
+  var comp, by;
+
+  function init() {
+    initEvents();
+    initComparator();
+  }
+
+  function initEvents() {
+    $(document).on("click", 'a.comment-close', function(event) {
+      event.preventDefault();
+      hide($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.vote', function(event) {
+      event.preventDefault();
+      handleVote($(this));
+    });
+    $(document).on("click", 'a.reply', function(event) {
+      event.preventDefault();
+      openReply($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.close-reply', function(event) {
+      event.preventDefault();
+      closeReply($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.sort-option', function(event) {
+      event.preventDefault();
+      handleReSort($(this));
+    });
+    $(document).on("click", 'a.show-proposal', function(event) {
+      event.preventDefault();
+      showProposal($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.hide-proposal', function(event) {
+      event.preventDefault();
+      hideProposal($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.show-propose-change', function(event) {
+      event.preventDefault();
+      showProposeChange($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.hide-propose-change', function(event) {
+      event.preventDefault();
+      hideProposeChange($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.accept-comment', function(event) {
+      event.preventDefault();
+      acceptComment($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.delete-comment', function(event) {
+      event.preventDefault();
+      deleteComment($(this).attr('id').substring(2));
+    });
+    $(document).on("click", 'a.comment-markup', function(event) {
+      event.preventDefault();
+      toggleCommentMarkupBox($(this).attr('id').substring(2));
+    });
+  }
+
+  /**
+   * Set comp, which is a comparator function used for sorting and
+   * inserting comments into the list.
+   */
+  function setComparator() {
+    // If the first three letters are "asc", sort in ascending order
+    // and remove the prefix.
+    if (by.substring(0,3) == 'asc') {
+      var i = by.substring(3);
+      comp = function(a, b) { return a[i] - b[i]; };
+    } else {
+      // Otherwise sort in descending order.
+      comp = function(a, b) { return b[by] - a[by]; };
+    }
+
+    // Reset link styles and format the selected sort option.
+    $('a.sel').attr('href', '#').removeClass('sel');
+    $('a.by' + by).removeAttr('href').addClass('sel');
+  }
+
+  /**
+   * Create a comp function. If the user has preferences stored in
+   * the sortBy cookie, use those, otherwise use the default.
+   */
+  function initComparator() {
+    by = 'rating'; // Default to sort by rating.
+    // If the sortBy cookie is set, use that instead.
+    if (document.cookie.length > 0) {
+      var start = document.cookie.indexOf('sortBy=');
+      if (start != -1) {
+        start = start + 7;
+        var end = document.cookie.indexOf(";", start);
+        if (end == -1) {
+          end = document.cookie.length;
+          by = unescape(document.cookie.substring(start, end));
+        }
+      }
+    }
+    setComparator();
+  }
+
+  /**
+   * Show a comment div.
+   */
+  function show(id) {
+    $('#ao' + id).hide();
+    $('#ah' + id).show();
+    var context = $.extend({id: id}, opts);
+    var popup = $(renderTemplate(popupTemplate, context)).hide();
+    popup.find('textarea[name="proposal"]').hide();
+    popup.find('a.by' + by).addClass('sel');
+    var form = popup.find('#cf' + id);
+    form.submit(function(event) {
+      event.preventDefault();
+      addComment(form);
+    });
+    $('#s' + id).after(popup);
+    popup.slideDown('fast', function() {
+      getComments(id);
+    });
+  }
+
+  /**
+   * Hide a comment div.
+   */
+  function hide(id) {
+    $('#ah' + id).hide();
+    $('#ao' + id).show();
+    var div = $('#sc' + id);
+    div.slideUp('fast', function() {
+      div.remove();
+    });
+  }
+
+  /**
+   * Perform an ajax request to get comments for a node
+   * and insert the comments into the comments tree.
+   */
+  function getComments(id) {
+    $.ajax({
+     type: 'GET',
+     url: opts.getCommentsURL,
+     data: {node: id},
+     success: function(data, textStatus, request) {
+       var ul = $('#cl' + id);
+       var speed = 100;
+       $('#cf' + id)
+         .find('textarea[name="proposal"]')
+         .data('source', data.source);
+
+       if (data.comments.length === 0) {
+         ul.html('<li>No comments yet.</li>');
+         ul.data('empty', true);
+       } else {
+         // If there are comments, sort them and put them in the list.
+         var comments = sortComments(data.comments);
+         speed = data.comments.length * 100;
+         appendComments(comments, ul);
+         ul.data('empty', false);
+       }
+       $('#cn' + id).slideUp(speed + 200);
+       ul.slideDown(speed);
+     },
+     error: function(request, textStatus, error) {
+       showError('Oops, there was a problem retrieving the comments.');
+     },
+     dataType: 'json'
+    });
+  }
+
+  /**
+   * Add a comment via ajax and insert the comment into the comment tree.
+   */
+  function addComment(form) {
+    var node_id = form.find('input[name="node"]').val();
+    var parent_id = form.find('input[name="parent"]').val();
+    var text = form.find('textarea[name="comment"]').val();
+    var proposal = form.find('textarea[name="proposal"]').val();
+
+    if (text == '') {
+      showError('Please enter a comment.');
+      return;
+    }
+
+    // Disable the form that is being submitted.
+    form.find('textarea,input').attr('disabled', 'disabled');
+
+    // Send the comment to the server.
+    $.ajax({
+      type: "POST",
+      url: opts.addCommentURL,
+      dataType: 'json',
+      data: {
+        node: node_id,
+        parent: parent_id,
+        text: text,
+        proposal: proposal
+      },
+      success: function(data, textStatus, error) {
+        // Reset the form.
+        if (node_id) {
+          hideProposeChange(node_id);
+        }
+        form.find('textarea')
+          .val('')
+          .add(form.find('input'))
+          .removeAttr('disabled');
+	var ul = $('#cl' + (node_id || parent_id));
+        if (ul.data('empty')) {
+          $(ul).empty();
+          ul.data('empty', false);
+        }
+        insertComment(data.comment);
+        var ao = $('#ao' + node_id);
+        ao.find('img').attr({'src': opts.commentBrightImage});
+        if (node_id) {
+          // if this was a "root" comment, remove the commenting box
+          // (the user can get it back by reopening the comment popup)
+          $('#ca' + node_id).slideUp();
+        }
+      },
+      error: function(request, textStatus, error) {
+        form.find('textarea,input').removeAttr('disabled');
+        showError('Oops, there was a problem adding the comment.');
+      }
+    });
+  }
+
+  /**
+   * Recursively append comments to the main comment list and children
+   * lists, creating the comment tree.
+   */
+  function appendComments(comments, ul) {
+    $.each(comments, function() {
+      var div = createCommentDiv(this);
+      ul.append($(document.createElement('li')).html(div));
+      appendComments(this.children, div.find('ul.comment-children'));
+      // To avoid stagnating data, don't store the comments children in data.
+      this.children = null;
+      div.data('comment', this);
+    });
+  }
+
+  /**
+   * After adding a new comment, it must be inserted in the correct
+   * location in the comment tree.
+   */
+  function insertComment(comment) {
+    var div = createCommentDiv(comment);
+
+    // To avoid stagnating data, don't store the comments children in data.
+    comment.children = null;
+    div.data('comment', comment);
+
+    var ul = $('#cl' + (comment.node || comment.parent));
+    var siblings = getChildren(ul);
+
+    var li = $(document.createElement('li'));
+    li.hide();
+
+    // Determine where in the parents children list to insert this comment.
+    for(var i=0; i < siblings.length; i++) {
+      if (comp(comment, siblings[i]) <= 0) {
+        $('#cd' + siblings[i].id)
+          .parent()
+          .before(li.html(div));
+        li.slideDown('fast');
+        return;
+      }
+    }
+
+    // If we get here, this comment rates lower than all the others,
+    // or it is the only comment in the list.
+    ul.append(li.html(div));
+    li.slideDown('fast');
+  }
+
+  function acceptComment(id) {
+    $.ajax({
+      type: 'POST',
+      url: opts.acceptCommentURL,
+      data: {id: id},
+      success: function(data, textStatus, request) {
+        $('#cm' + id).fadeOut('fast');
+        $('#cd' + id).removeClass('moderate');
+      },
+      error: function(request, textStatus, error) {
+        showError('Oops, there was a problem accepting the comment.');
+      }
+    });
+  }
+
+  function deleteComment(id) {
+    $.ajax({
+      type: 'POST',
+      url: opts.deleteCommentURL,
+      data: {id: id},
+      success: function(data, textStatus, request) {
+        var div = $('#cd' + id);
+        if (data == 'delete') {
+          // Moderator mode: remove the comment and all children immediately
+          div.slideUp('fast', function() {
+            div.remove();
+          });
+          return;
+        }
+        // User mode: only mark the comment as deleted
+        div
+          .find('span.user-id:first')
+          .text('[deleted]').end()
+          .find('div.comment-text:first')
+          .text('[deleted]').end()
+          .find('#cm' + id + ', #dc' + id + ', #ac' + id + ', #rc' + id +
+                ', #sp' + id + ', #hp' + id + ', #cr' + id + ', #rl' + id)
+          .remove();
+        var comment = div.data('comment');
+        comment.username = '[deleted]';
+        comment.text = '[deleted]';
+        div.data('comment', comment);
+      },
+      error: function(request, textStatus, error) {
+        showError('Oops, there was a problem deleting the comment.');
+      }
+    });
+  }
+
+  function showProposal(id) {
+    $('#sp' + id).hide();
+    $('#hp' + id).show();
+    $('#pr' + id).slideDown('fast');
+  }
+
+  function hideProposal(id) {
+    $('#hp' + id).hide();
+    $('#sp' + id).show();
+    $('#pr' + id).slideUp('fast');
+  }
+
+  function showProposeChange(id) {
+    $('#pc' + id).hide();
+    $('#hc' + id).show();
+    var textarea = $('#pt' + id);
+    textarea.val(textarea.data('source'));
+    $.fn.autogrow.resize(textarea[0]);
+    textarea.slideDown('fast');
+  }
+
+  function hideProposeChange(id) {
+    $('#hc' + id).hide();
+    $('#pc' + id).show();
+    var textarea = $('#pt' + id);
+    textarea.val('').removeAttr('disabled');
+    textarea.slideUp('fast');
+  }
+
+  function toggleCommentMarkupBox(id) {
+    $('#mb' + id).toggle();
+  }
+
+  /** Handle when the user clicks on a sort by link. */
+  function handleReSort(link) {
+    var classes = link.attr('class').split(/\s+/);
+    for (var i=0; i<classes.length; i++) {
+      if (classes[i] != 'sort-option') {
+	by = classes[i].substring(2);
+      }
+    }
+    setComparator();
+    // Save/update the sortBy cookie.
+    var expiration = new Date();
+    expiration.setDate(expiration.getDate() + 365);
+    document.cookie= 'sortBy=' + escape(by) +
+                     ';expires=' + expiration.toUTCString();
+    $('ul.comment-ul').each(function(index, ul) {
+      var comments = getChildren($(ul), true);
+      comments = sortComments(comments);
+      appendComments(comments, $(ul).empty());
+    });
+  }
+
+  /**
+   * Function to process a vote when a user clicks an arrow.
+   */
+  function handleVote(link) {
+    if (!opts.voting) {
+      showError("You'll need to login to vote.");
+      return;
+    }
+
+    var id = link.attr('id');
+    if (!id) {
+      // Didn't click on one of the voting arrows.
+      return;
+    }
+    // If it is an unvote, the new vote value is 0,
+    // Otherwise it's 1 for an upvote, or -1 for a downvote.
+    var value = 0;
+    if (id.charAt(1) != 'u') {
+      value = id.charAt(0) == 'u' ? 1 : -1;
+    }
+    // The data to be sent to the server.
+    var d = {
+      comment_id: id.substring(2),
+      value: value
+    };
+
+    // Swap the vote and unvote links.
+    link.hide();
+    $('#' + id.charAt(0) + (id.charAt(1) == 'u' ? 'v' : 'u') + d.comment_id)
+      .show();
+
+    // The div the comment is displayed in.
+    var div = $('div#cd' + d.comment_id);
+    var data = div.data('comment');
+
+    // If this is not an unvote, and the other vote arrow has
+    // already been pressed, unpress it.
+    if ((d.value !== 0) && (data.vote === d.value * -1)) {
+      $('#' + (d.value == 1 ? 'd' : 'u') + 'u' + d.comment_id).hide();
+      $('#' + (d.value == 1 ? 'd' : 'u') + 'v' + d.comment_id).show();
+    }
+
+    // Update the comments rating in the local data.
+    data.rating += (data.vote === 0) ? d.value : (d.value - data.vote);
+    data.vote = d.value;
+    div.data('comment', data);
+
+    // Change the rating text.
+    div.find('.rating:first')
+      .text(data.rating + ' point' + (data.rating == 1 ? '' : 's'));
+
+    // Send the vote information to the server.
+    $.ajax({
+      type: "POST",
+      url: opts.processVoteURL,
+      data: d,
+      error: function(request, textStatus, error) {
+        showError('Oops, there was a problem casting that vote.');
+      }
+    });
+  }
+
+  /**
+   * Open a reply form used to reply to an existing comment.
+   */
+  function openReply(id) {
+    // Swap out the reply link for the hide link
+    $('#rl' + id).hide();
+    $('#cr' + id).show();
+
+    // Add the reply li to the children ul.
+    var div = $(renderTemplate(replyTemplate, {id: id})).hide();
+    $('#cl' + id)
+      .prepend(div)
+      // Setup the submit handler for the reply form.
+      .find('#rf' + id)
+      .submit(function(event) {
+        event.preventDefault();
+        addComment($('#rf' + id));
+        closeReply(id);
+      })
+      .find('input[type=button]')
+      .click(function() {
+        closeReply(id);
+      });
+    div.slideDown('fast', function() {
+      $('#rf' + id).find('textarea').focus();
+    });
+  }
+
+  /**
+   * Close the reply form opened with openReply.
+   */
+  function closeReply(id) {
+    // Remove the reply div from the DOM.
+    $('#rd' + id).slideUp('fast', function() {
+      $(this).remove();
+    });
+
+    // Swap out the hide link for the reply link
+    $('#cr' + id).hide();
+    $('#rl' + id).show();
+  }
+
+  /**
+   * Recursively sort a tree of comments using the comp comparator.
+   */
+  function sortComments(comments) {
+    comments.sort(comp);
+    $.each(comments, function() {
+      this.children = sortComments(this.children);
+    });
+    return comments;
+  }
+
+  /**
+   * Get the children comments from a ul. If recursive is true,
+   * recursively include childrens' children.
+   */
+  function getChildren(ul, recursive) {
+    var children = [];
+    ul.children().children("[id^='cd']")
+      .each(function() {
+        var comment = $(this).data('comment');
+        if (recursive)
+          comment.children = getChildren($(this).find('#cl' + comment.id), true);
+        children.push(comment);
+      });
+    return children;
+  }
+
+  /** Create a div to display a comment in. */
+  function createCommentDiv(comment) {
+    if (!comment.displayed && !opts.moderator) {
+      return $('<div class="moderate">Thank you!  Your comment will show up '
+               + 'once it is has been approved by a moderator.</div>');
+    }
+    // Prettify the comment rating.
+    comment.pretty_rating = comment.rating + ' point' +
+      (comment.rating == 1 ? '' : 's');
+    // Make a class (for displaying not yet moderated comments differently)
+    comment.css_class = comment.displayed ? '' : ' moderate';
+    // Create a div for this comment.
+    var context = $.extend({}, opts, comment);
+    var div = $(renderTemplate(commentTemplate, context));
+
+    // If the user has voted on this comment, highlight the correct arrow.
+    if (comment.vote) {
+      var direction = (comment.vote == 1) ? 'u' : 'd';
+      div.find('#' + direction + 'v' + comment.id).hide();
+      div.find('#' + direction + 'u' + comment.id).show();
+    }
+
+    if (opts.moderator || comment.text != '[deleted]') {
+      div.find('a.reply').show();
+      if (comment.proposal_diff)
+        div.find('#sp' + comment.id).show();
+      if (opts.moderator && !comment.displayed)
+        div.find('#cm' + comment.id).show();
+      if (opts.moderator || (opts.username == comment.username))
+        div.find('#dc' + comment.id).show();
+    }
+    return div;
+  }
+
+  /**
+   * A simple template renderer. Placeholders such as <%id%> are replaced
+   * by context['id'] with items being escaped. Placeholders such as <#id#>
+   * are not escaped.
+   */
+  function renderTemplate(template, context) {
+    var esc = $(document.createElement('div'));
+
+    function handle(ph, escape) {
+      var cur = context;
+      $.each(ph.split('.'), function() {
+        cur = cur[this];
+      });
+      return escape ? esc.text(cur || "").html() : cur;
+    }
+
+    return template.replace(/<([%#])([\w\.]*)\1>/g, function() {
+      return handle(arguments[2], arguments[1] == '%' ? true : false);
+    });
+  }
+
+  /** Flash an error message briefly. */
+  function showError(message) {
+    $(document.createElement('div')).attr({'class': 'popup-error'})
+      .append($(document.createElement('div'))
+               .attr({'class': 'error-message'}).text(message))
+      .appendTo('body')
+      .fadeIn("slow")
+      .delay(2000)
+      .fadeOut("slow");
+  }
+
+  /** Add a link the user uses to open the comments popup. */
+  $.fn.comment = function() {
+    return this.each(function() {
+      var id = $(this).attr('id').substring(1);
+      var count = COMMENT_METADATA[id];
+      var title = count + ' comment' + (count == 1 ? '' : 's');
+      var image = count > 0 ? opts.commentBrightImage : opts.commentImage;
+      var addcls = count == 0 ? ' nocomment' : '';
+      $(this)
+        .append(
+          $(document.createElement('a')).attr({
+            href: '#',
+            'class': 'sphinx-comment-open' + addcls,
+            id: 'ao' + id
+          })
+            .append($(document.createElement('img')).attr({
+              src: image,
+              alt: 'comment',
+              title: title
+            }))
+            .click(function(event) {
+              event.preventDefault();
+              show($(this).attr('id').substring(2));
+            })
+        )
+        .append(
+          $(document.createElement('a')).attr({
+            href: '#',
+            'class': 'sphinx-comment-close hidden',
+            id: 'ah' + id
+          })
+            .append($(document.createElement('img')).attr({
+              src: opts.closeCommentImage,
+              alt: 'close',
+              title: 'close'
+            }))
+            .click(function(event) {
+              event.preventDefault();
+              hide($(this).attr('id').substring(2));
+            })
+        );
+    });
+  };
+
+  var opts = {
+    processVoteURL: '/_process_vote',
+    addCommentURL: '/_add_comment',
+    getCommentsURL: '/_get_comments',
+    acceptCommentURL: '/_accept_comment',
+    deleteCommentURL: '/_delete_comment',
+    commentImage: '/static/_static/comment.png',
+    closeCommentImage: '/static/_static/comment-close.png',
+    loadingImage: '/static/_static/ajax-loader.gif',
+    commentBrightImage: '/static/_static/comment-bright.png',
+    upArrow: '/static/_static/up.png',
+    downArrow: '/static/_static/down.png',
+    upArrowPressed: '/static/_static/up-pressed.png',
+    downArrowPressed: '/static/_static/down-pressed.png',
+    voting: false,
+    moderator: false
+  };
+
+  if (typeof COMMENT_OPTIONS != "undefined") {
+    opts = jQuery.extend(opts, COMMENT_OPTIONS);
+  }
+
+  var popupTemplate = '\
+    <div class="sphinx-comments" id="sc<%id%>">\
+      <p class="sort-options">\
+        Sort by:\
+        <a href="#" class="sort-option byrating">best rated</a>\
+        <a href="#" class="sort-option byascage">newest</a>\
+        <a href="#" class="sort-option byage">oldest</a>\
+      </p>\
+      <div class="comment-header">Comments</div>\
+      <div class="comment-loading" id="cn<%id%>">\
+        loading comments... <img src="<%loadingImage%>" alt="" /></div>\
+      <ul id="cl<%id%>" class="comment-ul"></ul>\
+      <div id="ca<%id%>">\
+      <p class="add-a-comment">Add a comment\
+        (<a href="#" class="comment-markup" id="ab<%id%>">markup</a>):</p>\
+      <div class="comment-markup-box" id="mb<%id%>">\
+        reStructured text markup: <i>*emph*</i>, <b>**strong**</b>, \
+        <code>``code``</code>, \
+        code blocks: <code>::</code> and an indented block after blank line</div>\
+      <form method="post" id="cf<%id%>" class="comment-form" action="">\
+        <textarea name="comment" cols="80"></textarea>\
+        <p class="propose-button">\
+          <a href="#" id="pc<%id%>" class="show-propose-change">\
+            Propose a change &#9657;\
+          </a>\
+          <a href="#" id="hc<%id%>" class="hide-propose-change">\
+            Propose a change &#9663;\
+          </a>\
+        </p>\
+        <textarea name="proposal" id="pt<%id%>" cols="80"\
+                  spellcheck="false"></textarea>\
+        <input type="submit" value="Add comment" />\
+        <input type="hidden" name="node" value="<%id%>" />\
+        <input type="hidden" name="parent" value="" />\
+      </form>\
+      </div>\
+    </div>';
+
+  var commentTemplate = '\
+    <div id="cd<%id%>" class="sphinx-comment<%css_class%>">\
+      <div class="vote">\
+        <div class="arrow">\
+          <a href="#" id="uv<%id%>" class="vote" title="vote up">\
+            <img src="<%upArrow%>" />\
+          </a>\
+          <a href="#" id="uu<%id%>" class="un vote" title="vote up">\
+            <img src="<%upArrowPressed%>" />\
+          </a>\
+        </div>\
+        <div class="arrow">\
+          <a href="#" id="dv<%id%>" class="vote" title="vote down">\
+            <img src="<%downArrow%>" id="da<%id%>" />\
+          </a>\
+          <a href="#" id="du<%id%>" class="un vote" title="vote down">\
+            <img src="<%downArrowPressed%>" />\
+          </a>\
+        </div>\
+      </div>\
+      <div class="comment-content">\
+        <p class="tagline comment">\
+          <span class="user-id"><%username%></span>\
+          <span class="rating"><%pretty_rating%></span>\
+          <span class="delta"><%time.delta%></span>\
+        </p>\
+        <div class="comment-text comment"><#text#></div>\
+        <p class="comment-opts comment">\
+          <a href="#" class="reply hidden" id="rl<%id%>">reply &#9657;</a>\
+          <a href="#" class="close-reply" id="cr<%id%>">reply &#9663;</a>\
+          <a href="#" id="sp<%id%>" class="show-proposal">proposal &#9657;</a>\
+          <a href="#" id="hp<%id%>" class="hide-proposal">proposal &#9663;</a>\
+          <a href="#" id="dc<%id%>" class="delete-comment hidden">delete</a>\
+          <span id="cm<%id%>" class="moderation hidden">\
+            <a href="#" id="ac<%id%>" class="accept-comment">accept</a>\
+          </span>\
+        </p>\
+        <pre class="proposal" id="pr<%id%>">\
+<#proposal_diff#>\
+        </pre>\
+          <ul class="comment-children" id="cl<%id%>"></ul>\
+        </div>\
+        <div class="clearleft"></div>\
+      </div>\
+    </div>';
+
+  var replyTemplate = '\
+    <li>\
+      <div class="reply-div" id="rd<%id%>">\
+        <form id="rf<%id%>">\
+          <textarea name="comment" cols="80"></textarea>\
+          <input type="submit" value="Add reply" />\
+          <input type="button" value="Cancel" />\
+          <input type="hidden" name="parent" value="<%id%>" />\
+          <input type="hidden" name="node" value="" />\
+        </form>\
+      </div>\
+    </li>';
+
+  $(document).ready(function() {
+    init();
+  });
+})(jQuery);
+
+$(document).ready(function() {
+  // add comment anchors for all paragraphs that are commentable
+  $('.sphinx-has-comment').comment();
+
+  // highlight search words in search results
+  $("div.context").each(function() {
+    var params = $.getQueryParameters();
+    var terms = (params.q) ? params.q[0].split(/\s+/) : [];
+    var result = $(this);
+    $.each(terms, function() {
+      result.highlightText(this.toLowerCase(), 'highlighted');
+    });
+  });
+
+  // directly open comment window if requested
+  var anchor = document.location.hash;
+  if (anchor.substring(0, 9) == '#comment-') {
+    $('#ao' + anchor.substring(9)).click();
+    document.location.hash = '#s' + anchor.substring(9);
+  }
+});
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     /**
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ *
+ * Version: 5.5.1 (2020-10-01)
+ */
+!function(){"use strict";var x=function(){return(x=Object.assign||function(n){for(var e,t=1,r=arguments.length;t<r;t++)for(var o in e=arguments[t])Object.prototype.hasOwnProperty.call(e,o)&&(n[o]=e[o]);return n}).apply(this,arguments)};function c(n,e){var t={};for(var r in n)Object.prototype.hasOwnProperty.call(n,r)&&e.indexOf(r)<0&&(t[r]=n[r]);if(null!=n&&"function"==typeof Object.getOwnPropertySymbols)for(var o=0,r=Object.getOwnPropertySymbols(n);o<r.length;o++)e.indexOf(r[o])<0&&Object.prototype.propertyIsEnumerable.call(n,r[o])&&(t[r[o]]=n[r[o]]);return t}function u(){for(var n=0,e=0,t=arguments.length;e<t;e++)n+=arguments[e].length;for(var r=Array(n),o=0,e=0;e<t;e++)for(var i=arguments[e],u=0,c=i.length;u<c;u++,o++)r[o]=i[u];return r}var O=function(){},a=function(t,r){return function(){for(var n=[],e=0;e<arguments.length;e++)n[e]=arguments[e];return t(r.apply(null,n))}},y=function(n){return function(){return n}},v=function(n){return n};function b(r){for(var o=[],n=1;n<arguments.length;n++)o[n-1]=arguments[n];return function(){for(var n=[],e=0;e<arguments.length;e++)n[e]=arguments[e];var t=o.concat(n);return r.apply(null,t)}}var n,e,t,r,o,i,m=function(e){return function(n){return!e(n)}},f=function(n){return function(){throw new Error(n)}},s=function(n){return n()},l=y(!1),w=y(!0),d=function(t){var r,o=!1;return function(){for(var n=[],e=0;e<arguments.length;e++)n[e]=arguments[e];return o||(o=!0,r=t.apply(null,n)),r}},g=function(){return p},p=(n=function(n){return n.isNone()},{fold:function(n,e){return n()},is:l,isSome:l,isNone:w,getOr:t=function(n){return n},getOrThunk:e=function(n){return n()},getOrDie:function(n){throw new Error(n||"error: getOrDie called on none.")},getOrNull:y(null),getOrUndefined:y(undefined),or:t,orThunk:e,map:g,each:O,bind:g,exists:l,forall:w,filter:g,equals:n,equals_:n,toArray:function(){return[]},toString:y("none()")}),h=function(t){var n=y(t),e=function(){return o},r=function(n){return n(t)},o={fold:function(n,e){return e(t)},is:function(n){return t===n},isSome:w,isNone:l,getOr:n,getOrThunk:n,getOrDie:n,getOrNull:n,getOrUndefined:n,or:e,orThunk:e,map:function(n){return h(n(t))},each:function(n){n(t)},bind:r,exists:r,forall:r,filter:function(n){return n(t)?o:p},toArray:function(){return[t]},toString:function(){return"some("+t+")"},equals:function(n){return n.is(t)},equals_:function(n,e){return n.fold(l,function(n){return e(t,n)})}};return o},T={some:h,none:g,from:function(n){return null===n||n===undefined?p:h(n)}},S=function(r){return function(n){return t=typeof(e=n),(null===e?"null":"object"==t&&(Array.prototype.isPrototypeOf(e)||e.constructor&&"Array"===e.constructor.name)?"array":"object"==t&&(String.prototype.isPrototypeOf(e)||e.constructor&&"String"===e.constructor.name)?"string":t)===r;var e,t}},k=function(e){return function(n){return typeof n===e}},E=S("string"),C=S("object"),M=S("array"),D=k("boolean"),_=function(n){return!(null===(e=n)||e===undefined);var e},I=k("function"),F=k("number"),R=Array.prototype.slice,V=Array.prototype.indexOf,B=Array.prototype.push,A=function(n,e){return t=n,r=e,-1<V.call(t,r);var t,r},j=function(n,e){for(var t=0,r=n.length;t<r;t++){if(e(n[t],t))return!0}return!1},N=function(n,e){for(var t=n.length,r=new Array(t),o=0;o<t;o++){var i=n[o];r[o]=e(i,o)}return r},P=function(n,e){for(var t=0,r=n.length;t<r;t++){e(n[t],t)}},H=function(n,e){for(var t=[],r=0,o=n.length;r<o;r++){var i=n[r];e(i,r)&&t.push(i)}return t},z=function(n,e,t){return function(n,e){for(var t=n.length-1;0<=t;t--){e(n[t],t)}}(n,function(n){t=e(t,n)}),t},L=function(n,e,t){return P(n,function(n){t=e(t,n)}),t},G=function(n,e){return function(n,e,t){for(var r=0,o=n.length;r<o;r++){var i=n[r];if(e(i,r))return T.some(i);if(t(i,r))break}return T.none()}(n,e,l)},$=function(n,e){for(var t=0,r=n.length;t<r;t++){if(e(n[t],t))return T.some(t)}return T.none()},U=function(n){for(var e=[],t=0,r=n.length;t<r;++t){if(!M(n[t]))throw new Error("Arr.flatten item "+t+" was not an array, input: "+n);B.apply(e,n[t])}return e},W=function(n,e){return U(N(n,e))},X=function(n,e){for(var t=0,r=n.length;t<r;++t){if(!0!==e(n[t],t))return!1}return!0},q=function(n){var e=R.call(n,0);return e.reverse(),e},Y=function(n,e){return H(n,function(n){return!A(e,n)})},K=function(n){return[n]},J=function(n,e){for(var t=0;t<n.length;t++){var r=e(n[t],t);if(r.isSome())return r}return T.none()},Q=function(n,e){var t=function(n,e){for(var t=0;t<n.length;t++){var r=n[t];if(r.test(e))return r}return undefined}(n,e);if(!t)return{major:0,minor:0};var r=function(n){return Number(e.replace(t,"$"+n))};return nn(r(1),r(2))},Z=function(){return nn(0,0)},nn=function(n,e){return{major:n,minor:e}},en={nu:nn,detect:function(n,e){var t=String(e).toLowerCase();return 0===n.length?Z():Q(n,t)},unknown:Z},tn=function(n,e){var t=String(e).toLowerCase();return G(n,function(n){return n.search(t)})},rn=function(n,t){return tn(n,t).map(function(n){var e=en.detect(n.versionRegexes,t);return{current:n.name,version:e}})},on=function(n,t){return tn(n,t).map(function(n){var e=en.detect(n.versionRegexes,t);return{current:n.name,version:e}})},un=function(n,o){return n.replace(/\$\{([^{}]*)\}/g,function(n,e){var t,r=o[e];return"string"==(t=typeof r)||"number"==t?r.toString():n})},cn=function(n,e){return-1!==n.indexOf(e)},an=(r=/^\s+|\s+$/g,function(n){return n.replace(r,"")}),fn=/.*?version\/\ ?([0-9]+)\.([0-9]+).*/,sn=function(e){return function(n){return cn(n,e)}},ln=[{name:"Edge",versionRegexes:[/.*?edge\/ ?([0-9]+)\.([0-9]+)$/],search:function(n){return cn(n,"edge/")&&cn(n,"chrome")&&cn(n,"safari")&&cn(n,"applewebkit")}},{name:"Chrome",versionRegexes:[/.*?chrome\/([0-9]+)\.([0-9]+).*/,fn],search:function(n){return cn(n,"chrome")&&!cn(n,"chromeframe")}},{name:"IE",versionRegexes:[/.*?msie\ ?([0-9]+)\.([0-9]+).*/,/.*?rv:([0-9]+)\.([0-9]+).*/],search:function(n){return cn(n,"msie")||cn(n,"trident")}},{name:"Opera",versionRegexes:[fn,/.*?opera\/([0-9]+)\.([0-9]+).*/],search:sn("opera")},{name:"Firefox",versionRegexes:[/.*?firefox\/\ ?([0-9]+)\.([0-9]+).*/],search:sn("firefox")},{name:"Safari",versionRegexes:[fn,/.*?cpu os ([0-9]+)_([0-9]+).*/],search:function(n){return(cn(n,"safari")||cn(n,"mobile/"))&&cn(n,"applewebkit")}}],dn=[{name:"Windows",search:sn("win"),versionRegexes:[/.*?windows\ nt\ ?([0-9]+)\.([0-9]+).*/]},{name:"iOS",search:function(n){return cn(n,"iphone")||cn(n,"ipad")},versionRegexes:[/.*?version\/\ ?([0-9]+)\.([0-9]+).*/,/.*cpu os ([0-9]+)_([0-9]+).*/,/.*cpu iphone os ([0-9]+)_([0-9]+).*/]},{name:"Android",search:sn("android"),versionRegexes:[/.*?android\ ?([0-9]+)\.([0-9]+).*/]},{name:"OSX",search:sn("mac os x"),versionRegexes:[/.*?mac\ os\ x\ ?([0-9]+)_([0-9]+).*/]},{name:"Linux",search:sn("linux"),versionRegexes:[]},{name:"Solaris",search:sn("sunos"),versionRegexes:[]},{name:"FreeBSD",search:sn("freebsd"),versionRegexes:[]},{name:"ChromeOS",search:sn("cros"),versionRegexes:[/.*?chrome\/([0-9]+)\.([0-9]+).*/]}],mn={browsers:y(ln),oses:y(dn)},gn="Firefox",pn=function(n){var e=n.current,t=n.version,r=function(n){return function(){return e===n}};return{current:e,version:t,isEdge:r("Edge"),isChrome:r("Chrome"),isIE:r("IE"),isOpera:r("Opera"),isFirefox:r(gn),isSafari:r("Safari")}},hn={unknown:function(){return pn({current:undefined,version:en.unknown()})},nu:pn,edge:y("Edge"),chrome:y("Chrome"),ie:y("IE"),opera:y("Opera"),firefox:y(gn),safari:y("Safari")},vn="Windows",yn="Android",bn="Solaris",xn="FreeBSD",wn="ChromeOS",Sn=function(n){var e=n.current,t=n.version,r=function(n){return function(){return e===n}};return{current:e,version:t,isWindows:r(vn),isiOS:r("iOS"),isAndroid:r(yn),isOSX:r("OSX"),isLinux:r("Linux"),isSolaris:r(bn),isFreeBSD:r(xn),isChromeOS:r(wn)}},On={unknown:function(){return Sn({current:undefined,version:en.unknown()})},nu:Sn,windows:y(vn),ios:y("iOS"),android:y(yn),linux:y("Linux"),osx:y("OSX"),solaris:y(bn),freebsd:y(xn),chromeos:y(wn)},Tn=function(n,e){var t,r,o,i,u,c,a,f,s,l,d,m,g=mn.browsers(),p=mn.oses(),h=rn(g,n).fold(hn.unknown,hn.nu),v=on(p,n).fold(On.unknown,On.nu);return{browser:h,os:v,deviceType:(r=h,o=n,i=e,u=(t=v).isiOS()&&!0===/ipad/i.test(o),c=t.isiOS()&&!u,a=t.isiOS()||t.isAndroid(),f=a||i("(pointer:coarse)"),s=u||!c&&a&&i("(min-device-width:768px)"),l=c||a&&!s,d=r.isSafari()&&t.isiOS()&&!1===/safari/i.test(o),m=!l&&!s&&!d,{isiPad:y(u),isiPhone:y(c),isTablet:y(s),isPhone:y(l),isTouch:y(f),isAndroid:t.isAndroid,isiOS:t.isiOS,isWebView:y(d),isDesktop:y(m)})}},kn=function(n){return window.matchMedia(n).matches},En=d(function(){return Tn(navigator.userAgent,kn)}),Cn=function(){return En()},Mn=y,Dn=Mn("touchstart"),_n=Mn("touchmove"),In=Mn("touchend"),Fn=Mn("mousedown"),Rn=Mn("mousemove"),Vn=Mn("mouseup"),Bn=Mn("mouseover"),An=Mn("keydown"),jn=Mn("keyup"),Nn=Mn("input"),Pn=Mn("change"),Hn=Mn("click"),zn=Mn("transitionend"),Ln=Mn("selectstart"),Gn=function(n){return y("alloy."+n)},$n={tap:Gn("tap")},Un=Gn("focus"),Wn=Gn("blur.post"),Xn=Gn("paste.post"),qn=Gn("receive"),Yn=Gn("execute"),Kn=Gn("focus.item"),Jn=$n.tap,Qn=Gn("longpress"),Zn=Gn("system.init"),ne=Gn("system.attached"),ee=Gn("system.detached"),te=Gn("focusmanager.shifted"),re=Gn("highlight"),oe=Gn("dehighlight"),ie=function(n,e){fe(n,n.element,e,{})},ue=function(n,e,t){fe(n,n.element,e,t)},ce=function(n){ie(n,Yn())},ae=function(n,e,t){fe(n,e,t,{})},fe=function(n,e,t,r){var o=x({target:e},r);n.getSystem().triggerEvent(t,e,o)},se=function(n){if(null===n||n===undefined)throw new Error("Node cannot be null or undefined");return{dom:n}},le={fromHtml:function(n,e){var t=(e||document).createElement("div");if(t.innerHTML=n,!t.hasChildNodes()||1<t.childNodes.length)throw console.error("HTML does not have a single root node",n),new Error("HTML must have a single root node");return se(t.childNodes[0])},fromTag:function(n,e){var t=(e||document).createElement(n);return se(t)},fromText:function(n,e){var t=(e||document).createTextNode(n);return se(t)},fromDom:se,fromPoint:function(n,e,t){return T.from(n.dom.elementFromPoint(e,t)).map(se)}},de=function(n,e){var t=n.dom;if(1!==t.nodeType)return!1;var r=t;if(r.matches!==undefined)return r.matches(e);if(r.msMatchesSelector!==undefined)return r.msMatchesSelector(e);if(r.webkitMatchesSelector!==undefined)return r.webkitMatchesSelector(e);if(r.mozMatchesSelector!==undefined)return r.mozMatchesSelector(e);throw new Error("Browser lacks native selectors")},me=function(n){return 1!==n.nodeType&&9!==n.nodeType&&11!==n.nodeType||0===n.childElementCount},ge=function(n,e){var t=e===undefined?document:e.dom;return me(t)?[]:N(t.querySelectorAll(n),le.fromDom)},pe=function(n,e){var t=e===undefined?document:e.dom;return me(t)?T.none():T.from(t.querySelector(n)).map(le.fromDom)},he=function(n,e){return n.dom===e.dom},ve=("undefined"!=typeof window||Function("return this;")(),function(n){return n.dom.nodeName.toLowerCase()}),ye=function(e){return function(n){return n.dom.nodeType===e}},be=ye(1),xe=ye(3),we=ye(9),Se=ye(11),Oe=function(n){return le.fromDom(n.dom.ownerDocument)},Te=function(n){return we(n)?n:Oe(n)},ke=function(n){return T.from(n.dom.parentNode).map(le.fromDom)},Ee=function(n){return N(n.dom.childNodes,le.fromDom)},Ce=function(n,e){var t=n.dom.childNodes;return T.from(t[e]).map(le.fromDom)},Me=function(e,t){ke(e).each(function(n){n.dom.insertBefore(t.dom,e.dom)})},De=function(n,e){var t;(t=n,T.from(t.dom.nextSibling).map(le.fromDom)).fold(function(){ke(n).each(function(n){Ie(n,e)})},function(n){Me(n,e)})},_e=function(e,t){Ce(e,0).fold(function(){Ie(e,t)},function(n){e.dom.insertBefore(t.dom,n.dom)})},Ie=function(n,e){n.dom.appendChild(e.dom)},Fe=function(e,n){P(n,function(n){Ie(e,n)})},Re=function(n){n.dom.textContent="",P(Ee(n),function(n){Ve(n)})},Ve=function(n){var e=n.dom;null!==e.parentNode&&e.parentNode.removeChild(e)},Be=I(Element.prototype.attachShadow)&&I(Node.prototype.getRootNode),Ae=y(Be),je=Be?function(n){return le.fromDom(n.dom.getRootNode())}:Te,Ne=function(n){var e=je(n);return Se(e)?T.some(e):T.none()},Pe=function(n){return le.fromDom(n.dom.host)},He=function(n){if(Ae()&&_(n.target)){var e=le.fromDom(n.target);if(be(e)&&ze(e)&&n.composed&&n.composedPath){var t=n.composedPath();if(t)return 0===(r=t).length?T.none():T.some(r[0])}}var r;return T.from(n.target)},ze=function(n){return _(n.dom.shadowRoot)},Le=function(n){var e=xe(n)?n.dom.parentNode:n.dom;if(e===undefined||null===e||null===e.ownerDocument)return!1;var t,r,o=e.ownerDocument;return Ne(le.fromDom(e)).fold(function(){return o.body.contains(e)},(t=Le,r=Pe,function(n){return t(r(n))}))},Ge=function(){return $e(le.fromDom(document))},$e=function(n){var e=n.dom.body;if(null===e||e===undefined)throw new Error("Body is not available yet");return le.fromDom(e)},Ue=function(n){ie(n,ee());var e=n.components();P(e,Ue)},We=function(n){var e=n.components();P(e,We),ie(n,ne())},Xe=function(n,e){Ie(n.element,e.element)},qe=function(e,n){var t,r=e.components();P((t=e).components(),function(n){return Ve(n.element)}),Re(t.element),t.syncComponents();var o=Y(r,n);P(o,function(n){Ue(n),e.getSystem().removeFromWorld(n)}),P(n,function(n){n.getSystem().isConnected()?Xe(e,n):(e.getSystem().addToWorld(n),Xe(e,n),Le(e.element)&&We(n)),e.syncComponents()})},Ye=function(n,e,t){n.getSystem().addToWorld(e),t(n.element,e.element),Le(n.element)&&We(e),n.syncComponents()},Ke=function(e){var n,t=ke(e.element).bind(function(n){return e.getSystem().getByDom(n).toOptional()});Ue(n=e),Ve(n.element),n.getSystem().removeFromWorld(n),t.each(function(n){n.syncComponents()})},Je=function(n,e,t){t(n,e.element);var r=Ee(e.element);P(r,function(n){e.getByDom(n).each(We)})},Qe=Object.keys,Ze=Object.hasOwnProperty,nt=function(n,e){for(var t=Qe(n),r=0,o=t.length;r<o;r++){var i=t[r];e(n[i],i)}},et=function(n,t){return tt(n,function(n,e){return{k:e,v:t(n,e)}})},tt=function(n,r){var o={};return nt(n,function(n,e){var t=r(n,e);o[t.k]=t.v}),o},rt=function(n,e){var t,r,o,i,u={};return t=e,i=u,r=function(n,e){i[e]=n},o=O,nt(n,function(n,e){(t(n,e)?r:o)(n,e)}),u},ot=function(n,t){var r=[];return nt(n,function(n,e){r.push(t(n,e))}),r},it=function(n,e){return ut(n,e)?T.from(n[e]):T.none()},ut=function(n,e){return Ze.call(n,e)},ct=function(n,e){return ut(n,e)&&n[e]!==undefined&&null!==n[e]},at=function(n,e,t){if(!(E(t)||D(t)||F(t)))throw console.error("Invalid call to Attribute.set. Key ",e,":: Value ",t,":: Element ",n),new Error("Attribute value was not simple");n.setAttribute(e,t+"")},ft=function(n,e,t){at(n.dom,e,t)},st=function(n,e){var t=n.dom;nt(e,function(n,e){at(t,e,n)})},lt=function(n,e){var t=n.dom.getAttribute(e);return null===t?undefined:t},dt=function(n,e){return T.from(lt(n,e))},mt=function(n,e){var t=n.dom;return!(!t||!t.hasAttribute)&&t.hasAttribute(e)},gt=function(n,e){n.dom.removeAttribute(e)},pt=function(n,e){var t=lt(n,e);return t===undefined||""===t?[]:t.split(" ")},ht=function(n){return n.dom.classList!==undefined},vt=function(n,e){return o=e,i=pt(t=n,r="class").concat([o]),ft(t,r,i.join(" ")),!0;var t,r,o,i},yt=function(n,e){return o=e,0<(i=H(pt(t=n,r="class"),function(n){return n!==o})).length?ft(t,r,i.join(" ")):gt(t,r),!1;var t,r,o,i},bt=function(n,e){ht(n)?n.dom.classList.add(e):vt(n,e)},xt=function(n){0===(ht(n)?n.dom.classList:pt(n,"class")).length&&gt(n,"class")},wt=function(n,e){ht(n)?n.dom.classList.remove(e):yt(n,e),xt(n)},St=function(n,e){return ht(n)&&n.dom.classList.contains(e)},Ot=function(n,e,t){wt(n,t),bt(n,e)},Tt=/* */Object.freeze({__proto__:null,toAlpha:function(n,e,t){Ot(n.element,e.alpha,e.omega)},toOmega:function(n,e,t){Ot(n.element,e.omega,e.alpha)},isAlpha:function(n,e,t){return St(n.element,e.alpha)},isOmega:function(n,e,t){return St(n.element,e.omega)},clear:function(n,e,t){wt(n.element,e.alpha),wt(n.element,e.omega)}}),kt=function(t){return{is:function(n){return t===n},isValue:w,isError:l,getOr:y(t),getOrThunk:y(t),getOrDi

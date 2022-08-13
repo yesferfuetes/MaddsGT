@@ -1,0 +1,501 @@
+IRYW1wcHJvamVjdC5vcmcuY26CEyouYW1wcHJvamVjdC5vcmcuY26CEWFtcHByb2plY3QubmV0LmNughMqLmFtcHByb2plY3QubmV0LmNughdnb29nbGUtYW5hbHl0aWNzLWNuLmNvbYIZKi5nb29nbGUtYW5hbHl0aWNzLWNuLmNvbYIXZ29vZ2xlYWRzZXJ2aWNlcy1jbi5jb22CGSouZ29vZ2xlYWRzZXJ2aWNlcy1jbi5jb22CEWdvb2dsZXZhZHMtY24uY29tghMqLmdvb2dsZXZhZHMtY24uY29tghFnb29nbGVhcGlzLWNuLmNvbYITKi5nb29nbGVhcGlzLWNuLmNvbYIVZ29vZ2xlb3B0aW1pemUtY24uY29tghcqLmdvb2dsZW9wdGltaXplLWNuLmNvbYISZG91YmxlY2xpY2stY24ubmV0ghQqLmRvdWJsZWNsaWNrLWNuLm5ldIIYKi5mbHMuZG91YmxlY2xpY2stY24ubmV0ghYqLmcuZG91YmxlY2xpY2stY24ubmV0gg5kb3VibGVjbGljay5jboIQKi5kb3VibGVjbGljay5jboIUKi5mbHMuZG91YmxlY2xpY2suY26CEiouZy5kb3VibGVjbGljay5jboIRZGFydHNlYXJjaC1jbi5uZXSCEyouZGFydHNlYXJjaC1jbi5uZXSCHWdvb2dsZXRyYXZlbGFkc2VydmljZXMtY24uY29tgh8qLmdvb2dsZXRyYXZlbGFkc2VydmljZXMtY24uY29tghhnb29nbGV0YWdzZXJ2aWNlcy1jbi5jb22CGiouZ29vZ2xldGFnc2VydmljZXMtY24uY29tghdnb29nbGV0YWdtYW5hZ2VyLWNuLmNvbYIZKi5nb29nbGV0YWdtYW5hZ2VyLWNuLmNvbYIYZ29vZ2xlc3luZGljYXRpb24tY24uY29tghoqLmdvb2dsZXN5bmRpY2F0aW9uLWNuLmNvbYIkKi5zYWZlZnJhbWUuZ29vZ2xlc3luZGljYXRpb24tY24uY29tghZhcHAtbWVhc3VyZW1lbnQtY24uY29tghgqLmFwcC1tZWFzdXJlbWVudC1jbi5jb22CC2d2dDEtY24uY29tgg0qLmd2dDEtY24uY29tggtndnQyLWNuLmNvbYINKi5ndnQyLWNuLmNvbYILMm1kbi1jbi5uZXSCDSouMm1kbi1jbi5uZXSCFGdvb2dsZWZsaWdodHMtY24ubmV0ghYqLmdvb2dsZWZsaWdodHMtY24ubmV0ggxhZG1vYi1jbi5jb22CDiouYWRtb2ItY24uY29tgg0qLmdzdGF0aWMuY29tghQqLm1ldHJpYy5nc3RhdGljLmNvbYIKKi5ndnQxLmNvbYIRKi5nY3BjZG4uZ3Z0MS5jb22CCiouZ3Z0Mi5jb22CDiouZ2NwLmd2dDIuY29tghAqLnVybC5nb29nbGUuY29tghYqLnlvdXR1YmUtbm9jb29raWUuY29tggsqLnl0aW1nLmNvbYILYW5kcm9pZC5jb22CDSouYW5kcm9pZC5jb22CEyouZmxhc2guYW5kcm9pZC5jb22CBGcuY26CBiouZy5jboIEZy5jb4IGKi5nLmNvggZnb28uZ2yCCnd3dy5nb28uZ2yCFGdvb2dsZS1hbmFseXRpY3MuY29tghYqLmdvb2dsZS1hbmFseXRpY3MuY29tggpnb29nbGUuY29tghJnb29nbGVjb21tZXJjZS5jb22CFCouZ29vZ2xlY29tbWVyY2UuY29tgghnZ3BodC5jboIKKi5nZ3BodC5jboIKdXJjaGluLmNvbYIMKi51cmNoaW4uY29tggh5b3V0dS5iZYILeW91dHViZS5jb22CDSoueW91dHViZS5jb22CFHlvdXR1YmVlZHVjYXRpb24uY29tghYqLnlvdXR1YmVlZHVjYXRpb24uY29tgg95b3V0dWJla2lkcy5jb22CESoueW91dHViZWtpZHMuY29tggV5dC5iZYIHKi55dC5iZYIaYW5kcm9pZC5jbGllbnRzLmdvb2dsZS5jb22CG2RldmVsb3Blci5hbmRyb2lkLmdvb2dsZS5jboIcZGV2ZWxvcGVycy5hbmRyb2lkLmdvb2dsZS5jboIYc291cmNlLmFuZHJvaWQuZ29vZ2xlLmNuMCEGA1UdIAQaMBgwCAYGZ4EMAQIBMAwGCisGAQQB1nkCBQMwPAYDVR0fBDUwMzAxoC+gLYYraHR0cDovL2NybHMucGtpLmdvb2cvZ3RzMWMzL3pkQVR0MEV4X0ZrLmNybDCCAQMGCisGAQQB1nkCBAIEgfQEgfEA7wB1AEalVet1+pEgMLWiiWn0830RLEF0vv1JuIWr8vxw/m1HAAABghCdFPkAAAQDAEYwRAIgTUddrRHTEXgiuzUni+ScxMuf5UISiRlE+juDXR2ZS8YCIFnaci7NjHn9xO4+5WMOCyw7t0DtXSdobp5OfsBeX+0oAHYA36Veq2iCTx9sre64X04+WurNohKkal6OOxLAIERcKnMAAAGCEJ0U1AAABAMARzBFAiBYcVdZ3Dgf+0idJW8d/Fv5frVEMUWYSakdmONyHhM+TAIhAJGAYGispfhPjqZzzqKi3keMuqa7e1LlPWPzOAYI7D+AMA0GCSqGSIb3DQEBCwUAA4IBAQA2EnjwDeBfH/9s6/k88rkK/jzL8w08O2M0Y+7k96+gMey0B3lFCuuw3DDqBBD4UJThaZ5KEC0s6zvo/Jh7K6po9TL1EwkKt2C8C7kdlZgIKBnfTpBwVN8VSehiA6wnW4arXenjbrhp45QMP5CkLniYHojkKHFZF3l1be6II8NmYbzguTCgCVdABjVU27OGXiGFg2LD6Jmyn/bM6YysZ9a4N1VgA2whhuzSdy/yZo216mrtIOv3MP/Rozw3ftvF0mVukQ89wR17sf2R6zxKfpCAppUo8u0+bBypB+T/PYjkMdsYUdJn7GPIVigXXqsh5siS9XPj6o89ClkzlvsO7ePGEwEABAAAAAABAQAAAAAAAAZ4MjU1MTkAAAARRUNEU0EtUDI1Ni1TSEEyNTYABGYKMiaRXE/7uyCJhaYy3wW9w5eaVCJM1YWJaWtuluqDAAAAAAAADdowgg3WMIIMvqADAgECAhEArGkJvSI7UFsKWND4CJkhgDANBgkqhkiG9w0BAQsFADBGMQswCQYDVQQGEwJVUzEiMCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2VzIExMQzETMBEGA1UEAxMKR1RTIENBIDFDMzAeFw0yMjA3MTgwODE4NTdaFw0yMjEwMTAwODE4NTZaMBcxFTATBgNVBAMMDCouZ29vZ2xlLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIrIWovr+5Qjwiqv09vdCi6VBKbIqaTlYzMITER3qOMZY8+NA4DJdNaaRkl/UQ+rmQF6PAivOKzODCdHBDu6jESjggu3MIILszAOBgNVHQ8BAf8EBAMCB4AwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUN0LCINBXL5OsosBpt0A5NB9HsfEwHwYDVR0jBBgwFoAUinR/r4XN7pXNPZzQ4kYU83E1HScwagYIKwYBBQUHAQEEXjBcMCcGCCsGAQUFBzABhhtodHRwOi8vb2NzcC5wa2kuZ29vZy9ndHMxYzMwMQYIKwYBBQUHMAKGJWh0dHA6Ly9wa2kuZ29vZy9yZXBvL2NlcnRzL2d0czFjMy5kZXIwggloBgNVHREEgglfMIIJW4IMKi5nb29nbGUuY29tghYqLmFwcGVuZ2luZS5nb29nbGUuY29tggkqLmJkbi5kZXaCEiouY2xvdWQuZ29vZ2xlLmNvbYIYKi5jcm93ZHNvdXJjZS5nb29nbGUuY29tghgqLmRhdGFjb21wdXRlLmdvb2dsZS5jb22CCyouZ29vZ2xlLmNhggsqLmdvb2dsZS5jbIIOKi5nb29nbGUuY28uaW6CDiouZ29vZ2xlLmNvLmpwgg4qLmdvb2dsZS5jby51a4IPKi5nb29nbGUuY29tLmFygg8qLmdvb2dsZS5jb20uYXWCDyouZ29vZ2xlLmNvbS5icoIPKi5nb29nbGUuY29tLmNvgg8qLmdvb2dsZS5jb20ubXiCDyouZ29vZ2xlLmNvbS50coIPKi5nb29nbGUuY29tLnZuggsqLmdvb2dsZS5kZYILKi5nb29nbGUuZXOCCyouZ29vZ2xlLmZyggsqLmdvb2dsZS5odYILKi5nb29nbGUuaXSCCyouZ29vZ2xlLm5sggsqLmdvb2dsZS5wbIILKi5nb29nbGUucHSCEiouZ29vZ2xlYWRhcGlzLmNvbYIPKi5nb29nbGVhcGlzLmNughEqLmdvb2dsZXZpZGVvLmNvbYIMKi5nc3RhdGljLmNughAqLmdzdGF0aWMtY24uY29tgg9nb29nbGVjbmFwcHMuY26CESouZ29vZ2xlY25hcHBzLmNughFnb29nbGVhcHBzLWNuLmNvbYITKi5nb29nbGVhcHBzLWNuLmNvbYIMZ2tlY25hcHBzLmNugg4qLmdrZWNuYXBwcy5jboISZ29vZ2xlZG93bmxvYWRzLmNughQqLmdvb2dsZWRvd25sb2Fkcy5jboIQcmVjYXB0Y2hhLm5ldC5jboISKi5yZWNhcHRjaGEubmV0LmNughByZWNhcHRjaGEtY24ubmV0ghIqLnJlY2FwdGNoYS1jbi5uZXSCC3dpZGV2aW5lLmNugg0qLndpZGV2aW5lLmNughFhbXBwcm9qZWN0Lm9yZy5jboITKi5hbXBwcm9qZWN0Lm9yZy5jboIRYW1wcHJvamVjdC5uZXQuY26CEyouYW1wcHJvamVjdC5uZXQuY26CF2dvb2dsZS1hbmFseXRpY3MtY24uY29tghkqLmdvb2dsZS1hbmFseXRpY3MtY24uY29tghdnb29nbGVhZHNlcnZpY2VzLWNuLmNvbYIZKi5nb29nbGVhZHNlcnZpY2VzLWNuLmNvbYIRZ29vZ2xldmFkcy1jbi5jb22CEyouZ29vZ2xldmFkcy1jbi5jb22CEWdvb2dsZWFwaXMtY24uY29tghMqLmdvb2dsZWFwaXMtY24uY29tghVnb29nbGVvcHRpbWl6ZS1jbi5jb22CFyouZ29vZ2xlb3B0aW1pemUtY24uY29tghJkb3VibGVjbGljay1jbi5uZXSCFCouZG91YmxlY2xpY2stY24ubmV0ghgqLmZscy5kb3VibGVjbGljay1jbi5uZXSCFiouZy5kb3VibGVjbGljay1jbi5uZXSCDmRvdWJsZWNsaWNrLmNughAqLmRvdWJsZWNsaWNrLmNughQqLmZscy5kb3VibGVjbGljay5jboISKi5nLmRvdWJsZWNsaWNrLmNughFkYXJ0c2VhcmNoLWNuLm5ldIITKi5kYXJ0c2VhcmNoLWNuLm5ldIIdZ29vZ2xldHJhdmVsYWRzZXJ2aWNlcy1jbi5jb22CHyouZ29vZ2xldHJhdmVsYWRzZXJ2aWNlcy1jbi5jb22CGGdvb2dsZXRhZ3NlcnZpY2VzLWNuLmNvbYIaKi5nb29nbGV0YWdzZXJ2aWNlcy1jbi5jb22CF2dvb2dsZXRhZ21hbmFnZXItY24uY29tghkqLmdvb2dsZXRhZ21hbmFnZXItY24uY29tghhnb29nbGVzeW5kaWNhdGlvbi1jbi5jb22CGiouZ29vZ2xlc3luZGljYXRpb24tY24uY29tgiQqLnNhZmVmcmFtZS5nb29nbGVzeW5kaWNhdGlvbi1jbi5jb22CFmFwcC1tZWFzdXJlbWVudC1jbi5jb22CGCouYXBwLW1lYXN1cmVtZW50LWNuLmNvbYILZ3Z0MS1jbi5jb22CDSouZ3Z0MS1jbi5jb22CC2d2dDItY24uY29tgg0qLmd2dDItY24uY29tggsybWRuLWNuLm5ldIINKi4ybWRuLWNuLm5ldIIUZ29vZ2xlZmxpZ2h0cy1jbi5uZXSCFiouZ29vZ2xlZmxpZ2h0cy1jbi5uZXSCDGFkbW9iLWNuLmNvbYIOKi5hZG1vYi1jbi5jb22CDSouZ3N0YXRpYy5jb22CFCoubWV0cmljLmdzdGF0aWMuY29tggoqLmd2dDEuY29tghEqLmdjcGNkbi5ndnQxLmNvbYIKKi5ndnQyLmNvbYIOKi5nY3AuZ3Z0Mi5jb22CECoudXJsLmdvb2dsZS5jb22CFioueW91dHViZS1ub2Nvb2tpZS5jb22CCyoueXRpbWcuY29tggthbmRyb2lkLmNvbYINKi5hbmRyb2lkLmNvbYITKi5mbGFzaC5hbmRyb2lkLmNvbYIEZy5jboIGKi5nLmNuggRnLmNvggYqLmcuY2+CBmdvby5nbIIKd3d3Lmdvby5nbIIUZ29vZ2xlLWFuYWx5dGljcy5jb22CFiouZ29vZ2xlLWFuYWx5dGljcy5jb22CCmdvb2dsZS5jb22CEmdvb2dsZWNvbW1lcmNlLmNvbYIUKi5nb29nbGVjb21tZXJjZS5jb22CCGdncGh0LmNuggoqLmdncGh0LmNuggp1cmNoaW4uY29tggwqLnVyY2hpbi5jb22CCHlvdXR1LmJlggt5b3V0dWJlLmNvbYINKi55b3V0dWJlLmNvbYIUeW91dHViZWVkdWNhdGlvbi5jb22CFioueW91dHViZWVkdWNhdGlvbi5jb22CD3lvdXR1YmVraWRzLmNvbYIRKi55b3V0dWJla2lkcy5jb22CBXl0LmJlggcqLnl0LmJlghphbmRyb2lkLmNsaWVudHMuZ29vZ2xlLmNvbYIbZGV2ZWxvcGVyLmFuZHJvaWQuZ29vZ2xlLmNughxkZXZlbG9wZXJzLmFuZHJvaWQuZ29vZ2xlLmNughhzb3VyY2UuYW5kcm9pZC5nb29nbGUuY24wIQYDVR0gBBowGDAIBgZngQwBAgEwDAYKKwYBBAHWeQIFAzA8BgNVHR8ENTAzMDGgL6AthitodHRwOi8vY3Jscy5wa2kuZ29vZy9ndHMxYzMvemRBVHQwRXhfRmsuY3JsMIIBAwYKKwYBBAHWeQIEAgSB9ASB8QDvAHUARqVV63X6k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 request-method GET response-head HTTP/3 206 Partial Content
+accept-ranges: bytes
+content-range: bytes 0-6166/6167
+content-type: audio/mpeg
+cross-origin-resource-policy: cross-origin
+cross-origin-opener-policy-report-only: same-origin; report-to="youtube-marketing"
+report-to: {"group":"youtube-marketing","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/youtube-marketing"}]}
+content-length: 6167
+X-Firefox-Http3: h3
+date: Fri, 12 Aug 2022 23:01:58 GMT
+expires: Fri, 12 Aug 2022 23:01:58 GMT
+cache-control: public, max-age=0
+last-modified: Wed, 12 Jan 2022 21:08:00 GMT
+x-content-type-options: nosniff
+server: sffe
+x-xss-protection: 0
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443"; ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
+ original-response-headers accept-ranges: bytes
+content-range: bytes 0-6166/6167
+content-type: audio/mpeg
+cross-origin-resource-policy: cross-origin
+cross-origin-opener-policy-report-only: same-origin; report-to="youtube-marketing"
+report-to: {"group":"youtube-marketing","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/youtube-marketing"}]}
+content-length: 6167
+date: Fri, 12 Aug 2022 21:49:34 GMT
+expires: Fri, 12 Aug 2022 21:49:34 GMT
+cache-control: public, max-age=0
+last-modified: Wed, 12 Jan 2022 21:08:00 GMT
+x-content-type-options: nosniff
+server: sffe
+x-xss-protection: 0
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443"; ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
+ ctid 4 net-response-time-onstart 121 net-response-time-onstop 122                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      "use strict";
+
+/**
+ * @fileoverview    functions used on the database structure page
+ * @name            Database Structure
+ *
+ * @requires    jQuery
+ * @requires    jQueryUI
+ * @required    js/functions.js
+ */
+var DatabaseStructure = {};
+/**
+ * AJAX scripts for /database/structure
+ *
+ * Actions ajaxified here:
+ * Drop Database
+ * Truncate Table
+ * Drop Table
+ *
+ */
+
+/**
+ * Unbind all event handlers before tearing down a page
+ */
+
+AJAX.registerTeardown('database/structure.js', function () {
+  $(document).off('click', 'a.truncate_table_anchor.ajax');
+  $(document).off('click', 'a.drop_table_anchor.ajax');
+  $(document).off('click', '#real_end_input');
+  $(document).off('click', 'a.favorite_table_anchor.ajax');
+  $(document).off('click', '#printView');
+  $('a.real_row_count').off('click');
+  $('a.row_count_sum').off('click');
+  $('select[name=submit_mult]').off('change');
+});
+/**
+ * Adjust number of rows and total size in the summary
+ * when truncating, creating, dropping or inserting into a table
+ */
+
+DatabaseStructure.adjustTotals = function () {
+  var byteUnits = [Messages.strB, Messages.strKiB, Messages.strMiB, Messages.strGiB, Messages.strTiB, Messages.strPiB, Messages.strEiB];
+  /**
+   * @var $allTr jQuery object that references all the rows in the list of tables
+   */
+
+  var $allTr = $('#tablesForm').find('table.data tbody').first().find('tr'); // New summary values for the table
+
+  var tableSum = $allTr.length;
+  var rowsSum = 0;
+  var sizeSum = 0;
+  var overheadSum = 0;
+  var rowSumApproximated = false;
+  $allTr.each(function () {
+    var $this = $(this);
+    var i;
+    var tmpVal; // Get the number of rows for this SQL table
+
+    var strRows = $this.find('.tbl_rows').text(); // If the value is approximated
+
+    if (strRows.indexOf('~') === 0) {
+      rowSumApproximated = true; // The approximated value contains a preceding ~ (Eg 100 --> ~100)
+
+      strRows = strRows.substring(1, strRows.length);
+    }
+
+    strRows = strRows.replace(/[,.\s]/g, '');
+    var intRow = parseInt(strRows, 10);
+
+    if (!isNaN(intRow)) {
+      rowsSum += intRow;
+    } // Extract the size and overhead
+
+
+    var valSize = 0;
+    var valOverhead = 0;
+    var strSize = $this.find('.tbl_size span:not(.unit)').text().trim();
+    var strSizeUnit = $this.find('.tbl_size span.unit').text().trim();
+    var strOverhead = $this.find('.tbl_overhead span:not(.unit)').text().trim();
+    var strOverheadUnit = $this.find('.tbl_overhead span.unit').text().trim(); // Given a value and a unit, such as 100 and KiB, for the table size
+    // and overhead calculate their numeric values in bytes, such as 102400
+
+    for (i = 0; i < byteUnits.length; i++) {
+      if (strSizeUnit === byteUnits[i]) {
+        tmpVal = parseFloat(strSize);
+        valSize = tmpVal * Math.pow(1024, i);
+        break;
+      }
+    }
+
+    for (i = 0; i < byteUnits.length; i++) {
+      if (strOverheadUnit === byteUnits[i]) {
+        tmpVal = parseFloat(strOverhead);
+        valOverhead = tmpVal * Math.pow(1024, i);
+        break;
+      }
+    }
+
+    sizeSum += valSize;
+    overheadSum += valOverhead;
+  }); // Add some commas for readability:
+  // 1000000 becomes 1,000,000
+
+  var strRowSum = rowsSum + '';
+  var regex = /(\d+)(\d{3})/;
+
+  while (regex.test(strRowSum)) {
+    strRowSum = strRowSum.replace(regex, '$1' + ',' + '$2');
+  } // If approximated total value add ~ in front
+
+
+  if (rowSumApproximated) {
+    strRowSum = '~' + strRowSum;
+  } // Calculate the magnitude for the size and overhead values
+
+
+  var sizeMagnitude = 0;
+  var overheadMagnitude = 0;
+
+  while (sizeSum >= 1024) {
+    sizeSum /= 1024;
+    sizeMagnitude++;
+  }
+
+  while (overheadSum >= 1024) {
+    overheadSum /= 1024;
+    overheadMagnitude++;
+  }
+
+  sizeSum = Math.round(sizeSum * 10) / 10;
+  overheadSum = Math.round(overheadSum * 10) / 10; // Update summary with new data
+
+  var $summary = $('#tbl_summary_row');
+  $summary.find('.tbl_num').text(Functions.sprintf(Messages.strNTables, tableSum));
+
+  if (rowSumApproximated) {
+    $summary.find('.row_count_sum').text(strRowSum);
+  } else {
+    $summary.find('.tbl_rows').text(strRowSum);
+  }
+
+  $summary.find('.tbl_size').text(sizeSum + ' ' + byteUnits[sizeMagnitude]);
+  $summary.find('.tbl_overhead').text(overheadSum + ' ' + byteUnits[overheadMagnitude]);
+};
+/**
+ * Gets the real row count for a table or DB.
+ * @param object $target Target for appending the real count value.
+ */
+
+
+DatabaseStructure.fetchRealRowCount = function ($target) {
+  var $throbber = $('#pma_navigation').find('.throbber').first().clone().css({
+    visibility: 'visible',
+    display: 'inline-block'
+  }).on('click', false);
+  $target.html($throbber);
+  $.ajax({
+    type: 'GET',
+    url: $target.attr('href'),
+    cache: false,
+    dataType: 'json',
+    success: function success(response) {
+      if (response.success) {
+        // If to update all row counts for a DB.
+        if (response.real_row_count_all) {
+          $.each(JSON.parse(response.real_row_count_all), function (index, table) {
+            // Update each table row count.
+            $('table.data td[data-table*="' + table.table + '"]').text(table.row_count);
+          });
+        } // If to update a particular table's row count.
+
+
+        if (response.real_row_count) {
+          // Append the parent cell with real row count.
+          $target.parent().text(response.real_row_count);
+        } // Adjust the 'Sum' displayed at the bottom.
+
+
+        DatabaseStructure.adjustTotals();
+      } else {
+        Functions.ajaxShowMessage(Messages.strErrorRealRowCount);
+      }
+    },
+    error: function error() {
+      Functions.ajaxShowMessage(Messages.strErrorRealRowCount);
+    }
+  });
+};
+
+AJAX.registerOnload('database/structure.js', function () {
+  /**
+   * function to open the confirmation dialog for making table consistent with central list
+   *
+   * @param string   msg     message text to be displayed to user
+   * @param function success function to be called on success
+   *
+   */
+  var jqConfirm = function jqConfirm(msg, success) {
+    var dialogObj = $('<div class=\'hide\'>' + msg + '</div>');
+    $('body').append(dialogObj);
+    var buttonOptions = {};
+
+    buttonOptions[Messages.strContinue] = function () {
+      success();
+      $(this).dialog('close');
+    };
+
+    buttonOptions[Messages.strCancel] = function () {
+      $(this).dialog('close');
+      $('#tablesForm')[0].reset();
+    };
+
+    $(dialogObj).dialog({
+      resizable: false,
+      modal: true,
+      title: Messages.confirmTitle,
+      buttons: buttonOptions
+    });
+  };
+  /**
+  *  Event handler on select of "Make consistent with central list"
+  */
+
+
+  $('select[name=submit_mult]').on('change', function (event) {
+    var url = 'index.php?route=/database/structure';
+    var action = $(this).val();
+
+    if (action === 'make_consistent_with_central_list') {
+      event.preventDefault();
+      event.stopPropagation();
+      jqConfirm(Messages.makeConsistentMessage, function () {
+        var $form = $('#tablesForm');
+        var argsep = CommonParams.get('arg_separator');
+        var data = $form.serialize() + argsep + 'ajax_request=true' + argsep + 'ajax_page_request=true';
+        Functions.ajaxShowMessage();
+        AJAX.source = $form;
+        $.post('index.php?route=/database/structure/central-columns-make-consistent', data, AJAX.responseHandler);
+      });
+      return false;
+    }
+
+    if (action === 'copy_tbl' || action === 'add_prefix_tbl' || action === 'replace_prefix_tbl' || action === 'copy_tbl_change_prefix') {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if ($('input[name="selected_tbl[]"]:checked').length === 0) {
+        return false;
+      }
+
+      var formData = $('#tablesForm').serialize();
+      var modalTitle = '';
+
+      if (action === 'copy_tbl') {
+        url = 'index.php?route=/database/structure/copy-form';
+        modalTitle = Messages.strCopyTablesTo;
+      } else if (action === 'add_prefix_tbl') {
+        url = 'index.php?route=/database/structure/add-prefix';
+        modalTitle = Messages.strAddPrefix;
+      } else if (action === 'replace_prefix_tbl') {
+        url = 'index.php?route=/database/structure/change-prefix-form';
+        modalTitle = Messages.strReplacePrefix;
+      } else if (action === 'copy_tbl_change_prefix') {
+        url = 'index.php?route=/database/structure/change-prefix-form';
+        modalTitle = Messages.strCopyPrefix;
+      }
+
+      $.ajax({
+        type: 'POST',
+        url: url,
+        dataType: 'html',
+        data: formData
+      }).done(function (data) {
+        var dialogObj = $('<div class=\'hide\'>' + data + '</div>');
+        $('body').append(dialogObj);
+        var buttonOptions = {};
+
+        buttonOptions[Messages.strContinue] = function () {
+          $('#ajax_form').trigger('submit');
+          $(this).dialog('close');
+        };
+
+        buttonOptions[Messages.strCancel] = function () {
+          $(this).dialog('close');
+          $('#tablesForm')[0].reset();
+        };
+
+        $(dialogObj).dialog({
+          minWidth: 500,
+          resizable: false,
+          modal: true,
+          title: modalTitle,
+          buttons: buttonOptions
+        });
+      });
+      return;
+    }
+
+    if (action === 'analyze_tbl') {
+      url = 'index.php?route=/table/maintenance/analyze';
+    } else if (action === 'sync_unique_columns_central_list') {
+      url = 'index.php?route=/database/structure/central-columns-add';
+    } else if (action === 'delete_unique_columns_central_list') {
+      url = 'index.php?route=/database/structure/central-columns-remove';
+    } else if (action === 'check_tbl') {
+      url = 'index.php?route=/table/maintenance/check';
+    } else if (action === 'checksum_tbl') {
+      url = 'index.php?route=/table/maintenance/checksum';
+    } else if (action === 'drop_tbl') {
+      url = 'index.php?route=/database/structure/drop-form';
+    } else if (action === 'empty_tbl') {
+      url = 'index.php?route=/database/structure/empty-form';
+    } else if (action === 'export') {
+      url = 'index.php?route=/export/tables';
+    } else if (action === 'optimize_tbl') {
+      url = 'index.php?route=/table/maintenance/optimize';
+    } else if (action === 'repair_tbl') {
+      url = 'index.php?route=/table/maintenance/repair';
+    } else if (action === 'show_create') {
+      url = 'index.php?route=/database/structure/show-create';
+    } else {
+      $('#tablesForm').trigger('submit');
+      return;
+    }
+
+    var $form = $(this).parents('form');
+    var argsep = CommonParams.get('arg_separator');
+    var data = $form.serialize() + argsep + 'ajax_request=true' + argsep + 'ajax_page_request=true';
+    Functions.ajaxShowMessage();
+    AJAX.source = $form;
+    $.post(url, data, AJAX.responseHandler);
+  });
+  /**
+   * Ajax Event handler for 'Truncate Table'
+   */
+
+  $(document).on('click', 'a.truncate_table_anchor.ajax', function (event) {
+    event.preventDefault();
+    /**
+     * @var $this_anchor Object  referring to the anchor clicked
+     */
+
+    var $thisAnchor = $(this); // extract current table name and build the question string
+
+    /**
+     * @var curr_table_name String containing the name of the table to be truncated
+     */
+
+    var currTableName = $thisAnchor.parents('tr').children('th').children('a').text();
+    /**
+     * @var question    String containing the question to be asked for confirmation
+     */
+
+    var question = Messages.strTruncateTableStrongWarning + ' ' + Functions.sprintf(Messages.strDoYouReally, 'TRUNCATE `' + Functions.escapeHtml(currTableName) + '`') + Functions.getForeignKeyCheckboxLoader();
+    $thisAnchor.confirm(question, $thisAnchor.attr('href'), function (url) {
+      Functions.ajaxShowMessage(Messages.strProcessingRequest);
+      var params = Functions.getJsConfirmCommonParam(this, $thisAnchor.getPostData());
+      $.post(url, params, function (data) {
+        if (typeof data !== 'undefined' && data.success === true) {
+          Functions.ajaxShowMessage(data.message); // Adjust table statistics
+
+          var $tr = $thisAnchor.closest('tr');
+          $tr.find('.tbl_rows').text('0');
+          $tr.find('.tbl_size, .tbl_overhead').text('-');
+          DatabaseStructure.adjustTotals();
+        } else {
+          Functions.ajaxShowMessage(Messages.strErrorProcessingRequest + ' : ' + data.error, false);
+        }
+      }); // end $.post()
+    }, Functions.loadForeignKeyCheckbox);
+  }); // end of Truncate Table Ajax action
+
+  /**
+   * Ajax Event handler for 'Drop Table' or 'Drop View'
+   */
+
+  $(document).on('click', 'a.drop_table_anchor.ajax', function (event) {
+    event.preventDefault();
+    var $thisAnchor = $(this); // extract current table name and build the question string
+
+    /**
+     * @var $curr_row    Object containing reference to the current row
+     */
+
+    var $currRow = $thisAnchor.parents('tr');
+    /**
+     * @var curr_table_name String containing the name of the table to be truncated
+     */
+
+    var currTableName = $currRow.children('th').children('a').text();
+    /**
+     * @var is_view Boolean telling if we have a view
+     */
+
+    var isView = $currRow.hasClass('is_view') || $thisAnchor.hasClass('view');
+    /**
+     * @var question    String containing the question to be asked for confirmation
+     */
+
+    var question;
+
+    if (!isView) {
+      question = Messages.strDropTableStrongWarning + ' ' + Functions.sprintf(Messages.strDoYouReally, 'DROP TABLE `' + Functions.escapeHtml(currTableName) + '`');
+    } else {
+      question = Functions.sprintf(Messages.strDoYouReally, 'DROP VIEW `' + Functions.escapeHtml(currTableName) + '`');
+    }
+
+    question += Functions.getForeignKeyCheckboxLoader();
+    $thisAnchor.confirm(question, $thisAnchor.attr('href'), function (url) {
+      var $msg = Functions.ajaxShowMessage(Messages.strProcessingRequest);
+      var params = Functions.getJsConfirmCommonParam(this, $thisAnchor.getPostData());
+      $.post(url, params, function (data) {
+        if (typeof data !== 'undefined' && data.success === true) {
+          Functions.ajaxShowMessage(data.message);
+          $currRow.hide('medium').remove();
+          DatabaseStructure.adjustTotals();
+          Navigation.reload();
+          Functions.ajaxRemoveMessage($msg);
+        } else {
+          Functions.ajaxShowMessage(Messages.strErrorProcessingRequest + ' : ' + data.error, false);
+        }
+      }); // end $.post()
+    }, Functions.loadForeignKeyCheckbox);
+  }); // end of Drop Table Ajax action
+
+  /**
+   * Attach Event Handler for 'Print' link
+   */
+
+  $(document).on('click', '#printView', function (event) {
+    event.preventDefault(); // Take to preview mode
+
+    Functions.printPreview();
+  }); // end of Print View action
+  // Calculate Real End for InnoDB
+
+  /**
+   * Ajax Event handler for calculating the real end for a InnoDB table
+   *
+   */
+
+  $(document).on('click', '#real_end_input', function (event) {
+    event.preventDefault();
+    /**
+     * @var question    String containing the question to be asked for confirmation
+     */
+
+    var question = Messages.strOperationTakesLongTime;
+    $(this).confirm(question, '', function () {
+      return true;
+    });
+    return false;
+  }); // end Calculate Real End for InnoDB
+  // Add tooltip to favorite icons.
+
+  $('.favorite_table_anchor').each(function () {
+    Functions.tooltip($(this), 'a', $(this).attr('title'));
+  }); // Get real row count via Ajax.
+
+  $('a.real_row_count').on('click', function (event) {
+    event.preventDefault();
+    DatabaseStructure.fetchRealRowCount($(this));
+  }); // Get all real row count.
+
+  $('a.row_count_sum').on('click', function (event) {
+    event.preventDefault();
+    DatabaseStructure.fetchRealRowCount($(this));
+  });
+});                             
