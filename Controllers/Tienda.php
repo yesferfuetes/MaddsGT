@@ -66,6 +66,7 @@
 			}
 		}
 
+		/* AGREGANDO LOS PRODUCTOS AL CARRITO / REQUIERE DEL MODELO TPRODUCTO */
 		public function addCarrito(){
 			if($_POST){
 				//unset($_SESSION['arrCarrito']);exit;

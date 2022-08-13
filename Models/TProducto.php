@@ -12,6 +12,7 @@ trait TProducto{
 	private $intIdProducto;
 	private $strRutaCategoria;
 
+	/* MUESTRA LOS PRODUCTOS EN EL FRONTED/VIEWS/TIENDA.PHP */
 	public function getProductosT(){
 		$this->con = new Mysql();
 		$sql = "SELECT p.idproducto,
@@ -46,6 +47,7 @@ trait TProducto{
 		return $request;
 	}
 
+	/* MUESTRA LAS CATEGORIAS EN EL FRONTED/VIEWS/TIENDA.PHP */
 	public function getProductosCategoriaT(int $idcategoria, string $ruta){
 		$this->intIdcategoria = $idcategoria;
 		$this->strRuta = $ruta;
