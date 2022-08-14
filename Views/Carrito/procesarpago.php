@@ -154,7 +154,7 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
                         //VERIFICANDO SI EXISTE VARIABLE DE SESION
                         if(isset($_SESSION['login'])){
                     ?>
-
+                        <div id="divMetodoPago" class="notblock">
                         <h4 class="mtext-109 cl2 p-b-30">
                             Método de pago
                         </h4>
@@ -192,18 +192,15 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
                                     </select>
                                     <div class="dropDownSelect2"></div>
                                 </div>
+                                <br>
+                                <button type="submit" id="btnComprar" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+							    Procesar Pedido</button>
                             </div>
-
                             <!-- <div id="msgpaypal">
                                 <p>Para completar la transacción, te enviaremos a los servidores seguros de PayPal.</p>
                             </div> -->
+                        </div>	
                         </div>
-                        <hr>
-                        <br>
-
-						<button type="submit" id="btnComprar" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-							Pagar
-						</button>
                     <?php } ?>
 					</div>
 				</div>

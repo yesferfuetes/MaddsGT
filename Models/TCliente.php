@@ -49,6 +49,38 @@
         return $return;
 	}
 
+	public function insertPedido(string $idtransaccionpaypal = NULL, string $datospaypal = NULL, int $personaid, float $costo_envio, string $monto, int $tipopagoid, string $direccionenvio, string $status){
+		$this->con = new Mysql();
+		$query_insert  = "INSERT INTO pedido(idtransaccionpaypal,datospaypal,personaid,costo_envio,monto,tipopagoid,direccion_envio,status) 
+							  VALUES(?,?,?,?,?,?,?,?)";
+		$arrData = array($idtransaccionpaypal,
+    						$datospaypal,
+    						$personaid,
+    						$costo_envio,
+    						$monto,
+    						$tipopagoid,
+    						$direccionenvio,
+    						$status
+    					);
+		$request_insert = $this->con->insert($query_insert,$arrData);
+	    $return = $request_insert;
+	    return $return;
+	}
+
+	public function insertDetalle(int $idpedido, int $productoid, float $precio, int $cantidad){
+		$this->con = new Mysql();
+		$query_insert  = "INSERT INTO detalle_pedido(pedidoid,productoid,precio,cantidad) 
+							  VALUES(?,?,?,?)";
+		$arrData = array($idpedido,
+    					$productoid,
+						$precio,
+						$cantidad
+					);
+		$request_insert = $this->con->insert($query_insert,$arrData);
+	    $return = $request_insert;
+	    return $return;
+	}
+	
 	/* INSERTANDO DATOS DEL PEDIDO EN TABLA TEMP */
 	public function insertDetalleTemp(array $pedido){
 

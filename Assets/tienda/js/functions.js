@@ -287,3 +287,84 @@ function fntdelItem(element){
 	}
 	return false;
 } */
+
+/* OCULTANDO BOTON PROCESAR PAGO */
+if(document.querySelector("#txtDireccion")){
+	let direccion = document.querySelector("#txtDireccion");
+	direccion.addEventListener('keyup', function(){
+		let dir = this.value;
+		fntViewPago();
+	});
+}
+
+if(document.querySelector("#txtCiudad")){
+	let ciudad = document.querySelector("#txtCiudad");
+	ciudad.addEventListener('keyup', function(){
+		let c = this.value;
+		fntViewPago();
+	});
+}
+
+/* if(document.querySelector("#condiciones")){
+	let opt = document.querySelector("#condiciones");
+	opt.addEventListener('click', function(){
+		let opcion = this.checked;
+		if(opcion){
+			document.querySelector('#optMetodoPago').classList.remove("notblock");
+		}else{
+			document.querySelector('#optMetodoPago').classList.add("notblock");
+		}
+	});
+} */
+
+function fntViewPago(){
+	let direccion = document.querySelector("#txtDireccion").value;
+	let ciudad = document.querySelector("#txtCiudad").value;
+	if(direccion == "" || ciudad == ""){
+		document.querySelector('#divMetodoPago').classList.add("notblock");
+	}else{
+		document.querySelector('#divMetodoPago').classList.remove("notblock");
+	}
+}
+
+/* EXTRAER DATOS DEL BTN COMPRAR */
+if(document.querySelector("#btnComprar")){
+	let btnPago = document.querySelector("#btnComprar");
+	btnPago.addEventListener('click',function() { 
+		let dir = document.querySelector("#txtDireccion").value;
+	    let ciudad = document.querySelector("#txtCiudad").value;
+	    let inttipopago = document.querySelector("#listtipopago").value; 
+	    if( txtDireccion == "" || txtCiudad == "" || inttipopago =="" ){
+			swal("", "Complete datos de envío" , "error");
+			return;
+		}else{
+			divLoading.style.display = "flex";
+            
+            /* ENVIANDO DATOS VIA AJAX */
+			let request = (window.XMLHttpRequest) ? 
+	                    new XMLHttpRequest() : 
+	                    new ActiveXObject('Microsoft.XMLHTTP');
+			let ajaxUrl = base_url+'/Tienda/procesarVenta';
+			let formData = new FormData();
+		    formData.append('direccion',dir);    
+		   	formData.append('ciudad',ciudad);
+			formData.append('inttipopago',inttipopago);
+		   	request.open("POST",ajaxUrl,true);
+		    request.send(formData);
+		    request.onreadystatechange = function(){
+		    	if(request.readyState != 4) return;
+		    	if(request.status == 200){
+		    		let objData = JSON.parse(request.responseText);
+		    		if(objData.status){
+		    			window.location = base_url+"/tienda/confirmarpedido/";
+		    		}else{
+		    			swal("", objData.msg , "error");
+		    		}
+		    	}
+		    	divLoading.style.display = "none";
+            	return false;
+		    }
+		}
+
+	},false);
+}
