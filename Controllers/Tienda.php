@@ -66,7 +66,7 @@
 			}
 		}
 
-		/* AGREGANDO LOS PRODUCTOS AL CARRITO / REQUIERE DEL MODELO TPRODUCTO */
+		/* AGREGANDO LOS PRODUCTOS AL CARRITO-arrCarrito / REQUIERE DEL MODELO TPRODUCTO */
 		public function addCarrito(){
 			if($_POST){
 				//unset($_SESSION['arrCarrito']);exit;
@@ -83,7 +83,8 @@
 											'producto' => $arrInfoProducto['nombre'],
 											'cantidad' => $cantidad,
 											'precio' => $arrInfoProducto['precio'],
-											'imagen' => $arrInfoProducto['images'][0]['url_image']
+											'imagen' => $arrInfoProducto['images'][0]['url_image'],
+											'stock' => $arrInfoProducto['stock']
 										);
 						if(isset($_SESSION['arrCarrito'])){
 							$on = true;
@@ -274,8 +275,20 @@
 				$status = "Pendiente";
 				$subtotal = 0;
 				$costo_envio = COSTOENVIO;
+				$existencia = 0;
+				$stock = 0;
 
 				if(!empty($_SESSION['arrCarrito'])){
+
+					//CICLO PARA CONTROL DE STOCK
+					foreach ($_SESSION['arrCarrito'] as $producto){
+						$productoid = $producto['idproducto'];
+						$precio = $producto['precio'];
+						$cantidad = $producto['cantidad'];
+						$existencia = $producto['stock'];											
+					
+						$stock += $existencia - $cantidad;	
+					}
 
 					foreach ($_SESSION['arrCarrito'] as $pro) {
 						$subtotal += $pro['cantidad'] * $pro['precio']; 
@@ -295,6 +308,9 @@
 															$tipopagoid,
 															$direccionenvio, 
 															$status);
+
+						$request_producto = $this->updateProducto($productoid,$stock);
+
 						if($request_pedido > 0 ){
 
 							//Insertamos detalle

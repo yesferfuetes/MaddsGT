@@ -67,6 +67,27 @@
 	    return $return;
 	}
 
+	public function updateProducto(int $productoid, int $stock){
+		$this->con = new Mysql();
+		$this-> intProductoid = $productoid;
+		$this-> intStock = $stock;
+
+		$sql = "SELECT * FROM producto WHERE idproducto = $this->intProductoid";
+		$request = $this->con->select($sql);
+
+		
+
+		if(!empty($request))
+		{
+			$sql = "UPDATE producto SET stock = ? WHERE idproducto = $this->intProductoid";
+			$arrData = array($this->intStock);
+			$request = $this->con->update($sql,$arrData);
+		}else{
+			$request = "exist";
+		}
+		return $request;
+	}
+
 	public function insertDetalle(int $idpedido, int $productoid, float $precio, int $cantidad){
 		$this->con = new Mysql();
 		$query_insert  = "INSERT INTO detalle_pedido(pedidoid,productoid,precio,cantidad) 
