@@ -20,6 +20,7 @@
 			$this->views->getView($this,"login",$data);
 		}
 
+		/* METODO DE LOGIN PARA FRONTEND Y PARTE ADMIN */
 		public function loginUser(){
 			header('Access-Control-Allow-Origin: *'); //corrige error de CORS en API REST de PHP
 			if($_POST){
@@ -37,6 +38,7 @@
 							$_SESSION['idUser'] = $arrData['idpersona'];
 							$_SESSION['login'] = true;
 							
+							//Crea la variable de sesion
 							$arrData = $this->model->sessionLogin($_SESSION['idUser']);
 							sessionUser($_SESSION['idUser']);
 							

@@ -28,9 +28,16 @@
 				header("Location: ".base_url());
 				die();
 			}
-			if(isset($_SESSION['login'])){
+
+			$infoOrden = $this->getPedido(10);
+			$dataEmailOrden = array('pedido' => $infoOrden);
+
+			$mail = getFile("Template/Email/email_notificacion_orden",$dataEmailOrden);
+			dep($mail);
+
+			/* if(isset($_SESSION['login'])){
 				$this->setDetalleTemp();
-			}
+			} */
 			$data['page_tag'] = NOMBRE_EMPESA.' - Procesar Pago';
 			$data['page_title'] = 'Procesar Pago';
 			$data['page_name'] = "procesarpago";
@@ -41,14 +48,14 @@
 		}
 
 		/* OBTENIENDO DATOS PARA ALMACENARLOS EN TABLA TEMP */
-		public function setDetalleTemp(){
+		/* public function setDetalleTemp(){
 			$sid = session_id();
 			$arrPedido = array('idcliente' => $_SESSION['idUser'],
 								'idtransaccion' =>$sid, //variable de sesion
 								'productos' => $_SESSION['arrCarrito']
 							);
 			$this->insertDetalleTemp($arrPedido);
-		}
+		} */
 
 	}
  ?>

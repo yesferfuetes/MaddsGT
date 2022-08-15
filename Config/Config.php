@@ -26,6 +26,12 @@
 	const NOMBRE_EMPESA = "MaddsGT";
 	const WEB_EMPRESA = "www.maddsgt.com";
 
+	//Datos de empresa
+	const DIRECCION = "Zona 3 Ciudad de Guatemala";
+	const TELEMPRESA = "36416799";
+	const EMAIL_EMPRESA = "info@maddsgt.com";
+	const EMAIL_PEDIDOS = "info@maddsgt.com";
+
 	const CAT_SLIDER = "12,13";
 	const CAT_BANNER = "12,13";
 

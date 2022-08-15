@@ -5,7 +5,7 @@
 	{
 		return BASE_URL;
 	}
-    //Retorla la url de Assets
+    //Retorna la url de Assets
     function media()
     {
         return BASE_URL."/Assets";
