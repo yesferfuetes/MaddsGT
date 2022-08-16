@@ -297,6 +297,20 @@ if(document.querySelector("#txtDireccion")){
 	});
 }
 
+/* FUNCIONALIDAD DE OPT TERMINOS Y CONDIONES */
+if(document.querySelector("#condiciones")){
+	let opt = document.querySelector("#condiciones");
+	opt.addEventListener('click', function(){
+		let opcion = this.checked;
+
+		if(opcion){//Si opcion es verdadero
+			document.querySelector('#optMetodoPago').classList.remove("notblock");
+		}else{
+			document.querySelector('#optMetodoPago').classList.add("notblock");
+		}
+	});
+}
+
 if(document.querySelector("#txtCiudad")){
 	let ciudad = document.querySelector("#txtCiudad");
 	ciudad.addEventListener('keyup', function(){
@@ -304,18 +318,6 @@ if(document.querySelector("#txtCiudad")){
 		fntViewPago();
 	});
 }
-
-/* if(document.querySelector("#condiciones")){
-	let opt = document.querySelector("#condiciones");
-	opt.addEventListener('click', function(){
-		let opcion = this.checked;
-		if(opcion){
-			document.querySelector('#optMetodoPago').classList.remove("notblock");
-		}else{
-			document.querySelector('#optMetodoPago').classList.add("notblock");
-		}
-	});
-} */
 
 function fntViewPago(){
 	let direccion = document.querySelector("#txtDireccion").value;

@@ -321,12 +321,14 @@
 								$this->insertDetalle($request_pedido,$productoid,$precio,$cantidad);
 							}
 
+							//ENVIAMOS EL CORREO DE NOTIFICACION DE VENTA AL CLIENTE Y A LA TIENDA
+							/* DESCOMENTAR CUANDO ESTE EN PRODUCCION HOSTING */
 							/* $infoOrden = $this->getPedido($request_pedido);
 							$dataEmailOrden = array('asunto' => "Se ha creado la orden No.".$request_pedido,
 													'email' => $_SESSION['userData']['email_user'], 
 													'emailCopia' => EMAIL_PEDIDOS,
-													'pedido' => $infoOrden ); */
-							//sendEmail($dataEmailOrden,"email_notificacion_orden");
+													'pedido' => $infoOrden );
+							sendEmail($dataEmailOrden,"email_notificacion_orden");
 
 							$orden = openssl_encrypt($request_pedido, METHODENCRIPT, KEY);
 							$transaccion = openssl_encrypt($idtransaccionpaypal, METHODENCRIPT, KEY);
@@ -337,7 +339,7 @@
 										);
 							$_SESSION['dataorden'] = $arrResponse;
 							unset($_SESSION['arrCarrito']);
-							session_regenerate_id(true);
+							session_regenerate_id(true); */
 						}
 					}else{ //Pago con PayPal
 						$jsonPaypal = $_POST['datapay'];

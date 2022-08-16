@@ -28,11 +28,7 @@
 				header("Location: ".base_url());
 				die();
 			}
-			dep($_SESSION);
-			$infoOrden = $this->getPedido(10);
-			$dataEmailOrden = array('pedido' => $infoOrden);
-
-			$mail = getFile("Template/Email/email_notificacion_orden",$dataEmailOrden);
+			//dep($_SESSION);
 			//dep($mail);
 
 			/* if(isset($_SESSION['login'])){

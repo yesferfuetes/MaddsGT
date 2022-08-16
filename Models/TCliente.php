@@ -75,8 +75,6 @@
 		$sql = "SELECT * FROM producto WHERE idproducto = $this->intProductoid";
 		$request = $this->con->select($sql);
 
-		
-
 		if(!empty($request))
 		{
 			$sql = "UPDATE producto SET stock = ? WHERE idproducto = $this->intProductoid";

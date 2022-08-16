@@ -73,6 +73,7 @@ trait TProducto{
 					ON p.categoriaid = c.idcategoria
 					WHERE p.status != 0 AND p.categoriaid = $this->intIdcategoria AND c.ruta = '{$this->strRuta}'"; 
 					$request = $this->con->select_all($sql);
+					
 					if(count($request) > 0){
 						for ($c=0; $c < count($request) ; $c++) { 
 							$intIdProducto = $request[$c]['idproducto'];
