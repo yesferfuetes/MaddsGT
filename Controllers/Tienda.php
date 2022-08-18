@@ -286,9 +286,8 @@
 						$precio = $producto['precio'];
 						$cantidad = $producto['cantidad'];
 						$existencia = $producto['stock'];											
-					
-						$stock += $existencia - $cantidad;	
 					}
+					$stock += $existencia - $cantidad;	
 
 					foreach ($_SESSION['arrCarrito'] as $pro) {
 						$subtotal += $pro['cantidad'] * $pro['precio']; 
@@ -328,7 +327,7 @@
 													'email' => $_SESSION['userData']['email_user'], 
 													'emailCopia' => EMAIL_PEDIDOS,
 													'pedido' => $infoOrden );
-							sendEmail($dataEmailOrden,"email_notificacion_orden");
+							sendEmail($dataEmailOrden,"email_notificacion_orden");*/
 
 							$orden = openssl_encrypt($request_pedido, METHODENCRIPT, KEY);
 							$transaccion = openssl_encrypt($idtransaccionpaypal, METHODENCRIPT, KEY);
@@ -339,7 +338,7 @@
 										);
 							$_SESSION['dataorden'] = $arrResponse;
 							unset($_SESSION['arrCarrito']);
-							session_regenerate_id(true); */
+							session_regenerate_id(true);
 						}
 					}else{ //Pago con PayPal
 						$jsonPaypal = $_POST['datapay'];

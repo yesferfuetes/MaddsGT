@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 13-08-2022 a las 04:42:50
+-- Tiempo de generación: 18-08-2022 a las 03:44:07
 -- Versión del servidor: 8.0.27
 -- Versión de PHP: 7.4.26
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `categoria` (
 
 INSERT INTO `categoria` (`idcategoria`, `nombre`, `descripcion`, `portada`, `datecreated`, `ruta`, `status`) VALUES
 (12, 'Caballeros', 'Caballeros', 'img_f6bcdce170aafc62fea3321a082ff3e5.jpg', '2022-08-12 18:32:42', 'caballeros', 1),
-(13, 'Damas', 'Damas', 'img_2e407cf49bd92a9a08a74a56b831e2e6.jpg', '2022-08-12 18:34:27', 'damas', 1);
+(13, 'Damas', 'Prendas unicas!', 'img_2e407cf49bd92a9a08a74a56b831e2e6.jpg', '2022-08-12 18:34:27', 'damas', 1);
 
 -- --------------------------------------------------------
 
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `detalle_pedido` (
   PRIMARY KEY (`id`),
   KEY `pedidoid` (`pedidoid`),
   KEY `productoid` (`productoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -82,14 +82,15 @@ CREATE TABLE IF NOT EXISTS `detalle_temp` (
   PRIMARY KEY (`id`),
   KEY `productoid` (`productoid`),
   KEY `personaid` (`personaid`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `detalle_temp`
 --
 
 INSERT INTO `detalle_temp` (`id`, `personaid`, `productoid`, `precio`, `cantidad`, `transaccionid`) VALUES
-(9, 1, 17, '50.00', 1, 'p4n9c14heinankbqjqq18ngka1');
+(9, 1, 17, '50.00', 1, 'p4n9c14heinankbqjqq18ngka1'),
+(15, 23, 17, '50.00', 1, 'nku09glvs6v46udi5imv3h1857');
 
 -- --------------------------------------------------------
 
@@ -155,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `pedido` (
   PRIMARY KEY (`idpedido`),
   KEY `personaid` (`personaid`),
   KEY `tipopagoid` (`tipopagoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -175,7 +176,7 @@ CREATE TABLE IF NOT EXISTS `permisos` (
   PRIMARY KEY (`idpermiso`),
   KEY `rolid` (`rolid`),
   KEY `moduloid` (`moduloid`)
-) ENGINE=InnoDB AUTO_INCREMENT=608 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=632 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `permisos`
@@ -194,12 +195,30 @@ INSERT INTO `permisos` (`idpermiso`, `rolid`, `moduloid`, `r`, `w`, `u`, `d`) VA
 (599, 3, 4, 0, 0, 0, 0),
 (600, 3, 5, 0, 0, 0, 0),
 (601, 3, 6, 0, 0, 0, 0),
-(602, 1, 1, 1, 0, 0, 0),
-(603, 1, 2, 1, 1, 1, 1),
-(604, 1, 3, 1, 1, 1, 1),
-(605, 1, 4, 1, 1, 1, 1),
-(606, 1, 5, 1, 1, 1, 1),
-(607, 1, 6, 1, 1, 1, 1);
+(608, 1, 1, 1, 1, 1, 1),
+(609, 1, 2, 1, 1, 1, 1),
+(610, 1, 3, 1, 1, 1, 1),
+(611, 1, 4, 1, 1, 1, 1),
+(612, 1, 5, 1, 1, 1, 1),
+(613, 1, 6, 1, 1, 1, 1),
+(614, 4, 1, 1, 0, 0, 0),
+(615, 4, 2, 0, 0, 0, 0),
+(616, 4, 3, 0, 0, 0, 0),
+(617, 4, 4, 0, 0, 0, 0),
+(618, 4, 5, 0, 0, 0, 0),
+(619, 4, 6, 0, 0, 0, 0),
+(620, 5, 1, 1, 0, 0, 0),
+(621, 5, 2, 0, 0, 0, 0),
+(622, 5, 3, 0, 0, 0, 0),
+(623, 5, 4, 0, 0, 0, 0),
+(624, 5, 5, 0, 0, 0, 0),
+(625, 5, 6, 0, 0, 0, 0),
+(626, 7, 1, 1, 0, 0, 0),
+(627, 7, 2, 0, 0, 0, 0),
+(628, 7, 3, 0, 0, 0, 0),
+(629, 7, 4, 0, 0, 0, 0),
+(630, 7, 5, 0, 0, 0, 0),
+(631, 7, 6, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -225,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `persona` (
   `status` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`idpersona`),
   KEY `rolid` (`rolid`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `persona`
@@ -233,7 +252,8 @@ CREATE TABLE IF NOT EXISTS `persona` (
 
 INSERT INTO `persona` (`idpersona`, `identificacion`, `nombres`, `apellidos`, `telefono`, `email_user`, `password`, `nit`, `nombrefiscal`, `direccionfiscal`, `token`, `rolid`, `datecreated`, `status`) VALUES
 (1, '2409198920', 'Abel', 'OSH', 1234567, 'info@abelosh.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', '24252622', 'Abel OSH', 'Antigua Guatemala', '', 1, '2020-08-13 00:51:44', 1),
-(22, '11111111', 'Paola', 'Perez', 0, 'paola@perez.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', NULL, NULL, NULL, NULL, 3, '2022-08-12 22:02:27', 1);
+(22, '11111111', 'Paola', 'Perez', 0, 'paola@perez.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', NULL, NULL, NULL, NULL, 3, '2022-08-12 22:02:27', 1),
+(23, '222222555', 'Debani', 'Perez', 78941324, 'debani@ejemplo.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', '784455g', 'Debani', '16 calle Ciudad', NULL, 7, '2022-08-13 21:56:30', 1);
 
 -- --------------------------------------------------------
 
@@ -264,8 +284,7 @@ CREATE TABLE IF NOT EXISTS `producto` (
 
 INSERT INTO `producto` (`idproducto`, `categoriaid`, `codigo`, `nombre`, `descripcion`, `precio`, `stock`, `imagen`, `datecreated`, `ruta`, `status`) VALUES
 (16, 12, '45613', 'Producto 1', '<p>Decripcion</p>', '100.00', 1, '', '2022-08-12 18:47:52', 'producto-1', 1),
-(17, 13, '88888', 'Producto 2', '<p>Descripcion</p>', '50.00', 1, '', '2022-08-12 18:48:10', 'producto-2', 1),
-(18, 13, '12344', 'Producto 3', '<p>Descripcion</p>', '70.00', 1, '', '2022-08-12 18:48:30', 'producto-3', 1);
+(17, 13, '88888', 'Producto 2', '<p>Descripcion</p>', '50.00', 1, '', '2022-08-12 18:48:10', 'producto-2', 1);
 
 -- --------------------------------------------------------
 

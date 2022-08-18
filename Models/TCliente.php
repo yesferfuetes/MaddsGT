@@ -67,6 +67,7 @@
 	    return $return;
 	}
 
+	
 	public function updateProducto(int $productoid, int $stock){
 		$this->con = new Mysql();
 		$this-> intProductoid = $productoid;
