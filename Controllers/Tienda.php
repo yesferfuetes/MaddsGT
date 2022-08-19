@@ -280,15 +280,6 @@
 
 				if(!empty($_SESSION['arrCarrito'])){
 
-					//CICLO PARA CONTROL DE STOCK
-					foreach ($_SESSION['arrCarrito'] as $producto){
-						$productoid = $producto['idproducto'];
-						$precio = $producto['precio'];
-						$cantidad = $producto['cantidad'];
-						$existencia = $producto['stock'];											
-					}
-					$stock += $existencia - $cantidad;	
-
 					foreach ($_SESSION['arrCarrito'] as $pro) {
 						$subtotal += $pro['cantidad'] * $pro['precio']; 
 					}
@@ -307,9 +298,16 @@
 															$tipopagoid,
 															$direccionenvio, 
 															$status);
-
-						$request_producto = $this->updateProducto($productoid,$stock);
-
+							//CICLO PARA CONTROL DE STOCK
+							foreach ($_SESSION['arrCarrito'] as $producto){
+								$productoid = $producto['idproducto'];
+								$precio = $producto['precio'];
+								$cantidad = $producto['cantidad'];
+								$existencia = $producto['stock'];
+								$stock += $existencia - $cantidad;
+								$request_producto = $this->updateProducto($productoid,$stock);											
+							}
+						
 						if($request_pedido > 0 ){
 
 							//Insertamos detalle
