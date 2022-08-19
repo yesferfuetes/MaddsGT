@@ -7,11 +7,11 @@
 			parent::__construct();
 		}
 
-		public function selectPedidos(){
-			/* $where = "";
+		public function selectPedidos($idpersona = null){
+			$where = "";
 			if($idpersona != null){
 				$where = " WHERE p.personaid = ".$idpersona;
-			} */
+			}
 			$sql = "SELECT p.idpedido,
 							p.referenciacobro,
 							p.idtransaccionpaypal,
@@ -22,7 +22,7 @@
 							p.status 
 					FROM pedido p 
 					INNER JOIN tipopago tp
-					ON p.tipopagoid = tp.idtipopago";
+					ON p.tipopagoid = tp.idtipopago $where ";
 			$request = $this->select_all($sql);
 			return $request;
 

@@ -41,4 +41,12 @@
 
 	//Envío
 	const COSTOENVIO = 25;
+
+	//Modulos
+	const MCLIENTES = 3;
+	const MPEDIDOS = 5;
+
+	//Roles
+	const RADMINISTRADOR = 1;
+	const RCLIENTES = 7;
  ?>

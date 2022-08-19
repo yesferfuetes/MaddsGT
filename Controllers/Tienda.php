@@ -320,12 +320,12 @@
 
 							//ENVIAMOS EL CORREO DE NOTIFICACION DE VENTA AL CLIENTE Y A LA TIENDA
 							/* DESCOMENTAR CUANDO ESTE EN PRODUCCION HOSTING */
-							/* $infoOrden = $this->getPedido($request_pedido);
+							$infoOrden = $this->getPedido($request_pedido);
 							$dataEmailOrden = array('asunto' => "Se ha creado la orden No.".$request_pedido,
 													'email' => $_SESSION['userData']['email_user'], 
 													'emailCopia' => EMAIL_PEDIDOS,
 													'pedido' => $infoOrden );
-							sendEmail($dataEmailOrden,"email_notificacion_orden");*/
+							sendEmail($dataEmailOrden,"email_notificacion_orden");
 
 							$orden = openssl_encrypt($request_pedido, METHODENCRIPT, KEY);
 							$transaccion = openssl_encrypt($idtransaccionpaypal, METHODENCRIPT, KEY);
@@ -373,7 +373,7 @@
 													'emailCopia' => EMAIL_PEDIDOS,
 													'pedido' => $infoOrden );
 
-									//sendEmail($dataEmailOrden,"email_notificacion_orden");
+									sendEmail($dataEmailOrden,"email_notificacion_orden");
 
 									$orden = openssl_encrypt($request_pedido, METHODENCRIPT, KEY);
 									$transaccion = openssl_encrypt($idtransaccionpaypal, METHODENCRIPT, KEY);

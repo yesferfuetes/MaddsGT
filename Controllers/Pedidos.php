@@ -11,7 +11,7 @@ class Pedidos extends Controllers{
             header('Location: '.base_url().'/login');
             die();
         }
-        getPermisos(5);
+        getPermisos(MPEDIDOS);
     }
 
     public function Pedidos()
@@ -30,10 +30,12 @@ class Pedidos extends Controllers{
     public function getPedidos(){
         //verificando si tiene permisos de lectura
 		if($_SESSION['permisosMod']['r']){
-			/* $idpersona = "";
+
+			$idpersona = "";
+            //validando si es un cliente para mostrar sus pedidos
 			if( $_SESSION['userData']['idrol'] == RCLIENTES ){
 				$idpersona = $_SESSION['userData']['idpersona'];
-			} */
+			}
 			$arrData = $this->model->selectPedidos();
 			//dep($arrData);
 			for ($i=0; $i < count($arrData); $i++) {
