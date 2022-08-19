@@ -214,6 +214,7 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
                                             <?php 
                                             if(count($data['tiposPago']) > 0){ 
                                                 foreach ($data['tiposPago'] as $tipopago) {
+                                                    //condicional para mostrar tipos de pago
                                                     if($tipopago['idtipopago'] != 1 && $tipopago['idtipopago'] != 3 && $tipopago['idtipopago'] != 4 && $tipopago['idtipopago'] != 5){
                                             ?>
                                             <option value="<?= $tipopago['idtipopago']?>"><?= $tipopago['tipopago']?></option>
