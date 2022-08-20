@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 18-08-2022 a las 03:44:07
+-- Tiempo de generación: 19-08-2022 a las 21:05:36
 -- Versión del servidor: 8.0.27
 -- Versión de PHP: 7.4.26
 
@@ -63,7 +63,14 @@ CREATE TABLE IF NOT EXISTS `detalle_pedido` (
   PRIMARY KEY (`id`),
   KEY `pedidoid` (`pedidoid`),
   KEY `productoid` (`productoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_pedido`
+--
+
+INSERT INTO `detalle_pedido` (`id`, `pedidoid`, `productoid`, `precio`, `cantidad`) VALUES
+(45, 37, 19, '100.00', 1);
 
 -- --------------------------------------------------------
 
@@ -105,7 +112,15 @@ CREATE TABLE IF NOT EXISTS `imagen` (
   `img` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_swedish_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `productoid` (`productoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `imagen`
+--
+
+INSERT INTO `imagen` (`id`, `productoid`, `img`) VALUES
+(37, 19, 'pro_518b2bde86281136e436ae6f24dee647.jpg'),
+(39, 20, 'pro_c6d9f6b143c552b30694e9dd5742040f.jpg');
 
 -- --------------------------------------------------------
 
@@ -156,7 +171,14 @@ CREATE TABLE IF NOT EXISTS `pedido` (
   PRIMARY KEY (`idpedido`),
   KEY `personaid` (`personaid`),
   KEY `tipopagoid` (`tipopagoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `pedido`
+--
+
+INSERT INTO `pedido` (`idpedido`, `referenciacobro`, `idtransaccionpaypal`, `datospaypal`, `personaid`, `fecha`, `costo_envio`, `monto`, `tipopagoid`, `direccion_envio`, `status`) VALUES
+(37, NULL, NULL, NULL, 23, '2022-08-18 23:18:40', '25.00', '125.00', 2, '15 calle B, zona 1, Guatemala', 'Pendiente');
 
 -- --------------------------------------------------------
 
@@ -176,7 +198,7 @@ CREATE TABLE IF NOT EXISTS `permisos` (
   PRIMARY KEY (`idpermiso`),
   KEY `rolid` (`rolid`),
   KEY `moduloid` (`moduloid`)
-) ENGINE=InnoDB AUTO_INCREMENT=632 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=650 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `permisos`
@@ -195,12 +217,6 @@ INSERT INTO `permisos` (`idpermiso`, `rolid`, `moduloid`, `r`, `w`, `u`, `d`) VA
 (599, 3, 4, 0, 0, 0, 0),
 (600, 3, 5, 0, 0, 0, 0),
 (601, 3, 6, 0, 0, 0, 0),
-(608, 1, 1, 1, 1, 1, 1),
-(609, 1, 2, 1, 1, 1, 1),
-(610, 1, 3, 1, 1, 1, 1),
-(611, 1, 4, 1, 1, 1, 1),
-(612, 1, 5, 1, 1, 1, 1),
-(613, 1, 6, 1, 1, 1, 1),
 (614, 4, 1, 1, 0, 0, 0),
 (615, 4, 2, 0, 0, 0, 0),
 (616, 4, 3, 0, 0, 0, 0),
@@ -213,12 +229,18 @@ INSERT INTO `permisos` (`idpermiso`, `rolid`, `moduloid`, `r`, `w`, `u`, `d`) VA
 (623, 5, 4, 0, 0, 0, 0),
 (624, 5, 5, 0, 0, 0, 0),
 (625, 5, 6, 0, 0, 0, 0),
-(626, 7, 1, 1, 0, 0, 0),
-(627, 7, 2, 0, 0, 0, 0),
-(628, 7, 3, 0, 0, 0, 0),
-(629, 7, 4, 0, 0, 0, 0),
-(630, 7, 5, 0, 0, 0, 0),
-(631, 7, 6, 0, 0, 0, 0);
+(638, 1, 1, 1, 1, 1, 1),
+(639, 1, 2, 1, 1, 1, 1),
+(640, 1, 3, 1, 1, 1, 1),
+(641, 1, 4, 1, 1, 1, 1),
+(642, 1, 5, 1, 1, 1, 1),
+(643, 1, 6, 1, 1, 1, 1),
+(644, 7, 1, 1, 0, 0, 0),
+(645, 7, 2, 0, 0, 0, 0),
+(646, 7, 3, 0, 0, 0, 0),
+(647, 7, 4, 0, 0, 0, 0),
+(648, 7, 5, 1, 0, 0, 0),
+(649, 7, 6, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -276,7 +298,7 @@ CREATE TABLE IF NOT EXISTS `producto` (
   `status` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`idproducto`),
   KEY `categoriaid` (`categoriaid`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `producto`
@@ -284,7 +306,9 @@ CREATE TABLE IF NOT EXISTS `producto` (
 
 INSERT INTO `producto` (`idproducto`, `categoriaid`, `codigo`, `nombre`, `descripcion`, `precio`, `stock`, `imagen`, `datecreated`, `ruta`, `status`) VALUES
 (16, 12, '45613', 'Producto 1', '<p>Decripcion</p>', '100.00', 1, '', '2022-08-12 18:47:52', 'producto-1', 1),
-(17, 13, '88888', 'Producto 2', '<p>Descripcion</p>', '50.00', 1, '', '2022-08-12 18:48:10', 'producto-2', 1);
+(17, 13, '88888', 'Producto 2', '<p>Descripcion</p>', '50.00', 1, '', '2022-08-12 18:48:10', 'producto-2', 1),
+(19, 12, '202208123', 'Producto 3', '<p>Producto 3</p> <ul> <li>Estado: Excelente</li> <li>Marca: Zara</li> </ul>', '100.00', 0, '', '2022-08-18 22:27:27', 'producto-3', 1),
+(20, 13, '202208456', 'Producto 4', '<p>Producto 4</p> <ul> <li>Estado: Excelente</li> <li>Marza: Polo</li> </ul>', '75.00', 1, '', '2022-08-18 22:28:15', 'producto-4', 1);
 
 -- --------------------------------------------------------
 
