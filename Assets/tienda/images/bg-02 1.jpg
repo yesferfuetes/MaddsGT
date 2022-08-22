@@ -1,1081 +1,0 @@
-"use strict";
-
-/**
- * @fileoverview    function used in this file builds history tab and generates query.
-  *
-  * @requires    jQuery
-  * @requires    move.js
-  * @version $Id$
-  */
-
-/* global contr */
-// js/designer/init.js
-
-/* global fromArray:writable */
-// js/designer/move.js
-
-/* global themeImagePath */
-// templates/javascript/variables.twig
-var DesignerHistory = {};
-var historyArray = []; // Global array to store history objects
-
-var selectField = []; // Global array to store information for columns which are used in select clause
-
-var gIndex;
-var vqbEditor = null;
-/**
- * To display details of objects(where,rename,Having,aggregate,groupby,orderby,having)
- *
- * @param index index of historyArray where change is to be made
- *
-**/
-
-DesignerHistory.detail = function (index) {
-  var type = historyArray[index].getType();
-  var str;
-
-  if (type === 'Where') {
-    str = 'Where ' + historyArray[index].getColumnName() + historyArray[index].getObj().getRelationOperator() + historyArray[index].getObj().getQuery();
-  }
-
-  if (type === 'Rename') {
-    str = 'Rename ' + historyArray[index].getColumnName() + ' To ' + historyArray[index].getObj().getRenameTo();
-  }
-
-  if (type === 'Aggregate') {
-    str = 'Select ' + historyArray[index].getObj().getOperator() + '( ' + historyArray[index].getColumnName() + ' )';
-  }
-
-  if (type === 'GroupBy') {
-    str = 'GroupBy ' + historyArray[index].getColumnName();
-  }
-
-  if (type === 'OrderBy') {
-    str = 'OrderBy ' + historyArray[index].getColumnName() + ' ' + historyArray[index].getObj().getOrder();
-  }
-
-  if (type === 'Having') {
-    str = 'Having ';
-
-    if (historyArray[index].getObj().getOperator() !== 'None') {
-      str += historyArray[index].getObj().getOperator() + '( ' + historyArray[index].getColumnName() + ' )';
-      str += historyArray[index].getObj().getRelationOperator() + historyArray[index].getObj().getQuery();
-    } else {
-      str = 'Having ' + historyArray[index].getColumnName() + historyArray[index].getObj().getRelationOperator() + historyArray[index].getObj().getQuery();
-    }
-  }
-
-  return str;
-};
-/**
- * Sorts historyArray[] first,using table name as the key and then generates the HTML code for history tab,
- * clubbing all objects of same tables together
- * This function is called whenever changes are made in historyArray[]
- *
- *
- * @param {int}  init starting index of unsorted array
- * @param {int} finit   last index of unsorted array
- *
-**/
-
-
-DesignerHistory.display = function (init, finit) {
-  var str;
-  var i;
-  var j;
-  var k;
-  var sto;
-  var temp; // this part sorts the history array based on table name,this is needed for clubbing all object of same name together.
-
-  for (i = init; i < finit; i++) {
-    sto = historyArray[i];
-    temp = historyArray[i].getTab(); // + '.' + historyArray[i].getObjNo(); for Self JOINS
-
-    for (j = 0; j < i; j++) {
-      if (temp > historyArray[j].getTab()) {
-        // + '.' + historyArray[j].getObjNo())) { //for Self JOINS
-        for (k = i; k > j; k--) {
-          historyArray[k] = historyArray[k - 1];
-        }
-
-        historyArray[j] = sto;
-        break;
-      }
-    }
-  } // this part generates HTML code for history tab.adds delete,edit,and/or and detail features with objects.
-
-
-  str = ''; // string to store Html code for history tab
-
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    temp = historyArray[i].getTab(); // + '.' + historyArray[i].getObjNo(); for Self JOIN
-
-    str += '<h3 class="tiger"><a href="#">' + temp + '</a></h3>';
-    str += '<div class="toggle_container">\n';
-
-    while (historyArray[i].getTab() === temp) {
-      // + '.' + historyArray[i].getObjNo()) === temp) {
-      str += '<div class="block"> <table class="pma-table" width ="250">';
-      str += '<thead><tr><td>';
-
-      if (historyArray[i].getAndOr()) {
-        str += '<img src="' + themeImagePath + 'designer/or_icon.png" onclick="DesignerHistory.andOr(' + i + ')" title="OR"></td>';
-      } else {
-        str += '<img src="' + themeImagePath + 'designer/and_icon.png" onclick="DesignerHistory.andOr(' + i + ')" title="AND"></td>';
-      }
-
-      str += '<td style="padding-left: 5px;" class="right">' + Functions.getImage('b_sbrowse', Messages.strColumnName) + '</td>' + '<td width="175" style="padding-left: 5px">' + $('<div/>').text(historyArray[i].getColumnName()).html() + '<td>';
-
-      if (historyArray[i].getType() === 'GroupBy' || historyArray[i].getType() === 'OrderBy') {
-        var detailDescGroupBy = $('<div/>').text(DesignerHistory.detail(i)).html();
-        str += '<td class="text-center">' + Functions.getImage('s_info', DesignerHistory.detail(i)) + '</td>' + '<td title="' + detailDescGroupBy + '">' + historyArray[i].getType() + '</td>' + '<td onclick=DesignerHistory.historyDelete(' + i + ')>' + Functions.getImage('b_drop', Messages.strDelete) + '</td>';
-      } else {
-        var detailDesc = $('<div/>').text(DesignerHistory.detail(i)).html();
-        str += '<td class="text-center">' + Functions.getImage('s_info', DesignerHistory.detail(i)) + '</td>' + '<td title="' + detailDesc + '">' + historyArray[i].getType() + '</td>' + '<td onclick=DesignerHistory.historyEdit(' + i + ')>' + Functions.getImage('b_edit', Messages.strEdit) + '</td>' + '<td onclick=DesignerHistory.historyDelete(' + i + ')>' + Functions.getImage('b_drop', Messages.strDelete) + '</td>';
-      }
-
-      str += '</tr></thead>';
-      i++;
-
-      if (i >= historyArrayLength) {
-        break;
-      }
-
-      str += '</table></div>';
-    }
-
-    i--;
-    str += '</div>';
-  }
-
-  return str;
-};
-/**
- * To change And/Or relation in history tab
- *
- *
- * @param {int} index of historyArray where change is to be made
- *
-**/
-
-
-DesignerHistory.andOr = function (index) {
-  if (historyArray[index].getAndOr()) {
-    historyArray[index].setAndOr(0);
-  } else {
-    historyArray[index].setAndOr(1);
-  }
-
-  var existingDiv = document.getElementById('ab');
-  existingDiv.innerHTML = DesignerHistory.display(0, 0);
-  $('#ab').accordion('refresh');
-};
-/**
- * Deletes entry in historyArray
- *
- * @param index index of historyArray[] which is to be deleted
- *
-**/
-
-
-DesignerHistory.historyDelete = function (index) {
-  var fromArrayLength = fromArray.length;
-
-  for (var k = 0; k < fromArrayLength; k++) {
-    if (fromArray[k] === historyArray[index].getTab()) {
-      fromArray.splice(k, 1);
-      break;
-    }
-  }
-
-  historyArray.splice(index, 1);
-  var existingDiv = document.getElementById('ab');
-  existingDiv.innerHTML = DesignerHistory.display(0, 0);
-  $('#ab').accordion('refresh');
-};
-/**
- * To show where,rename,aggregate,having forms to edit a object
- *
- * @param{int} index index of historyArray where change is to be made
- *
-**/
-
-
-DesignerHistory.historyEdit = function (index) {
-  gIndex = index;
-  var type = historyArray[index].getType();
-
-  if (type === 'Where') {
-    document.getElementById('eQuery').value = historyArray[index].getObj().getQuery();
-    document.getElementById('erel_opt').value = historyArray[index].getObj().getRelationOperator();
-    document.getElementById('query_where').style.left = '530px';
-    document.getElementById('query_where').style.top = '130px';
-    document.getElementById('query_where').style.position = 'absolute';
-    document.getElementById('query_where').style.zIndex = '103';
-    document.getElementById('query_where').style.visibility = 'visible';
-    document.getElementById('query_where').style.display = 'block';
-  }
-
-  if (type === 'Having') {
-    document.getElementById('hQuery').value = historyArray[index].getObj().getQuery();
-    document.getElementById('hrel_opt').value = historyArray[index].getObj().getRelationOperator();
-    document.getElementById('hoperator').value = historyArray[index].getObj().getOperator();
-    document.getElementById('query_having').style.left = '530px';
-    document.getElementById('query_having').style.top = '130px';
-    document.getElementById('query_having').style.position = 'absolute';
-    document.getElementById('query_having').style.zIndex = '103';
-    document.getElementById('query_having').style.visibility = 'visible';
-    document.getElementById('query_having').style.display = 'block';
-  }
-
-  if (type === 'Rename') {
-    document.getElementById('e_rename').value = historyArray[index].getObj().getRenameTo();
-    document.getElementById('query_rename_to').style.left = '530px';
-    document.getElementById('query_rename_to').style.top = '130px';
-    document.getElementById('query_rename_to').style.position = 'absolute';
-    document.getElementById('query_rename_to').style.zIndex = '103';
-    document.getElementById('query_rename_to').style.visibility = 'visible';
-    document.getElementById('query_rename_to').style.display = 'block';
-  }
-
-  if (type === 'Aggregate') {
-    document.getElementById('e_operator').value = historyArray[index].getObj().getOperator();
-    document.getElementById('query_Aggregate').style.left = '530px';
-    document.getElementById('query_Aggregate').style.top = '130px';
-    document.getElementById('query_Aggregate').style.position = 'absolute';
-    document.getElementById('query_Aggregate').style.zIndex = '103';
-    document.getElementById('query_Aggregate').style.visibility = 'visible';
-    document.getElementById('query_Aggregate').style.display = 'block';
-  }
-};
-/**
- * Make changes in historyArray when Edit button is clicked
- * checks for the type of object and then sets the new value
- *
- * @param index index of historyArray where change is to be made
-**/
-
-
-DesignerHistory.edit = function (type) {
-  if (type === 'Rename') {
-    if (document.getElementById('e_rename').value !== '') {
-      historyArray[gIndex].getObj().setRenameTo(document.getElementById('e_rename').value);
-      document.getElementById('e_rename').value = '';
-    }
-
-    document.getElementById('query_rename_to').style.visibility = 'hidden';
-  }
-
-  if (type === 'Aggregate') {
-    if (document.getElementById('e_operator').value !== '---') {
-      historyArray[gIndex].getObj().setOperator(document.getElementById('e_operator').value);
-      document.getElementById('e_operator').value = '---';
-    }
-
-    document.getElementById('query_Aggregate').style.visibility = 'hidden';
-  }
-
-  if (type === 'Where') {
-    if (document.getElementById('erel_opt').value !== '--' && document.getElementById('eQuery').value !== '') {
-      historyArray[gIndex].getObj().setQuery(document.getElementById('eQuery').value);
-      historyArray[gIndex].getObj().setRelationOperator(document.getElementById('erel_opt').value);
-    }
-
-    document.getElementById('query_where').style.visibility = 'hidden';
-  }
-
-  if (type === 'Having') {
-    if (document.getElementById('hrel_opt').value !== '--' && document.getElementById('hQuery').value !== '') {
-      historyArray[gIndex].getObj().setQuery(document.getElementById('hQuery').value);
-      historyArray[gIndex].getObj().setRelationOperator(document.getElementById('hrel_opt').value);
-      historyArray[gIndex].getObj().setOperator(document.getElementById('hoperator').value);
-    }
-
-    document.getElementById('query_having').style.visibility = 'hidden';
-  }
-
-  var existingDiv = document.getElementById('ab');
-  existingDiv.innerHTML = DesignerHistory.display(0, 0);
-  $('#ab').accordion('refresh');
-};
-/**
- * history object closure
- *
- * @param nColumnName  name of the column on which conditions are put
- * @param nObj          object details(where,rename,orderby,groupby,aggregate)
- * @param nTab          table name of the column on which conditions are applied
- * @param nObjNo       object no used for inner join
- * @param nType         type of object
- *
-**/
-
-
-DesignerHistory.HistoryObj = function (nColumnName, nObj, nTab, nObjNo, nType) {
-  var andOr;
-  var obj;
-  var tab;
-  var columnName;
-  var objNo;
-  var type;
-
-  this.setColumnName = function (nColumnName) {
-    columnName = nColumnName;
-  };
-
-  this.getColumnName = function () {
-    return columnName;
-  };
-
-  this.setAndOr = function (nAndOr) {
-    andOr = nAndOr;
-  };
-
-  this.getAndOr = function () {
-    return andOr;
-  };
-
-  this.getRelation = function () {
-    return andOr;
-  };
-
-  this.setObj = function (nObj) {
-    obj = nObj;
-  };
-
-  this.getObj = function () {
-    return obj;
-  };
-
-  this.setTab = function (nTab) {
-    tab = nTab;
-  };
-
-  this.getTab = function () {
-    return tab;
-  };
-
-  this.setObjNo = function (nObjNo) {
-    objNo = nObjNo;
-  };
-
-  this.getObjNo = function () {
-    return objNo;
-  };
-
-  this.setType = function (nType) {
-    type = nType;
-  };
-
-  this.getType = function () {
-    return type;
-  };
-
-  this.setObjNo(nObjNo);
-  this.setTab(nTab);
-  this.setAndOr(0);
-  this.setObj(nObj);
-  this.setColumnName(nColumnName);
-  this.setType(nType);
-};
-/**
- * where object closure, makes an object with all information of where
- *
- * @param nRelationOperator type of relation operator to be applied
- * @param nQuery             stores value of value/sub-query
- *
-**/
-
-
-DesignerHistory.Where = function (nRelationOperator, nQuery) {
-  var relationOperator;
-  var query;
-
-  this.setRelationOperator = function (nRelationOperator) {
-    relationOperator = nRelationOperator;
-  };
-
-  this.setQuery = function (nQuery) {
-    query = nQuery;
-  };
-
-  this.getQuery = function () {
-    return query;
-  };
-
-  this.getRelationOperator = function () {
-    return relationOperator;
-  };
-
-  this.setQuery(nQuery);
-  this.setRelationOperator(nRelationOperator);
-};
-/**
- * Orderby object closure
- *
- * @param nOrder order, ASC or DESC
- */
-
-
-DesignerHistory.OrderBy = function (nOrder) {
-  var order;
-
-  this.setOrder = function (nOrder) {
-    order = nOrder;
-  };
-
-  this.getOrder = function () {
-    return order;
-  };
-
-  this.setOrder(nOrder);
-};
-/**
- * Having object closure, makes an object with all information of where
- *
- * @param nRelationOperator type of relation operator to be applied
- * @param nQuery             stores value of value/sub-query
- * @param nOperator          operator
-**/
-
-
-DesignerHistory.Having = function (nRelationOperator, nQuery, nOperator) {
-  var relationOperator;
-  var query;
-  var operator;
-
-  this.setOperator = function (nOperator) {
-    operator = nOperator;
-  };
-
-  this.setRelationOperator = function (nRelationOperator) {
-    relationOperator = nRelationOperator;
-  };
-
-  this.setQuery = function (nQuery) {
-    query = nQuery;
-  };
-
-  this.getQuery = function () {
-    return query;
-  };
-
-  this.getRelationOperator = function () {
-    return relationOperator;
-  };
-
-  this.getOperator = function () {
-    return operator;
-  };
-
-  this.setQuery(nQuery);
-  this.setRelationOperator(nRelationOperator);
-  this.setOperator(nOperator);
-};
-/**
- * rename object closure,makes an object with all information of rename
- *
- * @param nRenameTo new name information
- *
-**/
-
-
-DesignerHistory.Rename = function (nRenameTo) {
-  var renameTo;
-
-  this.setRenameTo = function (nRenameTo) {
-    renameTo = nRenameTo;
-  };
-
-  this.getRenameTo = function () {
-    return renameTo;
-  };
-
-  this.setRenameTo(nRenameTo);
-};
-/**
- * aggregate object closure
- *
- * @param nOperator aggregte operator
- *
-**/
-
-
-DesignerHistory.Aggregate = function (nOperator) {
-  var operator;
-
-  this.setOperator = function (nOperator) {
-    operator = nOperator;
-  };
-
-  this.getOperator = function () {
-    return operator;
-  };
-
-  this.setOperator(nOperator);
-};
-/**
- * This function returns unique element from an array
- *
- * @param arrayName array from which duplicate elem are to be removed.
- * @return unique array
- */
-
-
-DesignerHistory.unique = function (arrayName) {
-  var newArray = [];
-
-  uniquetop: for (var i = 0; i < arrayName.length; i++) {
-    var newArrayLength = newArray.length;
-
-    for (var j = 0; j < newArrayLength; j++) {
-      if (newArray[j] === arrayName[i]) {
-        continue uniquetop;
-      }
-    }
-
-    newArray[newArrayLength] = arrayName[i];
-  }
-
-  return newArray;
-};
-/**
- * This function takes in array and a value as input and returns 1 if values is present in array
- * else returns -1
- *
- * @param arrayName array
- * @param value  value which is to be searched in the array
- */
-
-
-DesignerHistory.found = function (arrayName, value) {
-  var arrayNameLength = arrayName.length;
-
-  for (var i = 0; i < arrayNameLength; i++) {
-    if (arrayName[i] === value) {
-      return 1;
-    }
-  }
-
-  return -1;
-};
-/**
- * This function concatenates two array
- *
- * @params add array elements of which are pushed in
- * @params arr array in which elements are added
- */
-
-
-DesignerHistory.addArray = function (add, arr) {
-  var addLength = add.length;
-
-  for (var i = 0; i < addLength; i++) {
-    arr.push(add[i]);
-  }
-
-  return arr;
-};
-/**
- * This function removes all elements present in one array from the other.
- *
- * @params rem array from which each element is removed from other array.
- * @params arr array from which elements are removed.
- *
- */
-
-
-DesignerHistory.removeArray = function (rem, arr) {
-  var remLength = rem.length;
-
-  for (var i = 0; i < remLength; i++) {
-    var arrLength = arr.length;
-
-    for (var j = 0; j < arrLength; j++) {
-      if (rem[i] === arr[j]) {
-        arr.splice(j, 1);
-      }
-    }
-  }
-
-  return arr;
-};
-/**
- * This function builds the groupby clause from history object
- *
- */
-
-
-DesignerHistory.queryGroupBy = function () {
-  var i;
-  var str = '';
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    if (historyArray[i].getType() === 'GroupBy') {
-      str += '`' + historyArray[i].getColumnName() + '`, ';
-    }
-  }
-
-  str = str.substr(0, str.length - 2);
-  return str;
-};
-/**
- * This function builds the Having clause from the history object.
- *
- */
-
-
-DesignerHistory.queryHaving = function () {
-  var i;
-  var and = '(';
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    if (historyArray[i].getType() === 'Having') {
-      if (historyArray[i].getObj().getOperator() !== 'None') {
-        and += historyArray[i].getObj().getOperator() + '(`' + historyArray[i].getColumnName() + '`) ' + historyArray[i].getObj().getRelationOperator();
-        and += ' ' + historyArray[i].getObj().getQuery() + ', ';
-      } else {
-        and += '`' + historyArray[i].getColumnName() + '` ' + historyArray[i].getObj().getRelationOperator() + ' ' + historyArray[i].getObj().getQuery() + ', ';
-      }
-    }
-  }
-
-  if (and === '(') {
-    and = '';
-  } else {
-    and = and.substr(0, and.length - 2) + ')';
-  }
-
-  return and;
-};
-/**
- * This function builds the orderby clause from the history object.
- *
- */
-
-
-DesignerHistory.queryOrderBy = function () {
-  var i;
-  var str = '';
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    if (historyArray[i].getType() === 'OrderBy') {
-      str += '`' + historyArray[i].getColumnName() + '` ' + historyArray[i].getObj().getOrder() + ', ';
-    }
-  }
-
-  str = str.substr(0, str.length - 2);
-  return str;
-};
-/**
- * This function builds the Where clause from the history object.
- *
- */
-
-
-DesignerHistory.queryWhere = function () {
-  var i;
-  var and = '(';
-  var or = '(';
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    if (historyArray[i].getType() === 'Where') {
-      if (historyArray[i].getAndOr() === 0) {
-        and += '( `' + historyArray[i].getColumnName() + '` ' + historyArray[i].getObj().getRelationOperator() + ' ' + historyArray[i].getObj().getQuery() + ')';
-        and += ' AND ';
-      } else {
-        or += '( `' + historyArray[i].getColumnName() + '` ' + historyArray[i].getObj().getRelationOperator() + ' ' + historyArray[i].getObj().getQuery() + ')';
-        or += ' OR ';
-      }
-    }
-  }
-
-  if (or !== '(') {
-    or = or.substring(0, or.length - 4) + ')';
-  } else {
-    or = '';
-  }
-
-  if (and !== '(') {
-    and = and.substring(0, and.length - 5) + ')';
-  } else {
-    and = '';
-  }
-
-  if (or !== '') {
-    and = and + ' OR ' + or + ' )';
-  }
-
-  return and;
-};
-
-DesignerHistory.checkAggregate = function (idThis) {
-  var i;
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    var temp = '`' + historyArray[i].getTab() + '`.`' + historyArray[i].getColumnName() + '`';
-
-    if (temp === idThis && historyArray[i].getType() === 'Aggregate') {
-      return historyArray[i].getObj().getOperator() + '(' + idThis + ')';
-    }
-  }
-
-  return '';
-};
-
-DesignerHistory.checkRename = function (idThis) {
-  var i;
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    var temp = '`' + historyArray[i].getTab() + '`.`' + historyArray[i].getColumnName() + '`';
-
-    if (temp === idThis && historyArray[i].getType() === 'Rename') {
-      return ' AS `' + historyArray[i].getObj().getRenameTo() + '`';
-    }
-  }
-
-  return '';
-};
-/**
-  * This function builds from clause of query
-  * makes automatic joins.
-  *
-  *
-  */
-
-
-DesignerHistory.queryFrom = function () {
-  var i;
-  var tabLeft = [];
-  var tabUsed = [];
-  var tTabLeft = [];
-  var temp;
-  var query = '';
-  var quer = '';
-  var parts = [];
-  var tArray = [];
-  tArray = fromArray;
-  var K = 0;
-  var k;
-  var key;
-  var key2;
-  var key3;
-  var parts1; // the constraints that have been used in the LEFT JOIN
-
-  var constraintsAdded = [];
-  var historyArrayLength = historyArray.length;
-
-  for (i = 0; i < historyArrayLength; i++) {
-    fromArray.push(historyArray[i].getTab());
-  }
-
-  fromArray = DesignerHistory.unique(fromArray);
-  tabLeft = fromArray;
-  temp = tabLeft.shift();
-  quer = '`' + temp + '`';
-  tabUsed.push(temp); // if master table (key2) matches with tab used get all keys and check if tab_left matches
-  // after this check if master table (key2) matches with tab left then check if any foreign matches with master .
-
-  for (i = 0; i < 2; i++) {
-    for (K in contr) {
-      for (key in contr[K]) {
-        // contr name
-        for (key2 in contr[K][key]) {
-          // table name
-          parts = key2.split('.');
-
-          if (DesignerHistory.found(tabUsed, parts[1]) > 0) {
-            for (key3 in contr[K][key][key2]) {
-              parts1 = contr[K][key][key2][key3][0].split('.');
-
-              if (DesignerHistory.found(tabLeft, parts1[1]) > 0) {
-                if (DesignerHistory.found(constraintsAdded, key) > 0) {
-                  query += ' AND ' + '`' + parts[1] + '`.`' + key3 + '` = ';
-                  query += '`' + parts1[1] + '`.`' + contr[K][key][key2][key3][1] + '` ';
-                } else {
-                  query += '\n' + 'LEFT JOIN ';
-                  query += '`' + parts[1] + '` ON ';
-                  query += '`' + parts1[1] + '`.`' + contr[K][key][key2][key3][1] + '` = ';
-                  query += '`' + parts[1] + '`.`' + key3 + '` ';
-                  constraintsAdded.push(key);
-                }
-
-                tTabLeft.push(parts[1]);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    K = 0;
-    tTabLeft = DesignerHistory.unique(tTabLeft);
-    tabUsed = DesignerHistory.addArray(tTabLeft, tabUsed);
-    tabLeft = DesignerHistory.removeArray(tTabLeft, tabLeft);
-    tTabLeft = [];
-
-    for (K in contr) {
-      for (key in contr[K]) {
-        for (key2 in contr[K][key]) {
-          // table name
-          parts = key2.split('.');
-
-          if (DesignerHistory.found(tabLeft, parts[1]) > 0) {
-            for (key3 in contr[K][key][key2]) {
-              parts1 = contr[K][key][key2][key3][0].split('.');
-
-              if (DesignerHistory.found(tabUsed, parts1[1]) > 0) {
-                if (DesignerHistory.found(constraintsAdded, key) > 0) {
-                  query += ' AND ' + '`' + parts[1] + '`.`' + key3 + '` = ';
-                  query += '`' + parts1[1] + '`.`' + contr[K][key][key2][key3][1] + '` ';
-                } else {
-                  query += '\n' + 'LEFT JOIN ';
-                  query += '`' + parts[1] + '` ON ';
-                  query += '`' + parts1[1] + '`.`' + contr[K][key][key2][key3][1] + '` = ';
-                  query += '`' + parts[1] + '`.`' + key3 + '` ';
-                  constraintsAdded.push(key);
-                }
-
-                tTabLeft.push(parts[1]);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    tTabLeft = DesignerHistory.unique(tTabLeft);
-    tabUsed = DesignerHistory.addArray(tTabLeft, tabUsed);
-    tabLeft = DesignerHistory.removeArray(tTabLeft, tabLeft);
-    tTabLeft = [];
-  }
-
-  for (k in tabLeft) {
-    quer += ' , `' + tabLeft[k] + '`';
-  }
-
-  query = quer + query;
-  fromArray = tArray;
-  return query;
-};
-/**
- * This function is the main function for query building.
- * uses history object details for this.
- *
- * @uses DesignerHistory.queryWhere()
- * @uses DesignerHistory.queryGroupBy()
- * @uses DesignerHistory.queryHaving()
- * @uses DesignerHistory.queryOrderBy()
- */
-
-
-DesignerHistory.buildQuery = function () {
-  var qSelect = 'SELECT ';
-  var temp;
-  var selectFieldLength = selectField.length;
-
-  if (selectFieldLength > 0) {
-    for (var i = 0; i < selectFieldLength; i++) {
-      temp = DesignerHistory.checkAggregate(selectField[i]);
-
-      if (temp !== '') {
-        qSelect += temp;
-        temp = DesignerHistory.checkRename(selectField[i]);
-        qSelect += temp + ', ';
-      } else {
-        temp = DesignerHistory.checkRename(selectField[i]);
-        qSelect += selectField[i] + temp + ', ';
-      }
-    }
-
-    qSelect = qSelect.substring(0, qSelect.length - 2);
-  } else {
-    qSelect += '* ';
-  }
-
-  qSelect += '\nFROM ' + DesignerHistory.queryFrom();
-  var qWhere = DesignerHistory.queryWhere();
-
-  if (qWhere !== '') {
-    qSelect += '\nWHERE ' + qWhere;
-  }
-
-  var qGroupBy = DesignerHistory.queryGroupBy();
-
-  if (qGroupBy !== '') {
-    qSelect += '\nGROUP BY ' + qGroupBy;
-  }
-
-  var qHaving = DesignerHistory.queryHaving();
-
-  if (qHaving !== '') {
-    qSelect += '\nHAVING ' + qHaving;
-  }
-
-  var qOrderBy = DesignerHistory.queryOrderBy();
-
-  if (qOrderBy !== '') {
-    qSelect += '\nORDER BY ' + qOrderBy;
-  }
-  /**
-   * @var button_options Object containing options
-   *                     for jQueryUI dialog buttons
-   */
-
-
-  var buttonOptions = {};
-
-  buttonOptions[Messages.strClose] = function () {
-    $(this).dialog('close');
-  };
-
-  buttonOptions[Messages.strSubmit] = function () {
-    if (vqbEditor) {
-      var $elm = $ajaxDialog.find('textarea');
-      vqbEditor.save();
-      $elm.val(vqbEditor.getValue());
-    }
-
-    $('#vqb_form').trigger('submit');
-  };
-
-  var $ajaxDialog = $('#box').dialog({
-    appendTo: '#page_content',
-    width: 500,
-    buttons: buttonOptions,
-    modal: true,
-    title: 'SELECT'
-  }); // Attach syntax highlighted editor to query dialog
-
-  /**
-   * @var $elm jQuery object containing the reference
-   *           to the query textarea.
-   */
-
-  var $elm = $ajaxDialog.find('textarea');
-
-  if (!vqbEditor) {
-    vqbEditor = Functions.getSqlEditor($elm);
-  }
-
-  if (vqbEditor) {
-    vqbEditor.setValue(qSelect);
-    vqbEditor.focus();
-  } else {
-    $elm.val(qSelect);
-    $elm.trigger('focus');
-  }
-};
-
-AJAX.registerTeardown('designer/history.js', function () {
-  vqbEditor = null;
-  historyArray = [];
-  selectField = [];
-  $('#ok_edit_rename').off('click');
-  $('#ok_edit_having').off('click');
-  $('#ok_edit_Aggr').off('click');
-  $('#ok_edit_where').off('click');
-});
-AJAX.registerOnload('designer/history.js', function () {
-  $('#ok_edit_rename').on('click', function () {
-    DesignerHistory.edit('Rename');
-  });
-  $('#ok_edit_having').on('click', function () {
-    DesignerHistory.edit('Having');
-  });
-  $('#ok_edit_Aggr').on('click', function () {
-    DesignerHistory.edit('Aggregate');
-  });
-  $('#ok_edit_where').on('click', function () {
-    DesignerHistory.edit('Where');
-  });
-  $('#ab').accordion({
-    collapsible: true,
-    active: 'none'
-  });
-});                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 DSIG    ì˜   GDEFï]ë  ,  ¨GPOS¬{üC  Ô  ”nGSUB\Ô,K  —D  ?|OS/2U¯¦a  ÖÀ   `cmap_£¿   ×   
-lcvt ]Lo İè   Üfpgmvd~ ŞÄ  gasp    İà   glyfÅÑ»6  áŒ ˆ<head¦ iÈ   6hheaº
-\ j    $hmtxê¿  j$  ğloca ¯Ø ƒ  zmaxpŸò     nameà2l® °  postÌ¬ÛÚ •Ä  Hprepœ×_ ëÜ   ¼      Bb  3  8  : x  { ÿ    3 55 7X Zc e¸ ºÁ ÃÃ Åø ü b ff hr t{ }~ £ ¥® °Ì ÍÍ Ò  D IË ÎÎ ĞÚ Üã å$ &/ 1N SS ÏÏ ÒÒ ÔÔ ÛÛ   " $$ )) ;; NN {{ €€ ‚è . 77 :;        b   t  ÍÑ  ‚   ¢¥ §¨ ­È ÉË ÌÌ Î× ØØ Ùå .     
- Úì DFLT latn      ÿÿ      : 	AZE  FCAT  RCRT  ^KAZ  jMOL  vNLD  ‚ROM  TAT  šTRK  ¦  ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ  	    ÿÿ  
-    !kern Èkern Ğkern Økern àkern èkern ğkern økern kernkernkernmark mark,mark8markDmarkPmark\markhmarktmark€markŒmark˜mkmk¤mkmk®mkmk¸mkmkÂmkmkÌmkmkÖmkmkàmkmkêmkmkômkmkşmkmk                                                                                                                                                                                                                  	   , 4 < D L T \    P    âÜîV’    ¦    ğ    #Ò    f:   j   jæ   qô uâ     & , 2 8 > D J P r x ~ „ Š  İÿÚ Ã D Ã O Ã % Ã 5 Ã  Ã ! œ  7 KŸ   G¢ G£ ¤  İÿÎ ^ÿì ^ÿğ ^ÿñ İÿÈ İÿÉnÿë uh   @FLRX^djpv|‚ˆ”š ¦¬²¸¾ÄÊĞÖÜæğú(2<F4:DJPV\bhnx‚Œ– ª´¾ÈÒÜæğú",6@JT^hr|†š¤®¸ÂÌÒÜæğöü *4>HR\fpz„˜¢¬¶ÀÊÔŞèòü$.8BLV`jt~ˆ’œª¸ÆÔâğò	 			*	8	F	T	b	p	~	Œ	š	¨	¶	Ä	Ò	à	î	ü
-
-
-
-&
-4
-B
-P
-^
-l
-z
-ˆ
-–
-¤
-²
-À
-Î
-Ü
-æ
-ô,:HVdr€œª¸ÆÔâğş &4BP^lzˆ–¤²ÀÎÜêø"0>LZhv„’ ®¼ÊØæô,:HVdr€œª¸ÆÔâğş&0:DN`jt~ˆ’œ¦°ºÈÖäJ8’ ®¼ÊØæğ Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿß Îÿ÷ eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé İÿØ  °ÿøİÿí  °ÿøİÿø  °ÿøİÿí  °ÿøİÿí ; :ÿì ;ÿì <ÿì =ÿì >ÿì ?ÿì @ÿì {ÿì |ÿì }ÿì ~ÿì ÿì €ÿì ÿì ‚ÿì ƒÿì „ÿì …ÿì †ÿì ‡ÿì ˆÿì İÿì Şÿì ßÿì àÿì áÿì âÿì ãÿì äÿì åÿì æÿì çÿì èÿì éÿì êÿì ëÿì ìÿì íÿì îÿì ïÿì ğÿì ñÿì òÿì óÿì ôÿì õÿì öÿì ÷ÿì øÿì ùÿì úÿì ûÿì üÿì ıÿì şÿì ÿÿìÿìÿìÿì ÎÿÎ  °ÿøİÿí ÎÿÎ ÎÿÎ ÎÿÎ ÎÿÎ ÎÿÎ ÎÿÎ ÎÿÎ  °ÿøİÿí eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé eÿùİÿé İÿÔ eÿ÷İÿä eÿùİÿé eÿùİÿé Îÿ÷ Îÿ÷ Îÿ÷ Îÿ÷ Îÿ÷ Îÿ÷ Îÿ÷ Îÿ÷ eÿùİÿé İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ İÿÉnÿÇ  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿøİÿí  °ÿıİÿİnÿŞ  °ÿıİÿİnÿØ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ @ :ÿó ;ÿó <ÿó =ÿó >ÿó ?ÿó @ÿó {ÿó |ÿó }ÿó ~ÿó ÿó €ÿó ÿó ‚ÿó ƒÿó „ÿó …ÿó †ÿó ‡ÿó ˆÿó °ÿı ²ÿô ´ÿô İÿó Şÿó ßÿó àÿó áÿó âÿó ãÿó äÿó åÿó æÿó çÿó èÿó éÿó êÿó ëÿó ìÿó íÿó îÿó ïÿó ğÿó ñÿó òÿó óÿó ôÿó õÿó öÿó ÷ÿó øÿó ùÿó úÿó ûÿó üÿó ıÿó şÿó ÿÿóÿóÿóÿóİ  nÿÕ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿıİÿİnÿŞ  °ÿøÎÿùèÿò  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿêÎÿõèÿü eÿùİÿé  °ÿêÎÿ÷èÿî  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü İ  İ   °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿøÎÿğèÿı  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü  °ÿêÎÿõèÿü Îÿ÷  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿí ²ÿó ´ÿóİÿæ  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿíİÿá  °ÿøÎÿğèÿı  °ÿó ²ÿó ´ÿó  °ÿğ ²ÿğ ´ÿğ Y :ÿî ;ÿî <ÿî =ÿî >ÿî ?ÿî @ÿî {ÿî |ÿî }ÿî ~ÿî ÿî €ÿî ÿî ‚ÿî ƒÿî „ÿî …ÿî †ÿî ‡ÿî ˆÿî °ÿğ ²ÿğ ´ÿğ İÿî Şÿî ßÿî àÿî áÿî âÿî ãÿî äÿî åÿî æÿî çÿî èÿî éÿî êÿî ëÿî ìÿî íÿî îÿî ïÿî ğÿî ñÿî òÿî óÿî ôÿî õÿî öÿî ÷ÿî øÿî ùÿî úÿî ûÿî üÿî ıÿî şÿî ÿÿîÿîÿîÿîƒÿõ…ÿõ‡ÿõ‰ÿõ‹ÿõÿõÿõ‘ÿõ“ÿõ•ÿõ—ÿõ™ÿõ›ÿõÿõŸÿõ¡ÿõ£ÿõ¥ÿõ§ÿõ©ÿõ«ÿõ­ÿõ¯ÿõ±ÿõ³ÿõµÿõ·ÿõ ; :ÿõ ;ÿõ <ÿõ =ÿõ >ÿõ ?ÿõ @ÿõ {ÿõ |ÿõ }ÿõ ~ÿõ ÿõ €ÿõ ÿõ ‚ÿõ ƒÿõ „ÿõ …ÿõ †ÿõ ‡ÿõ ˆÿõ İÿõ Şÿõ ßÿõ àÿõ áÿõ âÿõ ãÿõ äÿõ åÿõ æÿõ çÿõ èÿõ éÿõ êÿõ ëÿõ ìÿõ íÿõ îÿõ ïÿõ ğÿõ ñÿõ òÿõ óÿõ ôÿõ õÿõ öÿõ ÷ÿõ øÿõ ùÿõ úÿõ ûÿõ üÿõ ıÿõ şÿõ ÿÿõÿõÿõÿõ V :  ;  <  =  >  ?  @  {  |  }  ~    €    ‚  ƒ  „  …  †  ‡  ˆ  İ  Ş  ß  à  á  â  ã  ä  å  æ  ç  è  é  ê  ë  ì  í  î  ï  ğ  ñ  ò  ó  ô  õ  ö  ÷  ø  ù  ú  û  ü  ı  ş  ÿ    ƒÿö…ÿö‡ÿö‰ÿö‹ÿöÿöÿö‘ÿö“ÿö•ÿö—ÿö™ÿö›ÿöÿöŸÿö¡ÿö£ÿö¥ÿö§ÿö©ÿö«ÿö­ÿö¯ÿö±ÿö³ÿöµÿö·ÿö  °ÿç ²ÿç ´ÿç  °ÿõ ²ÿõ ´ÿõ  °ÿò ²ÿò ´ÿò  °ÿõ ²ÿõ ´ÿõ  °ÿü ²ÿü ´ÿü  °ÿøÎÿğèÿı İÿÉnÿÇ İÿÉnÿÇ c¨      Îÿß cœ   j<l,    ÿíÿµÿìÿÉÿéÿéÿßÿıÿõ                                        ÿø                    ÿô      ÿô          ÿøÿú                                  ÿîÿİ                                                         ÿôÿé  ÿö    ÿı    ÿèÿí  ÿö                                ÿãÿË                        ÿú          ÿ÷                    ÿİ      ÿÀÿğÿğ  ÿğÿñÿµÿŞ  ÿÖÿğÿùÿò            ÿû          ÿê                                      ÿòÿì  ÿì              ÿõ      ÿÁÿäÿø  ÿõÿöÿÉÿÄÿæ  ÿäÿæÿæÿıÿù  ÿ÷                                        ÿò  ÿø                                                    ÿı                 bÊ   nHp  
-  ÿö                  ÿöÿí                ÿã                      ÿğÿÁÿïÿÒÿş                    ÿú                  ÿñÿã                         ÿöÿí  ÿø  ÿìÿğ                ÿèÿÔ            ÿû  ÿù        ÿã        ÿôÿÁ            ÿü  ÿî                  ÿôÿï      ÿ÷        ÿøÿÒ      ÿø             b¦   pÔs    ÿöÿáÿ÷ÿñ                                >ÿçÿöÿñ # \   ÿö             ÿöÿı        ÿğ      ÿø                ÿùÿæÿä            ÿı  ÿ÷    ÿñ                            ÿ÷                ÿúÿÓ        ÿğ    ÿùÿñ        ÿü        ÿÁ    ÿé  ÿÀ    ÿïÿï  ÿø    ÿıÿâ      ÿéÿñ  ÿü                             ÿæ        ÿ÷    ÿø            ÿñ      ÿä  ÿı                             ÿıÿøÿñÿïÿß  ÿğ      ÿğ      ÿø  ÿı   ÿöÿæÿéÿä          ÿı  ÿì    ÿñ          ÿæÿüÿı                          ÿü    ÿù        ÿğ                       bRbh  â u  ‚  ˆ      ”  š     ¦  ¬  ²  ¸  ¾ \  Ä  Ê  Ğ  ¦  Ö  Ü  â  è      î  ô  ú  ú       ¦    b   & , 2 P 8 > t z            $  *  0  6  <  B  H  N  T  Z  `  f  T  l  r  r  x  ~  „  Š    –  f   D J  œ V  ¢  ¬     ¨  ®  ´  º    À  Æ    r  Ì  Ò  6  Ø  Ş    r  H  ‚  ä  î  ê € h n  º  ğ  ğ  ö    Ş  ü      l            ¢ °jjjj¶jjjj¼jjjjÂjjjjÈjjjjÔÎjjjàÚjjjÔÎjjjìæjjjøòjjjşjjjj
-j"jjj4(.jj@:jjjRFjjLdXjj^ ÿ ÿ, ÿ) ÿ~ ÿ@ ÿw ÿF ÿ? ÿn ÿ£ şõ ÿ5 ÿ$ ÿ% ÿZ şş ÿ4 ÿ8 ÿ` ÿk ÿ[ ÿl ÿ ÿ€ ÿ½ ÿ'½ ÿ)½ ÿm½ ÿ<½ ÿ›½ ÿP½ ÿ7½ ÿn½ ÿH½ şõ½ ÿ4½ ÿ3½ ÿ$½ ÿF½ ÿ½ ÿ(½ ÿ6½ ÿ½ ÿ ½ ÿ2½ ÿl½ ÿ½ ÿ`½ ÿ( ÿM ÿ ÿ/ ÿ' ÿH ÿq ÿ‡½ ÿh½ ÿ+½ ÿ/½ ÿH ÿW ÿ1 ÿ" ÿ1½ ÿ½ ÿ½ ÿ"½ şö ÿ ÿ~   ÿ   ÿ‹   ÿh   ÿF   ÿB   şÊ   ÿp   ÿÑ   ÿÚ   ÿ½ ÿ  şî ÿ½ ÿ5´ şÒ´ ÿi´  vV  v‹  ®Ö  _¿  _• v   –½ "   - M   V½ ˆ   ½   Â a   F   a ,    ½     
- Ÿ½ _   ^½ S   S8 W‡ 3   28 @‡      ]<]X  Ö r     " ( . 4 : @ F L ® R X ^ 4 d j p v   | ‚ ˆ ˆ  ” 4 . ´  Ô  Ú  à  æ   ì  ò š   ¦ ¬ ¬ ² ¸ ¾ Ä Ê Ğ Ö Ü â è î ô â ú          $ ô  Ô  ø  ş * 
- 0 :  6 < B H  N T  Ô   Z ` Ä f l ¦   Ö  r | x º À H ~ ~ „ ¦ l Š    ú – œ ¢ ¨ ¨ 0 ü ÿ~   ÿ   ÿ‹   ÿh   ÿF   ÿB   şÊ   ÿp   ÿÑ   ÿÚ   ÿ ÿ, ÿ) ÿ~ ÿ@ ÿw ÿF ÿ? ÿn ÿ£ şõ ÿ5 ÿ$ ÿ% ÿZ şş ÿ4 ÿ8 ÿ` ÿk ÿ[ ÿl ÿ ÿ€ ÿ½ ÿ'½ ÿ)½ ÿm½ ÿ<½ ÿ›½ ÿP½ ÿ7½ ÿn½ ÿH½ şõ½ ÿ4½ ÿ3½ ÿ$½ ÿF½ ÿ½ ÿ(½ ÿ6½ ÿ½ ÿ ½ ÿ2½ ÿl½ ÿ½ ÿ`½ ÿ( ÿM ÿ ÿ/ ÿ' ÿH ÿq ÿ‡½ ÿh½ ÿ+½ ÿ/½ ÿH ÿW ÿ1 ÿ" ÿ1½ ÿ½ ÿ½ ÿ"½ şö ÿ ÿ½ ÿ  şî ÿ½ a   F   a , YYt  â u + + +$ +$ +* +0 +6 +< +B +H +N +T ,È +Z +` +f +< +l +r +x +~ +$ +$ +„ +Š + + +– +œ +< +6 ,Î  *Ü  *â  *è  *î +  *ô  *ú ,¶ ,¼ +¢ +¨ +® +´ +´ +º +À +Æ +Ì +Ò +Ø +Ş +ä +ê +ğ +ö +ü +ê , , , , , , ,  ,& ,, +ü  *Ü  +   + ,2 + ,8 +B +– ,> ,D ,J ,P +$ ,V ,\  *Ü , ,b ,h +Ì ,n ,t +® , +Ş + ,z +„ ,€ ,Â ,Ô ,Ú ,P ,† ,† ,Œ +® ,t ,’ +¨ ,˜ , , ,¤ ,ª ,° ,° ,8+
-++@ˆ@ˆ++"+(@ˆ@ˆ+
-++.@ˆ@ˆ++"+4@ˆ@ˆ+
-++:@ˆ@ˆ++"+@@ˆ@ˆ+
-++F@ˆ@ˆ++"+L@ˆ@ˆ+R++X@ˆ@ˆ+^+"+@@ˆ@ˆ+
-++F@ˆ@ˆ++"+L@ˆ@ˆ+
-++d@ˆ@ˆ++"+j@ˆ@ˆ+
-++p@ˆ@ˆ++"+v@ˆ@ˆ+
-++:@ˆ@ˆ++"+@@ˆ@ˆ+
-++F@ˆ@ˆ++"+L@ˆ@ˆ+R++X@ˆ@ˆ+^+"+@@ˆ@ˆ+
-++F@ˆ@ˆ++"+L@ˆ@ˆ+
-++|@ˆ@ˆ++"+‚@ˆ@ˆ+
-++ˆ@ˆ@ˆ++"+@ˆ@ˆ+
-++:@ˆ@ˆ++"+@@ˆ@ˆ+
-++:@ˆ@ˆ+
-++@ˆ@ˆ++"+@@ˆ@ˆ+R++@ˆ@ˆ+^+"+(@ˆ@ˆ+
-++”@ˆ@ˆ++"+š@ˆ@ˆ+
-++:@ˆ@ˆ++"+@@ˆ@ˆ+
-++:@ˆ@ˆ++"+@@ˆ@ˆ+
-++:@ˆ@ˆ++"+@@ˆ@ˆ+
-++@ˆ@ˆ++"+(@ˆ@ˆ+
-++ @ˆ@ˆ++"+¦@ˆ@ˆ+
-++¬@ˆ@ˆ++"+²@ˆ@ˆ+
-++¸@ˆ@ˆ++"+¾@ˆ@ˆ+Ä+Ê+Ğ@ˆ@ˆ+Ä+Ê+Ö@ˆ@ˆ+Ü@ˆ+â@ˆ@ˆ+Ü@ˆ+è@ˆ@ˆ+Ü@ˆ+î@ˆ@ˆ+ô@ˆ+â@ˆ@ˆ+ô@ˆ+ú@ˆ@ˆ+Ü@ˆ+î@ˆ@ˆ+Ü@ˆ+î@ˆ@ˆ, @ˆ,,@ˆ,@ˆ,,@ˆ,@ˆ,,@ˆ,@ˆ,,@ˆ, @ˆ,$,@ˆ,@ˆ,,@ˆ,*@ˆ,,@ˆ, @ˆ,,@ˆ,0@ˆ,6,@ˆ,0@ˆ,<,@ˆ,B,H,N@ˆ@ˆ,T,Z,`@ˆ@ˆ,B,H+”@ˆ@ˆ,T,Z,f@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,x,H,~@ˆ@ˆ,„,Z,Š@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,B,H,@ˆ@ˆ,T,Z,–@ˆ@ˆ,œ,H,r@ˆ@ˆ,¢,Z,¨@ˆ@ˆ,B,H,@ˆ@ˆ,T,Z,–@ˆ@ˆ,B,H,®@ˆ@ˆ,T,Z,´@ˆ@ˆ,B,H,º@ˆ@ˆ,T,Z,À@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,œ,H,N@ˆ@ˆ,¢,Z,`@ˆ@ˆ,B,H,Æ@ˆ@ˆ,T,Z,Ì@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,B,H,l@ˆ@ˆ,T,Z,r@ˆ@ˆ,B,H,@ˆ@ˆ,T,Z,–@ˆ@ˆ,B,H,@ˆ@ˆ,T,Z,–@ˆ@ˆ,B,H,N@ˆ@ˆ,T,Z,`@ˆ@ˆ,B,H,Ò@ˆ@ˆ,T,Z,Ø@ˆ@ˆ,Ş@ˆ,ä@ˆ@ˆ,ê@ˆ,ğ@ˆ@ˆ,Ş@ˆ,ö@ˆ@ˆ,ê@ˆ+”@ˆ@ˆ,Ş@ˆ,ö@ˆ@ˆ,ê@ˆ+”@ˆ@ˆ,Ş@ˆ,ö@ˆ@ˆ,ê@ˆ+”@ˆ@ˆ,ü@ˆ,ä@ˆ@ˆ-@ˆ,ğ@ˆ@ˆ,Ş@ˆ,ö@ˆ@ˆ,ê@ˆ+”@ˆ@ˆ,Ş@ˆ,ö@ˆ@ˆ,ê@ˆ+”@ˆ@ˆ-@ˆ--@ˆ-@ˆ-&- @ˆ-,@ˆ--@ˆ-@ˆ-2-@ˆ-8@ˆ--@ˆ->-D-J@ˆ@ˆ-P-V-\@ˆ@ˆ->-D-b@ˆ@ˆ-P-V-h@ˆ@ˆ->-D-n@ˆ@ˆ-P-V-t@ˆ@ˆ->-D-z@ˆ@ˆ-P-V-€@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ->-D-’@ˆ@ˆ-P-V-˜@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ--D-J@ˆ@ˆ-¤-V-\@ˆ@ˆ->-D-ª@ˆ@ˆ-P-V-°@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ->-D-†@ˆ@ˆ-P-V-Œ@ˆ@ˆ->-D-J@ˆ@ˆ-P-V-\@ˆ@ˆ->-D-¶@ˆ@ˆ-P-V-¼@ˆ@ˆ@ˆ@ˆ-Â@ˆ@ˆ@ˆ@ˆ-È@ˆ@ˆ@ˆ@ˆ-Î@ˆ@ˆ@ˆ@ˆ-Ô@ˆ@ˆ@ˆ@ˆ-Ú@ˆ@ˆ@ˆ@ˆ-à@ˆ@ˆ-æ@ˆ-ì@ˆ@ˆ-ò@ˆ-ì@ˆ@ˆ-ø@ˆ.-ş.
--ø@ˆ.-ş.
--ø@ˆ.-ş.
--ø@ˆ.-ş.
--ø@ˆ.-ş.
-."@ˆ.-ş.
--ø@ˆ.(-ş.
-..@ˆ.-ş.
--ø@ˆ.4-ş.
--ø@ˆ.-ş.
-.:@ˆ.F.@.L.R@ˆ@ˆ@ˆ@ˆ.X@ˆ-J@ˆ@ˆ.^@ˆ.d@ˆ@ˆ.j@ˆ-J@ˆ@ˆ.p@ˆ.v@ˆ@ˆ.|.‚.ˆ@ˆ@ˆ.p@ˆ.@ˆ@ˆ.|.‚.”@ˆ@ˆ.p@ˆ.š@ˆ@ˆ.|.‚. @ˆ@ˆ.p@ˆ.¦@ˆ@ˆ.|.‚.¬@ˆ@ˆ.²@ˆ.v@ˆ@ˆ.¸.‚.ˆ@ˆ@ˆ.p@ˆ.¦@ˆ@ˆ.|.‚.¬@ˆ@ˆ.¾@ˆ.v@ˆ@ˆ.Ä.‚.ˆ@ˆ@ˆ-@ˆ,ğ@ˆ@ˆ.Ê.‚.Ğ@ˆ@ˆ.p@ˆ.Ö@ˆ@ˆ.|.‚.Ü@ˆ@ˆ.p@ˆ.v@ˆ@ˆ.|.‚.ˆ@ˆ@ˆ.p@ˆ.â@ˆ@ˆ.|.‚.è@ˆ@ˆ.î.ú/ .ô/.î.ú/.ô/.î.ú/.ô/.î.ú/.ô/.î.ú/.ô//.ú/.ô/.î.ú/.ô/.î.ú/$.ô/.î.ú/*.ô/.î.ú/.ô/.î.ú/.ô/.î.ú/0.ô/.î.ú/6.ô//.ú/ .ô/.î.ú/<.ô/.î.ú/.ô/.î.ú/ .ô/.î.ú/B.ô//.ú/ .ô/.î.ú/<.ô/.î.ú/.ô/.î.ú/H.ô/.î.ú/N.ô/.î.ú/.ô/.î.ú/.ô/.î.ú/.ô/.î.ú/.ô/.î.ú/ .ô//T/`/f/Z/l/T/`/r/Z/l.î.ú/H.ô/.î.ú/.ô/.î.ú/x.ô/.î.ú/~.ô//„/Š/@ˆ@ˆ/–.ú.Ğ.ô/œ/¢@ˆ/¨@ˆ@ˆ/¢@ˆ+ú@ˆ@ˆ/¢@ˆ,Æ@ˆ@ˆ/®@ˆ/¨@ˆ@ˆ/¢@ˆ,Æ@ˆ@ˆ/´@ˆ/¨@ˆ@ˆ/¢@ˆ,Æ@ˆ@ˆ/¢@ˆ/¨@ˆ@ˆ/º@ˆ/À@ˆ@ˆ/º@ˆ.â@ˆ@ˆ/º@ˆ/Æ@ˆ@ˆ/º@ˆ/Ì@ˆ@ˆ/º@ˆ/Æ@ˆ@ˆ/Ò@ˆ/À@ˆ@ˆ/º@ˆ/Ì@ˆ@ˆ/Ø@ˆ/À@ˆ@ˆ/º@ˆ/Ì@ˆ@ˆ/Ş@ˆ/À@ˆ@ˆ/Ş@ˆ/ä@ˆ@ˆ/ê@ˆ/ö/ğ@ˆ/ü@ˆ00@ˆ/ê@ˆ/ö/ğ@ˆ/ü@ˆ00@ˆ/ê@ˆ0/ğ@ˆ/ü@ˆ00@ˆ0@ˆ/ö/ğ@ˆ0 @ˆ00@ˆ0&@ˆ/ö/ğ@ˆ0,@ˆ00@ˆ02@ˆ/ö/ğ@ˆ08@ˆ00@ˆ/ê@ˆ/ö/ğ@ˆ/ü@ˆ00@ˆ0>0D0J@ˆ0P.Ê0V0\@ˆ0b0>0D0h@ˆ0P.Ê0V0n@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0z0D0J@ˆ0P0€0V0\@ˆ0b0>0D0†@ˆ0P.Ê0V0Œ@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0>0D0J@ˆ0P.Ê0V0\@ˆ0b0>0D0h@ˆ0P.Ê0V0n@ˆ0b0z0D0J@ˆ0P0€0V0\@ˆ0b0>0D0†@ˆ0P.Ê0V0’@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0>0D0˜@ˆ0P.Ê0V0@ˆ0b0>0D+š@ˆ0P.Ê0V/H@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0>0D0t@ˆ0P.Ê0V+š@ˆ0b0>0D0¤@ˆ0P.Ê0V0ª@ˆ0b0>0D0J@ˆ0P.Ê0V0\@ˆ0b0>0D0°@ˆ0P.Ê0V0¶@ˆ0b0>0D0˜@ˆ0P.Ê0V0@ˆ0b0>0D0¼@ˆ0P.Ê0V0Â@ˆ0b0È@ˆ0Î@ˆ@ˆ@ˆ@ˆ0Ô@ˆ@ˆ0È@ˆ0Ú@ˆ@ˆ@ˆ@ˆ0à@ˆ@ˆ0È@ˆ0æ@ˆ@ˆ@ˆ@ˆ0ì@ˆ@ˆ0È@ˆ0æ@ˆ@ˆ@ˆ@ˆ0ì@ˆ@ˆ0È@ˆ0ò@ˆ@ˆ@ˆ@ˆ0ø@ˆ@ˆ,T@ˆ/À@ˆ@ˆ0ş@ˆ1@ˆ@ˆ,T@ˆ.â@ˆ@ˆ0ş@ˆ1
-@ˆ@ˆ,T@ˆ/Ì@ˆ@ˆ0ş@ˆ0@ˆ@ˆ,T@ˆ/Ì@ˆ@ˆ0ş@ˆ0@ˆ@ˆ,T@ˆ/Ì@ˆ@ˆ0ş@ˆ0@ˆ@ˆ,¢@ˆ/À@ˆ@ˆ1@ˆ1@ˆ@ˆ,T@ˆ1@ˆ@ˆ0ş@ˆ1@ˆ@ˆ,T@ˆ/Ì@ˆ@ˆ0ş@ˆ0@ˆ@ˆ,T@ˆ/Ì@ˆ@ˆ0ş@ˆ0@ˆ@ˆ,T@ˆ,~@ˆ@ˆ0ş@ˆ1"@ˆ@ˆ1(@ˆ1.@ˆ@ˆ1(@ˆ1.@ˆ@ˆ1(@ˆ14@ˆ@ˆ1(@ˆ14@ˆ@ˆ1(@ˆ1:@ˆ@ˆ1(@ˆ1:@ˆ@ˆ1(@ˆ1:@ˆ@ˆ1(@ˆ1:@ˆ@ˆ1@@ˆ1.@ˆ@ˆ1@@ˆ1.@ˆ@ˆ1F1L1R@ˆ@ˆ/º1X1^@ˆ@ˆ1F1L1d@ˆ@ˆ/º1X1j@ˆ@ˆ1F1L1p@ˆ@ˆ/º1X1v@ˆ@ˆ1F1L1|@ˆ@ˆ/º1X1‚@ˆ@ˆ1ˆ1L1@ˆ@ˆ/Ş1X1”@ˆ@ˆ1F1L1|@ˆ@ˆ/º1X1‚@ˆ@ˆ1F1L1š@ˆ@ˆ/º1X1 @ˆ@ˆ1F1L1¦@ˆ@ˆ/º1X1¬@ˆ@ˆ1F1L1²@ˆ@ˆ/º1X1¸@ˆ@ˆ1F1L1|@ˆ@ˆ/º1X1‚@ˆ@ˆ1ˆ1L1¾@ˆ@ˆ/Ş1X1Ä@ˆ@ˆ1F1L1|@ˆ@ˆ/º1X1‚@ˆ@ˆ1F1L1Ê@ˆ@ˆ/º1X1Ğ@ˆ@ˆ1F1L1Ö@ˆ@ˆ/º1X1Ü@ˆ@ˆ1F1L1â@ˆ@ˆ/º1X1è@ˆ@ˆ1F1L1î@ˆ@ˆ/º1X1ô@ˆ@ˆ1ˆ1L1R@ˆ@ˆ/Ş1X1^@ˆ@ˆ1F1L1ú@ˆ@ˆ/º1X2 @ˆ@ˆ1F1L2@ˆ@ˆ/º1X2@ˆ@ˆ1F1L1p@ˆ@ˆ/º1X1v@ˆ@ˆ1F1L2@ˆ@ˆ/º1X2@ˆ@ˆ1F1L1R@ˆ@ˆ/º1X1^@ˆ@ˆ1F1L2@ˆ@ˆ/º1X2$@ˆ@ˆ1F1L2*@ˆ@ˆ/º1X20@ˆ@ˆ1F1L26@ˆ@ˆ/º1X2<@ˆ@ˆ@ˆ@ˆ2B@ˆ@ˆ@ˆ@ˆ2H@ˆ@ˆ@ˆ@ˆ2N@ˆ@ˆ@ˆ@ˆ2T@ˆ@ˆ2Z@ˆ2`@ˆ@ˆ2Z@ˆ2f@ˆ@ˆ2Z@ˆ2l@ˆ@ˆ2r@ˆ2`@ˆ@ˆ2r@ˆ2x@ˆ@ˆ2Z@ˆ2~@ˆ@ˆ2Z@ˆ2„@ˆ@ˆ2Š@ˆ@ˆ22–2Š@ˆ@ˆ22–2œ@ˆ2¢22–2Š@ˆ@ˆ22–2¨@ˆ2®22–2¨@ˆ2´22–2º2À2`@ˆ@ˆ2Æ2Ì2Ò@ˆ@ˆ2º2À2f@ˆ@ˆ2Æ2Ì2Ø@ˆ@ˆ2º2À2l@ˆ@ˆ2Æ2Ì2Ş@ˆ@ˆ2º2À2l@ˆ@ˆ2Æ2Ì2Ş@ˆ@ˆ2ä2À2ê@ˆ@ˆ2ğ2Ì2ö@ˆ@ˆ2º2À2~@ˆ@ˆ2Æ2Ì2ü@ˆ@ˆ2º2À3@ˆ@ˆ2Æ2Ì3@ˆ@ˆ32À3@ˆ@ˆ32Ì3 @ˆ@ˆ2º2À3@ˆ@ˆ2Æ2Ì3@ˆ@ˆ2º2À3&@ˆ@ˆ2Æ2Ì3,@ˆ@ˆ2º2À32@ˆ@ˆ2Æ2Ì38@ˆ@ˆ2º2À3>@ˆ@ˆ2Æ2Ì3D@ˆ@ˆ2º2À3J@ˆ@ˆ2Æ2Ì3P@ˆ@ˆ2º2À2„@ˆ@ˆ2Æ2Ì3V@ˆ@ˆ32À2`@ˆ@ˆ32Ì2Ò@ˆ@ˆ2º2À3V@ˆ@ˆ2Æ2Ì3\@ˆ@ˆ2º2À3b@ˆ@ˆ2Æ2Ì3h@ˆ@ˆ2º2À2l@ˆ@ˆ2Æ2Ì2Ş@ˆ@ˆ2º2À3n@ˆ@ˆ2Æ2Ì3t@ˆ@ˆ2º2À3z@ˆ@ˆ2Æ2Ì3€@ˆ@ˆ2º2À3z@ˆ@ˆ2Æ2Ì3€@ˆ@ˆ2º2À2`@ˆ@ˆ2Æ2Ì2Ò@ˆ@ˆ2º2À3†@ˆ@ˆ2Æ2Ì3Œ@ˆ@ˆ3’3˜3@ˆ@ˆ2Z3¤3ª@ˆ@ˆ@ˆ@ˆ3°@ˆ@ˆ@ˆ@ˆ3¶@ˆ@ˆ3¼@ˆ3¶@ˆ@ˆ@ˆ@ˆ3Â@ˆ@ˆ@ˆ@ˆ3È@ˆ@ˆ@ˆ@ˆ3Î@ˆ@ˆ@ˆ@ˆ3Ô@ˆ@ˆ,B@ˆ3à3Ú3æ3ì@ˆ3à3Ú3æ,B@ˆ3ò3Ú3æ,œ@ˆ3à3Ú3æ3ø3ş4@ˆ@ˆ@ˆ4
-4@ˆ@ˆ@ˆ4
-4@ˆ@ˆ@ˆ4
-4@ˆ@ˆ@ˆ4
-4"@ˆ@ˆ@ˆ4
-4(@ˆ@ˆ@ˆ4
-4.@ˆ@ˆ@ˆ4
-3à@ˆ@ˆ@ˆ4
-44@ˆ@ˆ@ˆ4
-4@ˆ@ˆ4:3ş4@ˆ@ˆ@ˆ4
-4@@ˆ@ˆ@ˆ4
-4F@ˆ@ˆ@ˆ4
-4"@ˆ@ˆ3ø3ş4L@ˆ@ˆ@ˆ4
-4R@ˆ@ˆ@ˆ4
-4@ˆ@ˆ@ˆ4
-4X@ˆ@ˆ@ˆ@ˆ4^@ˆ@ˆ@ˆ@ˆ4d@ˆ@ˆ@ˆ@ˆ4j@ˆ@ˆ@ˆ@ˆ4p@ˆ@ˆ@ˆ@ˆ4v@ˆ@ˆ4|@ˆ4‚@ˆ4ˆ4@ˆ4‚@ˆ4ˆ4”@ˆ4š@ˆ@ˆ4 @ˆ4‚4¦4¬4²@ˆ4¾4¸4Ä4 @ˆ4Ê4¦4¬4²@ˆ4Ğ4¸4Ä4 @ˆ4‚4¦4¬4²@ˆ4¾4¸4Ä4Ö@ˆ4‚4¦4¬4Ü@ˆ4¾4¸4Ä4 @ˆ4â4¦4¬4²@ˆ4è4¸4Ä4î@ˆ4‚4¦4¬4ô@ˆ4¾4¸4Ä4 @ˆ4ú4¦4¬4²@ˆ5 4¸4Ä4 @ˆ4‚4¦4¬4²@ˆ4¾4¸4Ä5@ˆ5555@ˆ5*5$5056@ˆ@ˆ@ˆ@ˆ5<@ˆ5B@ˆ@ˆ5H@ˆ5N@ˆ@ˆ5H@ˆ5T@ˆ@ˆ5Z@ˆ5`@ˆ@ˆ5H@ˆ5f@ˆ@ˆ5l@ˆ5N@ˆ@ˆ5H@ˆ5r@ˆ@ˆ5x@ˆ5N@ˆ@ˆ5H@ˆ5N@ˆ@ˆ5H@ˆ5~@ˆ@ˆ5H@ˆ5N@ˆ@ˆ5H@ˆ5„@ˆ@ˆ5Š5–5œ55¢5Š5–5¨55¢5Š5–5®55¢5Š5–5´55¢5Š5–5º55¢5À5–5´55¢5Š5–5º55¢5Š5–5Æ55¢5Š5–5Ì55¢5Š5–5Ò55¢5Š5–5Ø55¢5Š5–5Ş55¢5Š5–5ä55¢5À5–5œ55¢5Š5–5ê55¢5Š5–5ğ55¢5Š5–5œ55¢5Š5–5ö55¢5ü5–5œ55¢5Š5–655¢5Š5–5ğ55¢5Š5–655¢5Š5–655¢5Š5–5®55¢5Š5–655¢5Š5–655¢5Š5–655¢5Š5–5œ55¢@ˆ@ˆ6 @ˆ@ˆ@ˆ@ˆ6&@ˆ@ˆ5Š5–655¢5Š5–6,55¢5Š5–6255¢5Š5–6855¢4 @ˆ4‚@ˆ4ˆ6>@ˆ6D@ˆ@ˆ6>@ˆ6J@ˆ@ˆ6>@ˆ6P@ˆ@ˆ6V@ˆ6D@ˆ@ˆ6>@ˆ6\@ˆ@ˆ6b@ˆ6D@ˆ@ˆ6>@ˆ6P@ˆ@ˆ6>@ˆ6D@ˆ@ˆ6h@ˆ6n@ˆ@ˆ6h@ˆ6t@ˆ@ˆ6h@ˆ6z@ˆ@ˆ6h@ˆ6€@ˆ@ˆ6h@ˆ6†@ˆ@ˆ6Œ@ˆ6n@ˆ@ˆ6h@ˆ6’@ˆ@ˆ6˜@ˆ6n@ˆ@ˆ6h@ˆ6@ˆ@ˆ6¤@ˆ6n@ˆ@ˆ6¤@ˆ6ª@ˆ@ˆ6°@ˆ6¼6¶6Â6È@ˆ6Ô6Î6Ú6°@ˆ6¼6¶6Â6È@ˆ6Ô6Î6Ú6à@ˆ6¼6¶6Â6æ@ˆ6Ô6Î6Ú6ì@ˆ6¼6¶6Â6ò@ˆ6Ô6Î6Ú6°@ˆ6ø6¶6Â6È@ˆ6ş6Î6Ú7@ˆ6¼6¶6Â7
-@ˆ6Ô6Î6Ú6°@ˆ6¼6¶6Â6È@ˆ6Ô6Î6Ú777@ˆ7"777(@ˆ7"777.@ˆ7"7774@ˆ7"777:@ˆ7"777@@ˆ7"7F77@ˆ7"777L@ˆ7"777R@ˆ7"777@ˆ7"777X@ˆ7"7F77@ˆ7"777L@ˆ7"777R@ˆ7"777^@ˆ7"777d@ˆ7"777.@ˆ7"777j@ˆ7"777p@ˆ7"777@ˆ7"777v@ˆ7"777^@ˆ7"777|@ˆ7"@ˆ@ˆ7‚@ˆ@ˆ@ˆ@ˆ7ˆ@ˆ@ˆ@ˆ@ˆ7@ˆ@ˆ@ˆ@ˆ7”@ˆ@ˆ@ˆ@ˆ7š@ˆ@ˆ@ˆ@ˆ7 @ˆ@ˆ@ˆ@ˆ7¦@ˆ@ˆ@ˆ@ˆ7¬@ˆ@ˆ@ˆ@ˆ7²@ˆ@ˆ@ˆ@ˆ7¸@ˆ@ˆ7¾@ˆ7Ä@ˆ@ˆ7Ê@ˆ7Ğ@ˆ@ˆ7¾@ˆ7Ö@ˆ@ˆ7Ê@ˆ7Ü@ˆ@ˆ7¾@ˆ7â@ˆ@ˆ7Ê@ˆ7è@ˆ@ˆ7¾@ˆ7î@ˆ@ˆ7Ê@ˆ7ô@ˆ@ˆ7¾@ˆ7ú@ˆ@ˆ8 @ˆ7Ä@ˆ@ˆ8@ˆ7Ğ@ˆ@ˆ7¾@ˆ8@ˆ@ˆ7Ê@ˆ8@ˆ@ˆ7¾@ˆ8@ˆ@ˆ7Ê@ˆ8@ˆ@ˆ7¾@ˆ8$@ˆ@ˆ7Ê@ˆ8*@ˆ@ˆ7¾@ˆ80@ˆ@ˆ7Ê@ˆ86@ˆ@ˆ8<@ˆ8B@ˆ@ˆ8<@ˆ3ª@ˆ@ˆ8<@ˆ8H@ˆ@ˆ8<@ˆ8N@ˆ@ˆ8<@ˆ8T@ˆ@ˆ8<@ˆ8Z@ˆ@ˆ8<@ˆ8`@ˆ@ˆ8<@ˆ8f@ˆ@ˆ8l@ˆ8B@ˆ@ˆ8l@ˆ3ª@ˆ@ˆ8r8x8~@ˆ@ˆ78„8Š@ˆ@ˆ8r8x8@ˆ@ˆ78„8–@ˆ@ˆ8r8x8œ@ˆ@ˆ78„8¢@ˆ@ˆ8r8x8¨@ˆ@ˆ78„8®@ˆ@ˆ8´8x8º@ˆ@ˆ7F8„8¢@ˆ@ˆ8r8x8¨@ˆ@ˆ78„8®@ˆ@ˆ8r8x8À@ˆ@ˆ78„8Æ@ˆ@ˆ8r8x8Ì@ˆ@ˆ78„8Ò@ˆ@ˆ8r8x8Ø@ˆ@ˆ78„8Ş@ˆ@ˆ8r8x8ä@ˆ@ˆ78„8ê@ˆ@ˆ8´8x8ğ@ˆ@ˆ7F8„8Ş@ˆ@ˆ8r8x8ä@ˆ@ˆ78„8ê@ˆ@ˆ8r8x8ö@ˆ@ˆ78„8ü@ˆ@ˆ8r8x9@ˆ@ˆ78„9@ˆ@ˆ8r8x9@ˆ@ˆ78„9@ˆ@ˆ8r8x9@ˆ@ˆ8r8x9@ˆ@ˆ78„9 @ˆ@ˆ8´8x8~@ˆ@ˆ7F8„8Š@ˆ@ˆ8r8x9&@ˆ@ˆ78„9,@ˆ@ˆ8r8x92@ˆ@ˆ78„98@ˆ@ˆ8r8x8œ@ˆ@ˆ78„8¢@ˆ@ˆ8r8x9>@ˆ@ˆ78„9D@ˆ@ˆ8r8x8~@ˆ@ˆ78„8Š@ˆ@ˆ8r8x9J@ˆ@ˆ78„9P@ˆ@ˆ8r8x9V@ˆ@ˆ78„9\@ˆ@ˆ8r8x9b@ˆ@ˆ78„9h@ˆ@ˆ9n9t9z@ˆ@ˆ9n9t9€@ˆ@ˆ9†@ˆ9Œ@ˆ@ˆ9†@ˆ9’@ˆ@ˆ9†@ˆ9˜@ˆ@ˆ9@ˆ9Œ@ˆ@ˆ9@ˆ8@ˆ@ˆ9†@ˆ9˜@ˆ@ˆ9†@ˆ9¤@ˆ@ˆ9ª@ˆ9¶9°@ˆ9ª@ˆ9¼9°@ˆ9Â@ˆ9Î9È@ˆ9Ô@ˆ9¶9°@ˆ9ª@ˆ9¶9°@ˆ2¨@ˆ9Ú9°@ˆ9à@ˆ9æ9°@ˆ9ì79ò@ˆ@ˆ2º9ø9ş@ˆ@ˆ9ì7:@ˆ@ˆ2º9ø:
-@ˆ@ˆ9ì78º@ˆ@ˆ2º9ø:@ˆ@ˆ9ì78ğ@ˆ@ˆ2º9ø:@ˆ@ˆ:7:"@ˆ@ˆ2ä9ø:(@ˆ@ˆ9ì78ğ@ˆ@ˆ2º9ø:@ˆ@ˆ9ì7:.@ˆ@ˆ2º9ø:4@ˆ@ˆ::79¼@ˆ@ˆ39ø:@@ˆ@ˆ9ì7:.@ˆ@ˆ2º9ø:4@ˆ@ˆ9ì7:F@ˆ@ˆ2º9ø:L@ˆ@ˆ9ì7:R@ˆ@ˆ2º9ø:X@ˆ@ˆ9ì7:^@ˆ@ˆ2º9ø:d@ˆ@ˆ9ì7:j@ˆ@ˆ2º9ø:p@ˆ@ˆ9ì7:v@ˆ@ˆ2º9ø:|@ˆ@ˆ::79ò@ˆ@ˆ39ø9ş@ˆ@ˆ9ì7:‚@ˆ@ˆ2º9ø:ˆ@ˆ@ˆ9ì7:@ˆ@ˆ2º9ø:”@ˆ@ˆ9ì78º@ˆ@ˆ2º9ø:@ˆ@ˆ9ì7:š@ˆ@ˆ2º9ø: @ˆ@ˆ9ì7:¦@ˆ@ˆ2º9ø:¬@ˆ@ˆ9ì7:¦@ˆ@ˆ2º9ø:¬@ˆ@ˆ9ì79ò@ˆ@ˆ2º9ø9ş@ˆ@ˆ9ì7:²@ˆ@ˆ2º9ø:¸@ˆ@ˆ:¾@ˆ:Ä@ˆ@ˆ:Ê@ˆ:Ğ@ˆ@ˆ:¾@ˆ:Ö@ˆ@ˆ:Ê@ˆ:Ü@ˆ@ˆ:¾@ˆ:â@ˆ@ˆ:Ê@ˆ:è@ˆ@ˆ:¾@ˆ:â@ˆ@ˆ:Ê@ˆ:è@ˆ@ˆ:î@ˆ:Ä@ˆ@ˆ:ô@ˆ:Ğ@ˆ@ˆ:¾@ˆ:ú@ˆ@ˆ:Ê@ˆ; @ˆ@ˆ:¾@ˆ;@ˆ@ˆ:Ê@ˆ;@ˆ@ˆ.:@ˆ;;@ˆ;@ˆ;*;$@ˆ;0@ˆ;;@ˆ.:@ˆ;6;@ˆ;<@ˆ;;@ˆ4 ;B;H@ˆ@ˆ;N;T;Z@ˆ@ˆ4 ;B;H@ˆ@ˆ;N;T;Z@ˆ@ˆ4 ;B;`@ˆ@ˆ;N;T;f@ˆ@ˆ4 ;B;l@ˆ@ˆ;N;T;r@ˆ@ˆ4 ;B;x@ˆ@ˆ;N;T;~@ˆ@ˆ4 ;B;„@ˆ@ˆ;N;T;Š@ˆ@ˆ4 ;B;@ˆ@ˆ;N;T;–@ˆ@ˆ4 ;B;œ@ˆ@ˆ

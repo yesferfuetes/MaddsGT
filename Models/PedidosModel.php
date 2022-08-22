@@ -141,7 +141,7 @@
 			}
 		} */
 
-		/* public function updatePedido(int $idpedido, $transaccion = NULL, $idtipopago = NULL, string $estado){
+		public function updatePedido(int $idpedido, $transaccion = NULL, $idtipopago = NULL, string $estado){
 			if($transaccion == NULL){
 				$query_insert  = "UPDATE pedido SET status = ?  WHERE idpedido = $idpedido ";
 	        	$arrData = array($estado);
@@ -153,7 +153,7 @@
 	    					);
 			}
 			$request_insert = $this->update($query_insert,$arrData);
-        	return $request_insert;
-		} */
+        	return $request_insert;//RETORNA LA INFO HACIA EL CONTROLADOR
+		}
 	}
  ?>

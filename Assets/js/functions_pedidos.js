@@ -65,11 +65,11 @@ tablePedidos = $('#tablePedidos').dataTable( {
     "resonsieve":"true",
     "bDestroy": true,
     "iDisplayLength": 10,
-    "order":[[0,"desc"]]  
+    "order":[[0,"asc"]]  
 });
 
-function fntEditInfo(idpedido){
-    /* rowTable = element.parentNode.parentNode.parentNode; */
+function fntEditInfo(element,idpedido){
+    rowTable = element.parentNode.parentNode.parentNode;
     //implementacion de AJAX
     let request = (window.XMLHttpRequest) ? 
                     new XMLHttpRequest() : 
@@ -126,10 +126,13 @@ function fntUpdateInfo(){
         request.onreadystatechange = function(){
             if(request.readyState != 4) return;
             if(request.status == 200){
+
                 let objData = JSON.parse(request.responseText);
                 if(objData.status){
                      swal("", objData.msg ,"success");
                      $('#modalFormPedido').modal('hide');
+                    
+                    //PAGO CONTRA ENTREGA 
                     if(document.querySelector("#txtTransaccion")){
                         rowTable.cells[1].textContent = document.querySelector("#txtTransaccion").value;
                         rowTable.cells[4].textContent = document.querySelector("#listTipopago").selectedOptions[0].innerText;

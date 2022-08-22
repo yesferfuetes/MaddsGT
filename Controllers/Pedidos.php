@@ -68,7 +68,7 @@ class Pedidos extends Controllers{
 					}
 				}
 				if($_SESSION['permisosMod']['u']){
-					$btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo('.$arrData[$i]['idpedido'].')" title="Editar pedido"><i class="fas fa-pencil-alt"></i></button>';
+					$btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,'.$arrData[$i]['idpedido'].')" title="Editar pedido"><i class="fas fa-pencil-alt"></i></button>';
 				}
 				if($_SESSION['permisosMod']['d']){
 					$btnDelete = '<button class="btn btn-primary  btn-sm" onClick="fntDelInfo('.$arrData[$i]['idpedido'].')" title="Eliminar pedido"><i class="fas fa-trash-alt"></i></button>';
@@ -131,6 +131,7 @@ class Pedidos extends Controllers{
 				if($idpedido == ""){
 					$arrResponse = array("status" => false, "msg" => 'Datos incorrectos.');
 				}else{
+					//PAGO CON PAYPAL
 					if($idtipopago == ""){
 						if($estado == ""){
 							$arrResponse = array("status" => false, "msg" => 'Datos incorrectos.');
@@ -142,6 +143,7 @@ class Pedidos extends Controllers{
 								$arrResponse = array("status" => false, "msg" => "No es posible actualizar la información.");
 							}
 						}
+					//PAGO CONTRA ENTREGA
 					}else{
 						if($transaccion == "" or $idtipopago =="" or $estado == ""){
 							$arrResponse = array("status" => false, "msg" => 'Datos incorrectos.');

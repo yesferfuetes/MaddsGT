@@ -1,921 +1,0 @@
-/**
- * Functions used in configuration forms and on user preferences pages
- */
-
-var configInlineParams;
-var configScriptLoaded;
-
-/**
- * checks whether browser supports web storage
- *
- * @param type the type of storage i.e. localStorage or sessionStorage
- *
- * @returns bool
- */
-function isStorageSupported (type, warn) {
-    try {
-        window[type].setItem('PMATest', 'test');
-        // Check whether key-value pair was set successfully
-        if (window[type].getItem('PMATest') === 'test') {
-            // Supported, remove test variable from storage
-            window[type].removeItem('PMATest');
-            return true;
-        }
-    } catch (error) {
-        // Not supported
-        if (warn) {
-            Functions.ajaxShowMessage(Messages.strNoLocalStorage, false);
-        }
-    }
-    return false;
-}
-
-/**
- * Unbind all event handlers before tearing down a page
- */
-AJAX.registerTeardown('config.js', function () {
-    $('.optbox input[id], .optbox select[id], .optbox textarea[id]').off('change').off('keyup');
-    $('.optbox input[type=button][name=submit_reset]').off('click');
-    $('div.tabs_contents').off();
-    $('#import_local_storage, #export_local_storage').off('click');
-    $('form.prefs-form').off('change').off('submit');
-    $(document).off('click', 'div.click-hide-message');
-    $('#prefs_autoload').find('a').off('click');
-});
-
-AJAX.registerOnload('config.js', function () {
-    var $topmenuUpt = $('#user_prefs_tabs');
-    $topmenuUpt.find('a.active').attr('rel', 'samepage');
-    $topmenuUpt.find('a:not(.active)').attr('rel', 'newpage');
-});
-
-// default values for fields
-var defaultValues = {};
-
-/**
- * Returns field type
- *
- * @param {Element} field
- */
-function getFieldType (field) {
-    var $field = $(field);
-    var tagName = $field.prop('tagName');
-    if (tagName === 'INPUT') {
-        return $field.attr('type');
-    } else if (tagName === 'SELECT') {
-        return 'select';
-    } else if (tagName === 'TEXTAREA') {
-        return 'text';
-    }
-    return '';
-}
-
-/**
- * Enables or disables the "restore default value" button
- *
- * @param {Element} field
- * @param {boolean} display
- */
-function setRestoreDefaultBtn (field, display) {
-    var $el = $(field).closest('td').find('.restore-default img');
-    $el[display ? 'show' : 'hide']();
-}
-
-/**
- * Marks field depending on its value (system default or custom)
- *
- * @param {Element} field
- */
-function markField (field) {
-    var $field = $(field);
-    var type = getFieldType($field);
-    var isDefault = checkFieldDefault($field, type);
-
-    // checkboxes uses parent <span> for marking
-    var $fieldMarker = (type === 'checkbox') ? $field.parent() : $field;
-    setRestoreDefaultBtn($field, !isDefault);
-    $fieldMarker[isDefault ? 'removeClass' : 'addClass']('custom');
-}
-
-/**
- * Sets field value
- *
- * value must be of type:
- * o undefined (omitted) - restore default value (form default, not PMA default)
- * o String - if field_type is 'text'
- * o boolean - if field_type is 'checkbox'
- * o Array of values - if field_type is 'select'
- *
- * @param {Element} field
- * @param {String}  fieldType  see {@link #getFieldType}
- * @param {String|Boolean}  value
- */
-function setFieldValue (field, fieldType, value) {
-    var $field = $(field);
-    switch (fieldType) {
-    case 'text':
-    case 'number':
-        $field.val(value);
-        break;
-    case 'checkbox':
-        $field.prop('checked', value);
-        break;
-    case 'select':
-        var options = $field.prop('options');
-        var i;
-        var imax = options.length;
-        for (i = 0; i < imax; i++) {
-            options[i].selected = (value.indexOf(options[i].value) !== -1);
-        }
-        break;
-    }
-    markField($field);
-}
-
-/**
- * Gets field value
- *
- * Will return one of:
- * o String - if type is 'text'
- * o boolean - if type is 'checkbox'
- * o Array of values - if type is 'select'
- *
- * @param {Element} field
- * @param {String}  fieldType returned by {@link #getFieldType}
- * @type Boolean|String|String[]
- */
-function getFieldValue (field, fieldType) {
-    var $field = $(field);
-    switch (fieldType) {
-    case 'text':
-    case 'number':
-        return $field.prop('value');
-    case 'checkbox':
-        return $field.prop('checked');
-    case 'select':
-        var options = $field.prop('options');
-        var i;
-        var imax = options.length;
-        var items = [];
-        for (i = 0; i < imax; i++) {
-            if (options[i].selected) {
-                items.push(options[i].value);
-            }
-        }
-        return items;
-    }
-    return null;
-}
-
-/**
- * Returns values for all fields in fieldsets
- */
-// eslint-disable-next-line no-unused-vars
-function getAllValues () {
-    var $elements = $('fieldset input, fieldset select, fieldset textarea');
-    var values = {};
-    var type;
-    var value;
-    for (var i = 0; i < $elements.length; i++) {
-        type = getFieldType($elements[i]);
-        value = getFieldValue($elements[i], type);
-        if (typeof value !== 'undefined') {
-            // we only have single selects, fatten array
-            if (type === 'select') {
-                value = value[0];
-            }
-            values[$elements[i].name] = value;
-        }
-    }
-    return values;
-}
-
-/**
- * Checks whether field has its default value
- *
- * @param {Element} field
- * @param {String}  type
- * @return boolean
- */
-function checkFieldDefault (field, type) {
-    var $field = $(field);
-    var fieldId = $field.attr('id');
-    if (typeof defaultValues[fieldId] === 'undefined') {
-        return true;
-    }
-    var isDefault = true;
-    var currentValue = getFieldValue($field, type);
-    if (type !== 'select') {
-        isDefault = currentValue === defaultValues[fieldId];
-    } else {
-        // compare arrays, will work for our representation of select values
-        if (currentValue.length !== defaultValues[fieldId].length) {
-            isDefault = false;
-        } else {
-            for (var i = 0; i < currentValue.length; i++) {
-                if (currentValue[i] !== defaultValues[fieldId][i]) {
-                    isDefault = false;
-                    break;
-                }
-            }
-        }
-    }
-    return isDefault;
-}
-
-/**
- * Returns element's id prefix
- * @param {Element} element
- */
-// eslint-disable-next-line no-unused-vars
-function getIdPrefix (element) {
-    return $(element).attr('id').replace(/[^-]+$/, '');
-}
-
-// ------------------------------------------------------------------
-// Form validation and field operations
-//
-
-// form validator assignments
-var validate = {};
-
-// form validator list
-var validators = {
-    // regexp: numeric value
-    regExpNumeric: /^[0-9]+$/,
-    // regexp: extract parts from PCRE expression
-    regExpPcreExtract: /(.)(.*)\1(.*)?/,
-    /**
-     * Validates positive number
-     *
-     * @param {boolean} isKeyUp
-     */
-    validatePositiveNumber: function (isKeyUp) {
-        if (isKeyUp && this.value === '') {
-            return true;
-        }
-        var result = this.value !== '0' && validators.regExpNumeric.test(this.value);
-        return result ? true : Messages.error_nan_p;
-    },
-    /**
-     * Validates non-negative number
-     *
-     * @param {boolean} isKeyUp
-     */
-    validateNonNegativeNumber: function (isKeyUp) {
-        if (isKeyUp && this.value === '') {
-            return true;
-        }
-        var result = validators.regExpNumeric.test(this.value);
-        return result ? true : Messages.error_nan_nneg;
-    },
-    /**
-     * Validates port number
-     */
-    validatePortNumber: function () {
-        if (this.value === '') {
-            return true;
-        }
-        var result = validators.regExpNumeric.test(this.value) && this.value !== '0';
-        return result && this.value <= 65535 ? true : Messages.error_incorrect_port;
-    },
-    /**
-     * Validates value according to given regular expression
-     *
-     * @param {boolean} isKeyUp
-     * @param {string}  regexp
-     */
-    validateByRegex: function (isKeyUp, regexp) {
-        if (isKeyUp && this.value === '') {
-            return true;
-        }
-        // convert PCRE regexp
-        var parts = regexp.match(validators.regExpPcreExtract);
-        var valid = this.value.match(new RegExp(parts[2], parts[3])) !== null;
-        return valid ? true : Messages.error_invalid_value;
-    },
-    /**
-     * Validates upper bound for numeric inputs
-     *
-     * @param {boolean} isKeyUp
-     * @param {int} maxValue
-     */
-    validateUpperBound: function (isKeyUp, maxValue) {
-        var val = parseInt(this.value, 10);
-        if (isNaN(val)) {
-            return true;
-        }
-        return val <= maxValue ? true : Functions.sprintf(Messages.error_value_lte, maxValue);
-    },
-    // field validators
-    field: {
-    },
-    // fieldset validators
-    fieldset: {
-    }
-};
-
-/**
- * Registers validator for given field
- *
- * @param {String}  id       field id
- * @param {String}  type     validator (key in validators object)
- * @param {boolean} onKeyUp  whether fire on key up
- * @param {Array}   params   validation function parameters
- */
-// eslint-disable-next-line no-unused-vars
-function registerFieldValidator (id, type, onKeyUp, params) {
-    if (typeof validators[type] === 'undefined') {
-        return;
-    }
-    if (typeof validate[id] === 'undefined') {
-        validate[id] = [];
-    }
-    if (validate[id].length === 0) {
-        validate[id].push([type, params, onKeyUp]);
-    }
-}
-
-/**
- * Returns validation functions associated with form field
- *
- * @param {String}  fieldId     form field id
- * @param {boolean} onKeyUpOnly  see registerFieldValidator
- * @type Array
- * @return array of [function, parameters to be passed to function]
- */
-function getFieldValidators (fieldId, onKeyUpOnly) {
-    // look for field bound validator
-    var name = fieldId && fieldId.match(/[^-]+$/)[0];
-    if (typeof validators.field[name] !== 'undefined') {
-        return [[validators.field[name], null]];
-    }
-
-    // look for registered validators
-    var functions = [];
-    if (typeof validate[fieldId] !== 'undefined') {
-        // validate[field_id]: array of [type, params, onKeyUp]
-        for (var i = 0, imax = validate[fieldId].length; i < imax; i++) {
-            if (onKeyUpOnly && !validate[fieldId][i][2]) {
-                continue;
-            }
-            functions.push([validators[validate[fieldId][i][0]], validate[fieldId][i][1]]);
-        }
-    }
-
-    return functions;
-}
-
-/**
- * Displays errors for given form fields
- *
- * WARNING: created DOM elements must be identical with the ones made by
- * PhpMyAdmin\Config\FormDisplayTemplate::displayInput()!
- *
- * @param {Object} errorList list of errors in the form {field id: error array}
- */
-function displayErrors (errorList) {
-    var tempIsEmpty = function (item) {
-        return item !== '';
-    };
-
-    for (var fieldId in errorList) {
-        var errors = errorList[fieldId];
-        var $field = $('#' + fieldId);
-        var isFieldset = $field.attr('tagName') === 'FIELDSET';
-        var $errorCnt;
-        if (isFieldset) {
-            $errorCnt = $field.find('dl.errors');
-        } else {
-            $errorCnt = $field.siblings('.inline_errors');
-        }
-
-        // remove empty errors (used to clear error list)
-        errors = $.grep(errors, tempIsEmpty);
-
-        // CSS error class
-        if (!isFieldset) {
-            // checkboxes uses parent <span> for marking
-            var $fieldMarker = ($field.attr('type') === 'checkbox') ? $field.parent() : $field;
-            $fieldMarker[errors.length ? 'addClass' : 'removeClass']('field-error');
-        }
-
-        if (errors.length) {
-            // if error container doesn't exist, create it
-            if ($errorCnt.length === 0) {
-                if (isFieldset) {
-                    $errorCnt = $('<dl class="errors"></dl>');
-                    $field.find('table').before($errorCnt);
-                } else {
-                    $errorCnt = $('<dl class="inline_errors"></dl>');
-                    $field.closest('td').append($errorCnt);
-                }
-            }
-
-            var html = '';
-            for (var i = 0, imax = errors.length; i < imax; i++) {
-                html += '<dd>' + errors[i] + '</dd>';
-            }
-            $errorCnt.html(html);
-        } else if ($errorCnt !== null) {
-            // remove useless error container
-            $errorCnt.remove();
-        }
-    }
-}
-
-/**
- * Validates fields and fieldsets and call displayError function as required
- */
-function setDisplayError () {
-    var elements = $('.optbox input[id], .optbox select[id], .optbox textarea[id]');
-    // run all field validators
-    var errors = {};
-    for (var i = 0; i < elements.length; i++) {
-        validateField(elements[i], false, errors);
-    }
-    // run all fieldset validators
-    $('fieldset.optbox').each(function () {
-        validateFieldset(this, false, errors);
-    });
-    displayErrors(errors);
-}
-
-/**
- * Validates fieldset and puts errors in 'errors' object
- *
- * @param {Element} fieldset
- * @param {boolean} isKeyUp
- * @param {Object}  errors
- */
-function validateFieldset (fieldset, isKeyUp, errors) {
-    var $fieldset = $(fieldset);
-    if ($fieldset.length && typeof validators.fieldset[$fieldset.attr('id')] !== 'undefined') {
-        var fieldsetErrors = validators.fieldset[$fieldset.attr('id')].apply($fieldset[0], [isKeyUp]);
-        for (var fieldId in fieldsetErrors) {
-            if (typeof errors[fieldId] === 'undefined') {
-                errors[fieldId] = [];
-            }
-            if (typeof fieldsetErrors[fieldId] === 'string') {
-                fieldsetErrors[fieldId] = [fieldsetErrors[fieldId]];
-            }
-            $.merge(errors[fieldId], fieldsetErrors[fieldId]);
-        }
-    }
-}
-
-/**
- * Validates form field and puts errors in 'errors' object
- *
- * @param {Element} field
- * @param {boolean} isKeyUp
- * @param {Object}  errors
- */
-function validateField (field, isKeyUp, errors) {
-    var args;
-    var result;
-    var $field = $(field);
-    var fieldId = $field.attr('id');
-    errors[fieldId] = [];
-    var functions = getFieldValidators(fieldId, isKeyUp);
-    for (var i = 0; i < functions.length; i++) {
-        if (typeof functions[i][1] !== 'undefined' && functions[i][1] !== null) {
-            args = functions[i][1].slice(0);
-        } else {
-            args = [];
-        }
-        args.unshift(isKeyUp);
-        result = functions[i][0].apply($field[0], args);
-        if (result !== true) {
-            if (typeof result === 'string') {
-                result = [result];
-            }
-            $.merge(errors[fieldId], result);
-        }
-    }
-}
-
-/**
- * Validates form field and parent fieldset
- *
- * @param {Element} field
- * @param {boolean} isKeyUp
- */
-function validateFieldAndFieldset (field, isKeyUp) {
-    var $field = $(field);
-    var errors = {};
-    validateField($field, isKeyUp, errors);
-    validateFieldset($field.closest('fieldset.optbox'), isKeyUp, errors);
-    displayErrors(errors);
-}
-
-function loadInlineConfig () {
-    if (!Array.isArray(configInlineParams)) {
-        return;
-    }
-    for (var i = 0; i < configInlineParams.length; ++i) {
-        if (typeof configInlineParams[i] === 'function') {
-            configInlineParams[i]();
-        }
-    }
-}
-
-function setupValidation () {
-    validate = {};
-    configScriptLoaded = true;
-    if (configScriptLoaded && typeof configInlineParams !== 'undefined') {
-        loadInlineConfig();
-    }
-    // register validators and mark custom values
-    var $elements = $('.optbox input[id], .optbox select[id], .optbox textarea[id]');
-    $elements.each(function () {
-        markField(this);
-        var $el = $(this);
-        $el.on('change', function () {
-            validateFieldAndFieldset(this, false);
-            markField(this);
-        });
-        var tagName = $el.attr('tagName');
-        // text fields can be validated after each change
-        if (tagName === 'INPUT' && $el.attr('type') === 'text') {
-            $el.on('keyup', function () {
-                validateFieldAndFieldset($el, true);
-                markField($el);
-            });
-        }
-        // disable textarea spellcheck
-        if (tagName === 'TEXTAREA') {
-            $el.attr('spellcheck', false);
-        }
-    });
-
-    // check whether we've refreshed a page and browser remembered modified
-    // form values
-    var $checkPageRefresh = $('#check_page_refresh');
-    if ($checkPageRefresh.length === 0 || $checkPageRefresh.val() === '1') {
-        // run all field validators
-        var errors = {};
-        for (var i = 0; i < $elements.length; i++) {
-            validateField($elements[i], false, errors);
-        }
-        // run all fieldset validators
-        $('fieldset.optbox').each(function () {
-            validateFieldset(this, false, errors);
-        });
-
-        displayErrors(errors);
-    } else if ($checkPageRefresh) {
-        $checkPageRefresh.val('1');
-    }
-}
-
-AJAX.registerOnload('config.js', function () {
-    setupValidation();
-});
-
-//
-// END: Form validation and field operations
-// ------------------------------------------------------------------
-
-// ------------------------------------------------------------------
-// Tabbed forms
-//
-
-/**
- * Sets active tab
- *
- * @param {String} tabId
- */
-function setTab (tabId) {
-    $('ul.tabs').each(function () {
-        var $this = $(this);
-        if (!$this.find('li a[href="#' + tabId + '"]').length) {
-            return;
-        }
-        $this.find('li').removeClass('active').find('a[href="#' + tabId + '"]').parent().addClass('active');
-        $this.parent().find('div.tabs_contents fieldset').hide().filter('#' + tabId).show();
-        var hashValue = 'tab_' + tabId;
-        location.hash = hashValue;
-        $this.parent().find('input[name=tab_hash]').val(hashValue);
-    });
-}
-
-function setupConfigTabs () {
-    var forms = $('form.config-form');
-    forms.each(function () {
-        var $this = $(this);
-        var $tabs = $this.find('ul.tabs');
-        if (!$tabs.length) {
-            return;
-        }
-        // add tabs events and activate one tab (the first one or indicated by location hash)
-        $tabs.find('li').removeClass('active');
-        $tabs.find('a')
-            .on('click', function (e) {
-                e.preventDefault();
-                setTab($(this).attr('href').substr(1));
-            })
-            .first()
-            .parent()
-            .addClass('active');
-        $this.find('div.tabs_contents fieldset').hide().first().show();
-    });
-}
-
-function adjustPrefsNotification () {
-    var $prefsAutoLoad = $('#prefs_autoload');
-    var $tableNameControl = $('#table_name_col_no');
-    var $prefsAutoShowing = ($prefsAutoLoad.css('display') !== 'none');
-
-    if ($prefsAutoShowing && $tableNameControl.length) {
-        $tableNameControl.css('top', '55px');
-    }
-}
-
-AJAX.registerOnload('config.js', function () {
-    setupConfigTabs();
-    adjustPrefsNotification();
-
-    // tab links handling
-    // (works with history in FF, further browser support here would be an overkill)
-    window.onhashchange = function () {
-        if (location.hash.match(/^#tab_[a-zA-Z0-9_]+$/)) {
-            // session ID is sometimes appended here
-            var hash = location.hash.substr(5).split('&')[0];
-            if ($('#' + hash).length) {
-                setTab(hash);
-            }
-        }
-    };
-    window.onhashchange();
-});
-
-//
-// END: Tabbed forms
-// ------------------------------------------------------------------
-
-// ------------------------------------------------------------------
-// Form reset buttons
-//
-
-AJAX.registerOnload('config.js', function () {
-    $('.optbox input[type=button][name=submit_reset]').on('click', function () {
-        var fields = $(this).closest('fieldset').find('input, select, textarea');
-        for (var i = 0, imax = fields.length; i < imax; i++) {
-            setFieldValue(fields[i], getFieldType(fields[i]), defaultValues[fields[i].id]);
-        }
-        setDisplayError();
-    });
-});
-
-//
-// END: Form reset buttons
-// ------------------------------------------------------------------
-
-// ------------------------------------------------------------------
-// "Restore default" and "set value" buttons
-//
-
-/**
- * Restores field's default value
- *
- * @param {String} fieldId
- */
-function restoreField (fieldId) {
-    var $field = $('#' + fieldId);
-    if ($field.length === 0 || defaultValues[fieldId] === undefined) {
-        return;
-    }
-    setFieldValue($field, getFieldType($field), defaultValues[fieldId]);
-}
-
-function setupRestoreField () {
-    $('div.tabs_contents')
-        .on('mouseenter', '.restore-default, .set-value', function () {
-            $(this).css('opacity', 1);
-        })
-        .on('mouseleave', '.restore-default, .set-value', function () {
-            $(this).css('opacity', 0.25);
-        })
-        .on('click', '.restore-default, .set-value', function (e) {
-            e.preventDefault();
-            var href = $(this).attr('href');
-            var fieldSel;
-            if ($(this).hasClass('restore-default')) {
-                fieldSel = href;
-                restoreField(fieldSel.substr(1));
-            } else {
-                fieldSel = href.match(/^[^=]+/)[0];
-                var value = href.match(/=(.+)$/)[1];
-                setFieldValue($(fieldSel), 'text', value);
-            }
-            $(fieldSel).trigger('change');
-        })
-        .find('.restore-default, .set-value')
-        // inline-block for IE so opacity inheritance works
-        .css({ display: 'inline-block', opacity: 0.25 });
-}
-
-AJAX.registerOnload('config.js', function () {
-    setupRestoreField();
-});
-
-//
-// END: "Restore default" and "set value" buttons
-// ------------------------------------------------------------------
-
-// ------------------------------------------------------------------
-// User preferences import/export
-//
-
-AJAX.registerOnload('config.js', function () {
-    offerPrefsAutoimport();
-    var $radios = $('#import_local_storage, #export_local_storage');
-    if (!$radios.length) {
-        return;
-    }
-
-    // enable JavaScript dependent fields
-    $radios
-        .prop('disabled', false)
-        .add('#export_text_file, #import_text_file')
-        .on('click', function () {
-            var enableId = $(this).attr('id');
-            var disableId;
-            if (enableId.match(/local_storage$/)) {
-                disableId = enableId.replace(/local_storage$/, 'text_file');
-            } else {
-                disableId = enableId.replace(/text_file$/, 'local_storage');
-            }
-            $('#opts_' + disableId).addClass('disabled').find('input').prop('disabled', true);
-            $('#opts_' + enableId).removeClass('disabled').find('input').prop('disabled', false);
-        });
-
-    // detect localStorage state
-    var lsSupported = isStorageSupported('localStorage', true);
-    var lsExists = lsSupported ? (window.localStorage.config || false) : false;
-    $('div.localStorage-' + (lsSupported ? 'un' : '') + 'supported').hide();
-    $('div.localStorage-' + (lsExists ? 'empty' : 'exists')).hide();
-    if (lsExists) {
-        updatePrefsDate();
-    }
-    $('form.prefs-form').on('change', function () {
-        var $form = $(this);
-        var disabled = false;
-        if (!lsSupported) {
-            disabled = $form.find('input[type=radio][value$=local_storage]').prop('checked');
-        } else if (!lsExists && $form.attr('name') === 'prefs_import' &&
-            $('#import_local_storage')[0].checked
-        ) {
-            disabled = true;
-        }
-        $form.find('input[type=submit]').prop('disabled', disabled);
-    }).on('submit', function (e) {
-        var $form = $(this);
-        if ($form.attr('name') === 'prefs_export' && $('#export_local_storage')[0].checked) {
-            e.preventDefault();
-            // use AJAX to read JSON settings and save them
-            savePrefsToLocalStorage($form);
-        } else if ($form.attr('name') === 'prefs_import' && $('#import_local_storage')[0].checked) {
-            // set 'json' input and submit form
-            $form.find('input[name=json]').val(window.localStorage.config);
-        }
-    });
-
-    $(document).on('click', 'div.click-hide-message', function () {
-        $(this)
-            .hide()
-            .parent('.card-body')
-            .css('height', '')
-            .next('form')
-            .show();
-    });
-});
-
-/**
- * Saves user preferences to localStorage
- *
- * @param {Element} form
- */
-function savePrefsToLocalStorage (form) {
-    var $form = $(form);
-    var submit = $form.find('input[type=submit]');
-    submit.prop('disabled', true);
-    $.ajax({
-        url: 'index.php?route=/preferences/manage',
-        cache: false,
-        type: 'POST',
-        data: {
-            'ajax_request': true,
-            'server': CommonParams.get('server'),
-            'submit_get_json': true
-        },
-        success: function (data) {
-            if (typeof data !== 'undefined' && data.success === true) {
-                window.localStorage.config = data.prefs;
-                window.localStorage.configMtime = data.mtime;
-                window.localStorage.configMtimeLocal = (new Date()).toUTCString();
-                updatePrefsDate();
-                $('div.localStorage-empty').hide();
-                $('div.localStorage-exists').show();
-                var group = $form.parent('.card-body');
-                group.css('height', group.height() + 'px');
-                $form.hide('fast');
-                $form.prev('.click-hide-message').show('fast');
-            } else {
-                Functions.ajaxShowMessage(data.error);
-            }
-        },
-        complete: function () {
-            submit.prop('disabled', false);
-        }
-    });
-}
-
-/**
- * Updates preferences timestamp in Import form
- */
-function updatePrefsDate () {
-    var d = new Date(window.localStorage.configMtimeLocal);
-    var msg = Messages.strSavedOn.replace(
-        '@DATE@',
-        Functions.formatDateTime(d)
-    );
-    $('#opts_import_local_storage').find('div.localStorage-exists').html(msg);
-}
-
-/**
- * Prepares message which informs that localStorage preferences are available and can be imported or deleted
- */
-function offerPrefsAutoimport () {
-    var hasConfig = (isStorageSupported('localStorage')) && (window.localStorage.config || false);
-    var $cnt = $('#prefs_autoload');
-    if (!$cnt.length || !hasConfig) {
-        return;
-    }
-    $cnt.find('a').on('click', function (e) {
-        e.preventDefault();
-        var $a = $(this);
-        if ($a.attr('href') === '#no') {
-            $cnt.remove();
-            $.post('index.php', {
-                'server': CommonParams.get('server'),
-                'prefs_autoload': 'hide'
-            }, null, 'html');
-            return;
-        } else if ($a.attr('href') === '#delete') {
-            $cnt.remove();
-            localStorage.clear();
-            $.post('index.php', {
-                'server': CommonParams.get('server'),
-                'prefs_autoload': 'hide'
-            }, null, 'html');
-            return;
-        }
-        $cnt.find('input[name=json]').val(window.localStorage.config);
-        $cnt.find('form').trigger('submit');
-    });
-    $cnt.show();
-}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               DSIG    ü   GDEFêêé  ,  œGPOS—|b  È  ƒ(GSUB)i½ş  …ğ  7jOS/2U°¦¦  ½\   `cmap,Àc  ½¼  
-lcvt ]gu í\   Üfpgmvd~ î8  gasp    íT   glyf¬;?®  È( ­”headì¥ä u¼   6hheaë÷ uô   $hmtx¡üF v  locatJ	à ¨  Êmaxp±ø œt    nameİ&$q œ”  `post!,è ¢ô  J`prepœ×_ ûP   ¼      BV  3      E  G ¡  ¤ ¯  ± ¸  » Ø  Ú Ş  à$ &N Q¦ ¨¨ ªÃ ÆÍ Ï! $$ &0 29 ;Y [_ ap r ‘ª ­¾ Áò ø   ; >™ œ§ ©° ²Ğ ÒÖ Ø A Cu zz öö  		  77 GI KK PP VV bb ¢¢ §§ © GV ac       ?  ÷  ©´ ¶Ç ÉÌ ÎÏ Ôï ğò óó õş ÿÿ   GV     
- ÚÖ DFLT latn      ÿÿ      : 	AZE  FCAT  RCRT  ^KAZ  jMOL  vNLD  ‚ROM  TAT  šTRK  ¦  ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ      ÿÿ  	    ÿÿ  
-    !kern Èkern Ğkern Økern àkern èkern ğkern økern kernkernkernmark mark*mark4mark>markHmarkRmark\markfmarkpmarkzmark„mkmkmkmk˜mkmk¢mkmk¬mkmk¶mkmkÀmkmkÊmkmkÔmkmkŞmkmkèmkmkò                                                                                                                                                                                                          * 2 : B J R    H    fŒœ°    Ä    <    "L   h
-   hü   p6 tH        şÿÎ şÿÈ şÿÉ•ÿë t,   *06<BHNTZ`flrx~„Š–œ¢¨®´ºÀÆĞÚäîø&4:DJPV\bhnx‚Œ– ª´¾ÈÒÜæğú",6@JT^hr|†š¤®¸ÂÌÒÜæìòøş
- *4>HR\fpz„˜¢¬¶ÀÊÔŞèòü$.8BL^p‚”¦¸Öèú			0	B	T	f	x	‚	Œ	–	 	ª	´	¾	È	Ò	Ü	æ	ğ	ú
-
-
-
-"
-,
-6
-@
-J
-T
-^
-h
-r
-|
-†
-
-š
-¤
-®
-¸
-Â
-Ì
-Ò
-à
-î
-ü
-&4BP^lzˆ–¤²¼ÆĞÚäîø *4>HR\fpz„˜¢¬¶ÀÊÔŞèòü *4>HR\jt~ˆ’œ¦°ºÄÊØæô,6@NXblv€Š”¨²ĞŞôş õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿß õÿ÷  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé şÿØ  cÿøşÿí  cÿøşÿø  cÿøşÿí C  ÿì !ÿì "ÿì #ÿì $ÿì %ÿì &ÿì Gÿì Hÿì Iÿì Jÿì Kÿì Lÿì Mÿì ÿì €ÿì ÿì ‚ÿì ƒÿì „ÿì …ÿì †ÿì ‡ÿì ˆÿì ‰ÿì Šÿì ‹ÿì Œÿì ÿì ÿì ÿì ÿì ‘ÿì ’ÿì “ÿì ”ÿì •ÿì –ÿì —ÿì ˜ÿì ™ÿì šÿì ›ÿì œÿì ÿì ÿì Ÿÿì  ÿì ¡ÿì ¤ÿì ºÿì&ÿì'ÿì(ÿì)ÿì*ÿì+ÿì,ÿìOÿìÿìÿìÿìÿìÿìÿì ÿìBÿì õÿÎ  cÿøşÿí õÿÎ õÿÎ õÿÎ õÿÎ õÿÎ õÿÎ õÿÎ  cÿøşÿí  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé  àÿùşÿé şÿÔ  àÿ÷şÿä  àÿùşÿé õÿ÷ õÿ÷ õÿ÷ õÿ÷ õÿ÷ õÿ÷ õÿ÷ õÿ÷  àÿùşÿé şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿøşÿí  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿØ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ G  ÿó !ÿó "ÿó #ÿó $ÿó %ÿó &ÿó Gÿó Hÿó Iÿó Jÿó Kÿó Lÿó Mÿó cÿı eÿô ÿù €ÿó ÿó ‚ÿó ƒÿó „ÿó …ÿó †ÿó ‡ÿó ˆÿó ‰ÿó Šÿó ‹ÿó Œÿó ÿó ÿó ÿó ÿó ‘ÿó ’ÿó “ÿó ”ÿó •ÿó –ÿó —ÿó ˜ÿó ™ÿó šÿó ›ÿó œÿó ÿó ÿó Ÿÿó  ÿó ¡ÿó ¤ÿó ºÿó&ÿó'ÿó(ÿó)ÿó*ÿó+ÿó,ÿóOÿóÿóÿóÿóÿóÿóÿó ÿóBÿóş  •ÿÕ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿı ÿùşÿİ•ÿŞ  cÿøşÿí  àÿùşÿé şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ  cÿêõÿõ  àÿùşÿé  cÿêõÿ÷  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ ş   cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ  cÿêõÿõ õÿ÷  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿí eÿóşÿæ  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá  cÿíşÿá ş   cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿø ÿüõÿğ  cÿêõÿõ  cÿêõÿõ  cÿø ÿüõÿğ  àÿùşÿé şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ şÿÉ•ÿÇ  cÿó eÿó  cÿğ eÿğ G  ÿî !ÿî "ÿî #ÿî $ÿî %ÿî &ÿî Gÿî Hÿî Iÿî Jÿî Kÿî Lÿî Mÿî cÿğ eÿğ ÿî €ÿî ÿî ‚ÿî ƒÿî „ÿî …ÿî †ÿî ‡ÿî ˆÿî ‰ÿî Šÿî ‹ÿî Œÿî ÿî ÿî ÿî ÿî ‘ÿî ’ÿî “ÿî ”ÿî •ÿî –ÿî —ÿî ˜ÿî ™ÿî šÿî ›ÿî œÿî ÿî ÿî Ÿÿî  ÿî ¡ÿî ¤ÿî ºÿî&ÿî'ÿî(ÿî)ÿî*ÿî+ÿî,ÿîOÿîœÿõÿõÿîÿîÿîÿîÿîÿî ÿîBÿî C  ÿõ !ÿõ "ÿõ #ÿõ $ÿõ %ÿõ &ÿõ Gÿõ Hÿõ Iÿõ Jÿõ Kÿõ Lÿõ Mÿõ ÿõ €ÿõ ÿõ ‚ÿõ ƒÿõ „ÿõ …ÿõ †ÿõ ‡ÿõ ˆÿõ ‰ÿõ Šÿõ ‹ÿõ Œÿõ ÿõ ÿõ ÿõ ÿõ ‘ÿõ ’ÿõ “ÿõ ”ÿõ •ÿõ –ÿõ —ÿõ ˜ÿõ ™ÿõ šÿõ ›ÿõ œÿõ ÿõ ÿõ Ÿÿõ  ÿõ ¡ÿõ ¤ÿõ ºÿõ&ÿõ'ÿõ(ÿõ)ÿõ*ÿõ+ÿõ,ÿõOÿõÿõÿõÿõÿõÿõÿõ ÿõBÿõ E    !  "  #  $  %  &  G  H  I  J  K  L  M    €    ‚  ƒ  „  …  †  ‡  ˆ  ‰  Š  ‹  Œ          ‘  ’  “  ”  •  –  —  ˜  ™  š  ›  œ      Ÿ     ¡  ¤  º & ' ( ) * + , O œÿöÿö        B   cÿç eÿç  cÿõ eÿõ  cÿò eÿò  cÿõ eÿõ  cÿü eÿü c      õÿß c   fgÈ    ÿíÿµÿìÿÉÿéÿéÿßÿıÿõ                                                  ÿø                              ÿô      ÿô          ÿøÿú                                            ÿîÿİ                                                                             ÿøÿğ  ÿö    ÿı    ÿèÿí  ÿğÿìÿğÿøÿöÿø                                ÿãÿË                                  ÿú          ÿ÷                              ÿè      ÿÀÿğÿğ  ÿğÿñÿµÿŞÿÁÿô      ÿèÿÖÿğÿùÿò            ÿû          ÿê                                                ÿòÿì          ÿì                ÿõ      ÿÁÿäÿø  ÿõÿöÿÉÿÄ        ÿæ    ÿäÿæÿæÿıÿù  ÿ÷                                                  ÿò  ÿø                                                              ÿı                           `Ò   fg0  
-  ÿğÿÁÿğÿÁÿïÿÒÿş                    ÿú    ÿö  ÿö          ÿú                ÿñÿã                     ÿøÿğÿùÿğ  ÿø  ÿìÿğ                ÿèÿÔ            ÿû  ÿù    ÿè  ÿè        ÿôÿÁ                ÿôÿï  ÿ÷  ÿ÷        ÿøÿÒ  ÿø  ÿø                              ÿş `   fÎgÔ    ÿöÿáÿ÷ÿñ                                >ÿçÿöÿñ # \   ÿö             ÿöÿı        ÿğ      ÿø                ÿùÿæÿä            ÿı  ÿ÷    ÿñ                            ÿ÷                ÿúÿÓ        ÿğ    ÿùÿñ        ÿü        ÿÁ    ÿé  ÿÀ    ÿïÿï  ÿø    ÿıÿâ      ÿéÿñ  ÿü                             ÿæ        ÿ÷    ÿø            ÿñ      ÿä  ÿı                             ÿıÿøÿñÿïÿß  ÿğ      ÿğ      ÿø  ÿı   ÿöÿæÿéÿä          ÿı  ÿì    ÿñ          ÿæÿüÿı                          ÿü    ÿù        ÿğ                       ^n^„  æ v  †  Œ  ’  ˜    ¤  ª  °  ¶  ¼  Â  È Š  Î  Ô  Ú  à  æ  ¶  ì  ò  ø  ò  à  ş    
-        "  H N T Z ¢ ` f x ~  (  .  4  :  @  F  L  R  X  ^  F  d  j  p  v  |  ‚  ˆ    ”  š  :     ¦  ¬  ²  p  ¸ H l r  : ¨  ¾  ¼  Ä  Ê  ’  ’  Ô  ò  Ğ  Ö H  Ü  â  è  î  ¬  ô  :  ú     †    à   „ – œ ®  Ğ  ¶      
-    ¶  ø  .  $  *  0  6  <  B  ú Ú””””à””””æ””””ì””””ò””””şø”””
-”””şø””””””"”””4(.:”@””””LF”””^R””Xjd”””|pv””‚ˆ”” ÿD ÿk ÿL ÿK ÿ” ÿn ÿË ÿa ÿ_ ÿ ÿo ÿ ÿc ÿO ÿ[ ÿN ÿ† ÿ- ÿ] ÿ^ ÿ@ ÿs ÿS ÿ ÿd ÿg ÿ‚ ÿ‹ ÿd½ ÿ½ ÿn½ ÿk½ ÿ´½ ÿ€½ ÿì½ ÿ—½ ÿ½ ÿ}½ ÿ6½ ÿ„½ ÿp½ ÿy½ ÿo½ ÿM½ ÿ†½ ÿe½ ÿ‘½ ÿj½ ÿ”½ ÿu½ ÿŸ½ ÿ‡½ ÿA ÿÏ ÿh ÿG ÿ˜ ÿc½ ÿÀ½ ÿÚ½ ÿˆ½ ÿl½ ÿT½ ÿh½ ÿM ÿ~ ÿZ ÿw ÿm ÿz½ ÿs½ ÿm½ ÿ~½ ÿ‹½ ÿ|½ ÿ'   şĞ   ÿC   ÿ   şâ   şà   ş   ÿ#   ÿ´ şê´ ÿ'³ ÿt½ ÿ) ş® ÿ{½ ÿ   ÿ„   ÿ²   ¥V  Š  éÙ  Å¿  ¼– g   ·½  ü   X !   z½ y   ¾½ @   ~+ ¬ ]æ  î Â †   ½ |    
- #½ ü   ˆ½    X8 Ô‡  ı   ;8 ½‡      Y*YF  Ú s    & , 2 8 > D J P V \ Ü b h n t z J € † Œ † t ’ ˜  ¤ ª ° ¶ â  Ø  Ş  ä  ê   ğ  ö ¼ Â È Î Ô Ú à æ ì ò Ú ø ş  
-    " ( . Î 4 : @ F  L  Ø  ü   Î  R P X ^ & & h † d j  Ø p v | ‚ @ ˆ Î  ”  š t   è î  d J ¦ ¬  ² J Œ Â ¸ ¾ Ä Ê Ğ Ö  &,28 ÿ'   şĞ   ÿC   ÿ   şâ   şà   ş   ÿ#   ÿ   ÿ„   ÿ²  ÿD ÿk ÿL ÿK ÿ” ÿn ÿË ÿa ÿ_ ÿ ÿo ÿ ÿc ÿO ÿ[ ÿN ÿ† ÿ- ÿ] ÿ^ ÿ@ ÿs ÿS ÿ ÿd ÿg ÿ‚ ÿ‹ ÿd½ ÿ½ ÿn½ ÿk½ ÿ´½ ÿ€½ ÿì½ ÿ—½ ÿ½ ÿ}½ ÿ6½ ÿ„½ ÿp½ ÿy½ ÿo½ ÿM½ ÿ†½ ÿe½ ÿ‘½ ÿj½ ÿ”½ ÿu½ ÿŸ½ ÿ‡½ ÿA ÿÏ ÿh ÿG ÿ˜ ÿc½ ÿÀ½ ÿÚ½ ÿˆ½ ÿl½ ÿT½ ÿh½ ÿM ÿ~ ÿZ ÿw ÿm ÿz½ ÿs½ ÿm½ ÿ~½ ÿ‹½ ÿ|½ ÿt½ ÿ) ş® ÿ{½    	   ˆ ` TÖU4  æ v ,² ,¸ ,¾ ,Ä ,Ê ,Ğ ,Ö ,Ü ,â ,è ,î ,ô .† ,ú -  - - - ,â - - -$ - - -* -0 -6 -< -B -H -N .Œ  ,p  ,v  ,|  ,‚ ,   ,ˆ  , .t .z -T -Z -` -f -l -r -x -~ -„ -Š -r - -– -œ -¢ -¨ -® -´ -º -À -Æ -f -Ì -Ò -Ø -Ş -œ -ä  ,p  ,”  ,š -f ,¦ -ê ,è -ğ -ö ,¾ ,¾ -  - -ü .  ,p . . . . -Ø .  -f .& ., ,² .2 - .8 .€ .’ .˜ ,¬ -ü ,â .> .D -6 .J ,â -$ -Z .P .V .\ .b .h .n .&B,Ä,Ê,ĞCÚCÚ,Ä,Ê,ÖCÚCÚ,Ä,Ê,ÜCÚCÚ,Ä,Ê,âCÚCÚ,è,Ê,îCÚCÚ,Ä,Ê,âCÚCÚ,Ä,Ê,ôCÚCÚ,Ä,Ê,úCÚCÚ,Ä,Ê- CÚCÚ,Ä,Ê-CÚCÚ,è,Ê-CÚCÚ,Ä,Ê-CÚCÚ,Ä,Ê-CÚCÚ,Ä,Ê-CÚCÚ,Ä,Ê-CÚCÚ,Ä,Ê-$CÚCÚ,è,Ê,ĞCÚCÚ,Ä,Ê-*CÚCÚ,Ä,Ê-$CÚCÚ,Ä,Ê-0CÚCÚ,Ä,Ê-6CÚCÚ,Ä,Ê,ĞCÚCÚ,Ä,Ê-<CÚCÚ,Ä,Ê-BCÚCÚ,Ä,Ê-HCÚCÚ-N-T-ZCÚCÚ-N-T-`CÚCÚ-fCÚ-lCÚCÚ-fCÚ-rCÚCÚ-fCÚ-xCÚCÚ-~CÚ-lCÚCÚ-~CÚ-„CÚCÚ-fCÚ-CÚCÚ-fCÚ- CÚCÚ-ŠCÚ-–-CÚ-œCÚ-¢-CÚ-ŠCÚ-–-CÚ-ŠCÚ-¨-CÚ-ŠCÚ-–-CÚ-®CÚ-–-CÚ-ŠCÚ-–-CÚ-´CÚ-º-CÚ-À-Æ-ÌCÚCÚ-À-Æ-ÒCÚCÚ-À-Æ-ØCÚCÚ-À-Æ-ŞCÚCÚ-ä-Æ-êCÚCÚ-À-Æ-ğCÚCÚ-À-Æ-öCÚCÚ-ü-Æ.CÚCÚ-À-Æ-öCÚCÚ-À-Æ.CÚCÚ-À-Æ.CÚCÚ-À-Æ.CÚCÚ-À-Æ,ÜCÚCÚ-À-Æ-CÚCÚ-ü-Æ-ÌCÚCÚ-À-Æ.CÚCÚ-À-Æ,ÜCÚCÚ-À-Æ.CÚCÚ-À-Æ. CÚCÚ-À-Æ.&CÚCÚ-À-Æ.,CÚCÚ-À-Æ-ÌCÚCÚ-À-Æ-CÚCÚ.2CÚ.8CÚCÚ.2CÚ-0CÚCÚ.2CÚ.>CÚCÚ.2CÚ.DCÚCÚ.JCÚ.8CÚCÚ.2CÚ.PCÚCÚ.2CÚ.VCÚCÚ.\CÚ.h.bCÚ.nCÚ.z.tCÚ.€CÚ.h.bCÚ.\CÚ.†.bCÚ.ŒCÚ.h.bCÚ.’.˜.CÚCÚ.’.˜.¤CÚCÚ.’.˜.ªCÚCÚ.’.˜.°CÚCÚ.’.˜.¶CÚCÚ.’.˜.¼CÚCÚ.’.˜.ÂCÚCÚ.’.˜.ÈCÚCÚ.’.˜.ÎCÚCÚ.Ô.˜.CÚCÚ.’.˜.ÚCÚCÚ.’.˜.ÂCÚCÚ.’.˜.àCÚCÚ.’.˜.æCÚCÚ.’.˜.CÚCÚ.’.˜.ÎCÚCÚCÚCÚ.ìCÚCÚCÚCÚ.òCÚCÚCÚCÚ.øCÚCÚ.şCÚ/CÚCÚ/
-CÚ/CÚCÚ/CÚ///"/CÚ/(//"/CÚ/.//"/CÚ///"/4CÚ///"/CÚ/://"/@CÚ///"/CÚ/F//"/CÚ///"/LCÚ/X/R/^/dCÚ/jCÚCÚ/pCÚ/jCÚCÚ/vCÚ/|CÚCÚ/vCÚ/‚CÚCÚ/vCÚ/ˆCÚCÚ/vCÚ/CÚCÚ/”CÚ/|CÚCÚ/vCÚ/šCÚCÚ/ CÚ/|CÚCÚ/vCÚ/|CÚCÚ/¦/¬/²CÚCÚ/vCÚ/|CÚCÚ/vCÚ/šCÚCÚ/¸/Ä/Ê/¾/Ğ/¸/Ä/š/¾/Ğ/¸/Ä/Ö/¾/Ğ/¸/Ä.P/¾/Ğ/¸/Ä/Ü/¾/Ğ/â/Ä/è/¾/Ğ/¸/Ä/Ü/¾/Ğ/¸/Ä/î/¾/Ğ/¸/Ä/ô/¾/Ğ/¸/Ä-ğ/¾/Ğ/¸/Ä/ú/¾/Ğ/¸/Ä0 /¾/Ğ/¸/Ä0/¾/Ğ/â/Ä/Ê/¾/Ğ/¸/Ä-Ş/¾/Ğ/¸/Ä/ú/¾/Ğ/¸/Ä/Ê/¾/Ğ/¸/Ä0/¾/Ğ/â/Ä/Ê/¾/Ğ/¸/Ä,Ü/¾/Ğ/¸/Ä/ú/¾/Ğ/¸/Ä0/¾/Ğ/¸/Ä0/¾/Ğ/¸/Ä0/¾/Ğ/¸/Ä0$/¾/Ğ/¸/Ä0*/¾/Ğ/¸/Ä00/¾/Ğ/¸/Ä/Ê/¾/Ğ/¸/Ä06/¾0</¸/Ä0B/¾0</¸/Ä0/¾/Ğ/¸/Ä/Ü/¾/Ğ/¸/Ä0H/¾/Ğ/¸/Ä0N/¾/Ğ0T0Z0`CÚCÚ/¸/Ä0f/¾0<-ŠCÚ0lCÚCÚ-ŠCÚ0CÚCÚ-ŠCÚ0rCÚCÚ0xCÚ0lCÚCÚ-ŠCÚ0~CÚCÚ-®CÚ0lCÚCÚ-ŠCÚ,ÜCÚCÚ-ŠCÚ0lCÚCÚ0„CÚ0ŠCÚCÚ0„CÚ0CÚCÚ0„CÚ0–CÚCÚ0„CÚ0œCÚCÚ0„CÚ0¢CÚCÚ0¨CÚ0ŠCÚCÚ0„CÚ0®CÚCÚ0´CÚ0ŠCÚCÚ0„CÚ0ºCÚCÚ0ÀCÚ0ŠCÚCÚ0ÀCÚ0ÆCÚCÚ0ÌCÚ0Ø0ÒCÚ0ÌCÚ0Ø0ÒCÚ0ÌCÚ0Ş0ÒCÚ0äCÚ0Ø0ÒCÚ0êCÚ0Ø0ÒCÚ0ğCÚ0Ø0ÒCÚ0ÌCÚ0Ø0ÒCÚ0ö0ü1CÚ10ö0ü1CÚ10ö0ü0CÚ10ö0ü1CÚ10ö0ü-HCÚ10ö0ü-rCÚ110ü1CÚ10ö0ü1 CÚ10ö0ü-rCÚ10ö0ü1CÚ10ö0ü1CÚ110ü1CÚ10ö0ü1 CÚ10ö0ü-rCÚ10ö0ü1&CÚ10ö0ü1,CÚ10ö0ü,ÖCÚ10ö0ü12CÚ10ö0ü18CÚ10ö0ü1CÚ10ö0ü1>CÚ10ö0ü1&CÚ10ö0ü1DCÚ1CÚCÚ1JCÚCÚCÚCÚ1PCÚCÚCÚCÚ1VCÚCÚCÚCÚ1\CÚCÚCÚCÚ1bCÚCÚ1hCÚ1nCÚCÚ1hCÚ.>CÚCÚ1hCÚ1tCÚCÚ1hCÚ1zCÚCÚ1hCÚ-¨CÚCÚ1€CÚ1nCÚCÚ1hCÚ1†CÚCÚ1hCÚ1zCÚCÚ1hCÚ1ŒCÚCÚ1hCÚ-¨CÚCÚ1’CÚ1˜CÚCÚ1’CÚ-$CÚCÚ1’CÚ.CÚCÚ1’CÚ1CÚCÚ1¤CÚ1˜CÚCÚ.’.˜1ªCÚCÚ,Ä,Ê,ĞCÚCÚ0ö0ü1CÚ1/¦1°1¶CÚ1¼1Â1È1ÎCÚCÚ1Â1È1ÔCÚCÚ1Â1È.VCÚCÚ1Â1È1ÚCÚCÚ1à1È1æCÚCÚ1Â1È1ÚCÚCÚ1Â1È1ìCÚCÚ1Â1È1òCÚCÚ1Â1È-ÒCÚCÚ1Â1È1øCÚCÚ1à1È1şCÚCÚ1Â1È1øCÚCÚ1Â1È2CÚCÚ1Â1È2
-CÚCÚ1Â1È-$CÚCÚ1Â1È0CÚCÚ1à1È1ÎCÚCÚ1Â1È-HCÚCÚ1Â1È0CÚCÚ1Â1È2CÚCÚ1Â1È2CÚCÚ1Â1È1ÎCÚCÚ1Â1È2CÚCÚ1Â1È2"CÚCÚ1Â1È-rCÚCÚ-œCÚ-¢-CÚ-´CÚ-º-CÚ2(2.24CÚCÚ2(2.2:CÚCÚ2(2.2@CÚCÚ2(2.2FCÚCÚ2L2.1†CÚCÚ2(2.2RCÚCÚ2(2.2XCÚCÚ2^2.0ŞCÚCÚ2(2.2XCÚCÚ2(2.2dCÚCÚ2(2.2jCÚCÚ2(2.2pCÚCÚ2(2.2vCÚCÚ2(2.2|CÚCÚ2^2.24CÚCÚ2(2.2‚CÚCÚ2(2.2vCÚCÚ2(2.2ˆCÚCÚ2(2.2CÚCÚ2(2.2”CÚCÚ2(2.2šCÚCÚ2(2.24CÚCÚ2(2.2|CÚCÚ2 CÚ,ĞCÚCÚ2 CÚ,ÜCÚCÚ2 CÚ. CÚCÚ2 CÚ- CÚCÚ2¦CÚ,ĞCÚCÚ2 CÚ-HCÚCÚ2 CÚ-6CÚCÚ2¬2²2¸CÚCÚ2¬2²2¾CÚCÚ2¬2²2ÄCÚCÚ2¬2²2ÊCÚCÚ2¬2²2ĞCÚCÚ2¬2²2ÖCÚCÚ2¬2²2ÜCÚCÚ2¬2²2âCÚCÚ2¬2²2èCÚCÚ2¬2²2îCÚCÚ2ô2²2¸CÚCÚ2¬2²2úCÚCÚ2¬2²2âCÚCÚ2¬2²3 CÚCÚ2¬2²3CÚCÚ2¬2²2¸CÚCÚ2¬2²2îCÚCÚCÚCÚ3CÚCÚCÚCÚ3CÚCÚCÚCÚ3CÚCÚ/CÚ3//"3$CÚ.¤CÚCÚ3*CÚ.¤CÚCÚ/¦/¬30CÚCÚ/¦/¬36CÚCÚ/¦/¬3<CÚCÚ/¦/¬3BCÚCÚ3H/¬30CÚCÚ/¦/¬3NCÚCÚ3T/¬30CÚCÚ/¦/¬3ZCÚCÚ/¦/¬/²CÚCÚ/¦/¬30CÚCÚ/¦/¬3NCÚCÚ3`CÚ3l3fCÚ3`CÚ3l3fCÚ3`CÚ1z3fCÚ3rCÚ3l3fCÚ3xCÚ3l3fCÚ3~CÚ3l3fCÚ3`CÚ3l3fCÚ/¦1°1¶CÚ1¼/¦1°3„CÚ1¼/¦1°1CÚ1¼/¦1°2CÚ1¼/¦1°-6CÚ1¼/¦1°2CÚ1¼3T1°1¶CÚ1¼/¦1°/ÖCÚ1¼/¦1°2CÚ1¼/¦1°1¶CÚ1¼/¦1°3„CÚ1¼3T1°1¶CÚ1¼/¦1°/ÖCÚ1¼/¦1°2CÚ1¼/¦1°2CÚ1¼/¦1°3ŠCÚ1¼/¦1°3CÚ1¼/¦1°3–CÚ1¼/¦1°3œCÚ1¼/¦1°1¶CÚ1¼/¦1°3¢CÚ1¼/¦1°12CÚ1¼/¦1°3¨CÚ1¼CÚCÚ3®CÚCÚCÚCÚ3´CÚCÚCÚCÚ3ºCÚCÚCÚCÚ3ÀCÚCÚCÚCÚ3ÆCÚCÚ3ÌCÚ3ÒCÚCÚ3ÌCÚ3ØCÚCÚ3ÌCÚ/úCÚCÚ3ÌCÚ.VCÚCÚ3ÌCÚ0CÚCÚ3ŞCÚ3ÒCÚCÚ3ÌCÚ-CÚCÚ3ÌCÚ.VCÚCÚ3ÌCÚ1CÚCÚ3ÌCÚ0CÚCÚ1’CÚ1˜CÚCÚ1’CÚ-$CÚCÚ1’CÚ.CÚCÚ1’CÚ1CÚCÚ1¤CÚ1˜CÚCÚ3ä3ê3ğCÚCÚ3ä3ê3öCÚCÚ3ä3ê3üCÚCÚ3ä3ê4CÚCÚ43ê4CÚCÚ3ä3ê4CÚCÚ3ä3ê4CÚCÚ3ä3ê4CÚCÚ3ä3ê4 CÚCÚ3ä3ê4&CÚCÚ43ê4,CÚCÚ3ä3ê4CÚCÚ3ä3ê42CÚCÚ3ä3ê48CÚCÚ3ä3ê4>CÚCÚ3ä3ê4DCÚCÚ43ê3ğCÚCÚ3ä3ê4JCÚCÚ3ä3ê4PCÚCÚ3ä3ê4VCÚCÚ3ä3ê4\CÚCÚ3ä3ê3ğCÚCÚ3ä3ê4bCÚCÚ3ä3ê4hCÚCÚ3ä3ê4nCÚCÚCÚCÚ4tCÚCÚCÚCÚ4zCÚCÚ4€CÚ4†CÚCÚ4ŒCÚ4’CÚCÚ4ŒCÚ4˜CÚCÚ4ŒCÚ4CÚCÚ0äCÚ4’CÚCÚ0äCÚ4¤CÚCÚ4ŒCÚ4ªCÚCÚ4ŒCÚ4°CÚCÚ3äCÚCÚ4¶4¼3äCÚCÚ4¶4¼4CÚ4Â4¶4¼3äCÚCÚ4¶4¼4ÈCÚ4Î4¶4¼4Ô4Ú4àCÚCÚ4Ô4Ú4æCÚCÚ4Ô4Ú4ìCÚCÚ4Ô4Ú4òCÚCÚ4ø4Ú4şCÚCÚ4Ô4Ú5CÚCÚ4Ô4Ú5
-CÚCÚ54Ú5CÚCÚ4Ô4Ú5CÚCÚ4Ô4Ú5"CÚCÚ4Ô4Ú5(CÚCÚ4Ô4Ú5.CÚCÚ4Ô4Ú54CÚCÚ4Ô4Ú5:CÚCÚ54Ú4àCÚCÚ4Ô4Ú5@CÚCÚ4Ô4Ú5FCÚCÚ4Ô4Ú5LCÚCÚ4Ô4Ú5RCÚCÚ4Ô4Ú5XCÚCÚ4Ô4Ú5XCÚCÚ4Ô4Ú4àCÚCÚ4Ô4Ú5^CÚCÚ5dCÚ5jCÚCÚ5dCÚ5pCÚCÚ5dCÚ5vCÚCÚ5dCÚ5|CÚCÚ5dCÚ5‚CÚCÚ5dCÚ5ˆCÚCÚ5dCÚ5CÚCÚ5”CÚ5 5šCÚ5¦CÚ5 5šCÚ5”CÚ5¬5šCÚ5²CÚ5 5šCÚ5¸5¾5ÄCÚCÚ5¸5¾5ÊCÚCÚ5¸5¾5ĞCÚCÚ5¸5¾5ÖCÚCÚ5¸5¾5ÜCÚCÚ5¸5¾5âCÚCÚ5¸5¾5èCÚCÚ5¸5¾5îCÚCÚ5¸5¾5ÄCÚCÚ5ô5¾5ÄCÚCÚ5¸5¾5úCÚCÚ5¸5¾6 CÚCÚ5¸5¾6CÚCÚ5¸5¾6CÚCÚ5¸5¾6CÚCÚ5¸5¾5ÄCÚCÚ5¸5¾6CÚCÚCÚCÚ6CÚCÚCÚCÚ6$CÚCÚCÚCÚ6*CÚCÚCÚCÚ60CÚCÚ66CÚ6<CÚ6B6HCÚ6<CÚ6B6N6T6ZCÚCÚ6`CÚ6<6f6l6`CÚ6r6f6l6`CÚ6<6f6l6xCÚ6<6f6l6`CÚ6~6f6l6„CÚ6<6f6l6`CÚ6Š6f6l6`CÚ6<6f6l6CÚ6œ6–6¢6¨CÚ6®CÚCÚ6´CÚ6®CÚCÚ6ºCÚ6ÀCÚCÚ6ºCÚ6ÆCÚCÚ6ÌCÚ6ÒCÚCÚ6ºCÚ6ØCÚCÚ6ŞCÚ6ÀCÚCÚ6ºCÚ6äCÚCÚ6êCÚ6ÀCÚCÚ3äCÚ6ğCÚCÚ6ºCÚ6öCÚCÚ6ºCÚ6ÀCÚCÚ6ºCÚ6üCÚCÚ2(77772(74¤772(77772(77 772(77&777,772772(778772(77>772(77D772(77J772(77P772(77V772(77\777,77772(77b772(77h772(77772(77n777,77772(77b772(77t772(77z772(77€772(77†772(77Œ772(77’772(77’772(7777CÚCÚ7˜CÚCÚCÚCÚ7CÚCÚ2(77z772(77¤772(77ª772(77°777¶CÚ7¼CÚ7Â7ÈCÚ7ÎCÚCÚ7ÈCÚ7ÔCÚCÚ7ÈCÚ7ÚCÚCÚ7àCÚ7ÎCÚCÚ7ÈCÚ7æCÚCÚ7ìCÚ7ÎCÚCÚ7ÈCÚ7òCÚCÚ7ÈCÚ7ÎCÚCÚ7øCÚ7şCÚCÚ7øCÚ8CÚCÚ7øCÚ8
-CÚCÚ7øCÚ8CÚCÚ7øCÚ8CÚCÚ8CÚ7şCÚCÚ7øCÚ8"CÚCÚ8(CÚ7şCÚCÚ7øCÚ8.CÚCÚ84CÚ7şCÚCÚ84CÚ8:CÚCÚ7øCÚ8F8@8L8RCÚCÚCÚCÚ7ø
