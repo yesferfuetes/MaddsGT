@@ -23,7 +23,7 @@
 	//Datos envio de correo
 	const NOMBRE_REMITENTE = "MaddsGT";
 	const EMAIL_REMITENTE = "info@maddsgt.com";
-	const NOMBRE_EMPESA = "MaddsGT";
+	const NOMBRE_EMPESA = "MaddsGT | Venta de ropa nueva y usada";
 	const WEB_EMPRESA = "www.maddsgt.com";
 
 	//Datos de empresa
@@ -49,4 +49,6 @@
 	//Roles
 	const RADMINISTRADOR = 1;
 	const RCLIENTES = 7;
+
+	const STATUS = array('Completo','Aprobado','Cancelado','Reembolsado','Pendiente','Entregado');
  ?>

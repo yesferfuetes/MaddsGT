@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1:3306
--- Tiempo de generación: 19-08-2022 a las 21:05:36
+-- Tiempo de generación: 22-08-2022 a las 04:08:07
 -- Versión del servidor: 8.0.27
 -- Versión de PHP: 7.4.26
 
@@ -63,14 +63,17 @@ CREATE TABLE IF NOT EXISTS `detalle_pedido` (
   PRIMARY KEY (`id`),
   KEY `pedidoid` (`pedidoid`),
   KEY `productoid` (`productoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `detalle_pedido`
 --
 
 INSERT INTO `detalle_pedido` (`id`, `pedidoid`, `productoid`, `precio`, `cantidad`) VALUES
-(45, 37, 19, '100.00', 1);
+(45, 37, 19, '100.00', 1),
+(50, 40, 20, '75.00', 1),
+(51, 40, 16, '100.00', 1),
+(52, 41, 17, '50.00', 1);
 
 -- --------------------------------------------------------
 
@@ -171,14 +174,16 @@ CREATE TABLE IF NOT EXISTS `pedido` (
   PRIMARY KEY (`idpedido`),
   KEY `personaid` (`personaid`),
   KEY `tipopagoid` (`tipopagoid`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `pedido`
 --
 
 INSERT INTO `pedido` (`idpedido`, `referenciacobro`, `idtransaccionpaypal`, `datospaypal`, `personaid`, `fecha`, `costo_envio`, `monto`, `tipopagoid`, `direccion_envio`, `status`) VALUES
-(37, NULL, NULL, NULL, 23, '2022-08-18 23:18:40', '25.00', '125.00', 2, '15 calle B, zona 1, Guatemala', 'Pendiente');
+(37, NULL, NULL, NULL, 23, '2022-08-18 23:18:40', '25.00', '125.00', 2, '15 calle B, zona 1, Guatemala', 'Pendiente'),
+(40, NULL, NULL, NULL, 23, '2022-08-19 22:28:22', '25.00', '200.00', 2, '15 calle, Guatemala', 'Pendiente'),
+(41, NULL, NULL, NULL, 24, '2022-08-20 22:41:59', '25.00', '75.00', 2, '15 calle zona 6, Ciudad', 'Pendiente');
 
 -- --------------------------------------------------------
 
@@ -266,7 +271,7 @@ CREATE TABLE IF NOT EXISTS `persona` (
   `status` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`idpersona`),
   KEY `rolid` (`rolid`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci;
 
 --
 -- Volcado de datos para la tabla `persona`
@@ -275,7 +280,8 @@ CREATE TABLE IF NOT EXISTS `persona` (
 INSERT INTO `persona` (`idpersona`, `identificacion`, `nombres`, `apellidos`, `telefono`, `email_user`, `password`, `nit`, `nombrefiscal`, `direccionfiscal`, `token`, `rolid`, `datecreated`, `status`) VALUES
 (1, '2409198920', 'Abel', 'OSH', 1234567, 'info@abelosh.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', '24252622', 'Abel OSH', 'Antigua Guatemala', '', 1, '2020-08-13 00:51:44', 1),
 (22, '11111111', 'Paola', 'Perez', 0, 'paola@perez.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', NULL, NULL, NULL, NULL, 3, '2022-08-12 22:02:27', 1),
-(23, '222222555', 'Debani', 'Perez', 78941324, 'debani@ejemplo.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', '784455g', 'Debani', '16 calle Ciudad', NULL, 7, '2022-08-13 21:56:30', 1);
+(23, '222222555', 'Debani', 'Perez', 78941324, 'debani@ejemplo.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', '784455g', 'Debani', '16 calle Ciudad', NULL, 7, '2022-08-13 21:56:30', 1),
+(24, '1111888999', 'Clientedos', 'Clientedos', 99966444, 'ejemplocl@gmail.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', '100856', 'Cliente 2', 'Ciudad', NULL, 7, '2022-08-20 22:41:04', 1);
 
 -- --------------------------------------------------------
 
@@ -305,10 +311,10 @@ CREATE TABLE IF NOT EXISTS `producto` (
 --
 
 INSERT INTO `producto` (`idproducto`, `categoriaid`, `codigo`, `nombre`, `descripcion`, `precio`, `stock`, `imagen`, `datecreated`, `ruta`, `status`) VALUES
-(16, 12, '45613', 'Producto 1', '<p>Decripcion</p>', '100.00', 1, '', '2022-08-12 18:47:52', 'producto-1', 1),
-(17, 13, '88888', 'Producto 2', '<p>Descripcion</p>', '50.00', 1, '', '2022-08-12 18:48:10', 'producto-2', 1),
+(16, 12, '45613', 'Producto 1', '<p>Decripcion</p>', '100.00', 0, '', '2022-08-12 18:47:52', 'producto-1', 1),
+(17, 13, '88888', 'Producto 2', '<p>Descripcion</p>', '50.00', 0, '', '2022-08-12 18:48:10', 'producto-2', 1),
 (19, 12, '202208123', 'Producto 3', '<p>Producto 3</p> <ul> <li>Estado: Excelente</li> <li>Marca: Zara</li> </ul>', '100.00', 0, '', '2022-08-18 22:27:27', 'producto-3', 1),
-(20, 13, '202208456', 'Producto 4', '<p>Producto 4</p> <ul> <li>Estado: Excelente</li> <li>Marza: Polo</li> </ul>', '75.00', 1, '', '2022-08-18 22:28:15', 'producto-4', 1);
+(20, 13, '202208456', 'Producto 4', '<p>Producto 4</p> <ul> <li>Estado: Excelente</li> <li>Marza: Polo</li> </ul>', '75.00', 0, '', '2022-08-18 22:28:15', 'producto-4', 1);
 
 -- --------------------------------------------------------
 

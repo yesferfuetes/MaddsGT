@@ -28,8 +28,9 @@
 
 		}	
 
-		/* public function selectPedido(int $idpedido, $idpersona = NULL){
+		public function selectPedido(int $idpedido, $idpersona = NULL){
 			$busqueda = "";
+			/* VALIDANDO QUE EL PEDIDO SEA DEL CLIENTE INDICADO */
 			if($idpersona != NULL){
 				$busqueda = " AND p.personaid =".$idpersona;
 			}
@@ -50,7 +51,9 @@
 					ON p.tipopagoid = t.idtipopago
 					WHERE p.idpedido =  $idpedido ".$busqueda;
 			$requestPedido = $this->select($sql);
+
 			if(!empty($requestPedido)){
+				/* OBTENIENDO EL ID DE LA PERSONA DE LA CONSULTA DE ARRIBA */
 				$idpersona = $requestPedido['personaid'];
 				$sql_cliente = "SELECT idpersona,
 										nombres,
@@ -62,6 +65,8 @@
 										direccionfiscal 
 								FROM persona WHERE idpersona = $idpersona ";
 				$requestcliente = $this->select($sql_cliente);
+
+				/* OBTENIENDO EL DETALLE DE LA ORDEN */
 				$sql_detalle = "SELECT p.idproducto,
 											p.nombre as producto,
 											d.precio,
@@ -71,13 +76,15 @@
 									ON d.productoid = p.idproducto
 									WHERE d.pedidoid = $idpedido";
 				$requestProductos = $this->select_all($sql_detalle);
+
+				/* ARRAY PARA MOSTRAR LOS DATOS DEL CLIENTE,PEDIDO Y DETALLE */
 				$request = array('cliente' => $requestcliente,
 								'orden' => $requestPedido,
 								'detalle' => $requestProductos
 								 );
 			}
 			return $request;
-		} */
+		}
 
 		/* public function selectTransPaypal(string $idtransaccion, $idpersona = NULL){
 			$busqueda = "";

@@ -14,6 +14,7 @@
     <div class="col-md-12">
       <div class="tile">
         <?php
+        /* dep($data['arrPedido']); */
           if(empty($data['arrPedido'])){
         ?>
         <p>Datos no encontrados</p>
