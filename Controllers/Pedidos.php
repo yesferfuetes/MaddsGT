@@ -6,8 +6,9 @@ class Pedidos extends Controllers{
 
     public function __construct()
     {
+		sessionStart();
         parent::__construct();
-        session_start();//inicializando sesion
+        //session_start();//inicializando sesion
         if(empty($_SESSION['login']))
         {
             header('Location: '.base_url().'/login');
@@ -70,9 +71,9 @@ class Pedidos extends Controllers{
 				if($_SESSION['permisosMod']['u']){
 					$btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,'.$arrData[$i]['idpedido'].')" title="Editar pedido"><i class="fas fa-pencil-alt"></i></button>';
 				}
-				if($_SESSION['permisosMod']['d']){
+				/* if($_SESSION['permisosMod']['d']){
 					$btnDelete = '<button class="btn btn-primary  btn-sm" onClick="fntDelInfo('.$arrData[$i]['idpedido'].')" title="Eliminar pedido"><i class="fas fa-trash-alt"></i></button>';
-				}
+				} */
 				$arrData[$i]['options'] = '<div class="text-center">'.$btnView.' '.$btnEdit.' '.$btnDelete.'</div>';
 			}
 			echo json_encode($arrData,JSON_UNESCAPED_UNICODE);

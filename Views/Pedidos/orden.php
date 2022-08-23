@@ -1,3 +1,4 @@
+<!-- VISTA DE LA ORDEN DEL BOTON VIEW PARTE ADMINISTRATIVA -->
 <?php headerAdmin($data); ?>
 
 <main class="app-content">

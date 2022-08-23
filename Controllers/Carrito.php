@@ -9,8 +9,9 @@
 		
 		public function __construct()
 		{
+			sessionStart();
 			parent::__construct();
-			session_start();
+			//session_start();
 		}
 
 		public function carrito()

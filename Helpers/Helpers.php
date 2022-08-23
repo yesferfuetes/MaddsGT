@@ -103,6 +103,20 @@
         return $request;
     }
 
+    //LIMITA TIEMPO DE SESSION ACTIVA
+    function sessionStart(){
+        session_start();
+        $inactive = 60;
+        if(isset($_SESSION['timeout'])){
+            $session_in = time() - $_SESSION['inicio'];
+            if($session_in > $inactive){
+                header("Location: ".BASE_URL."/logout");
+            }
+        }else{
+            header("Location: ".BASE_URL."/logout");
+        }
+    }
+
     function uploadImage(array $data, string $name){
         $url_temp = $data['tmp_name'];
         $destino    = 'Assets/images/uploads/'.$name;        

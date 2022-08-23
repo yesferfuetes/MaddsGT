@@ -37,7 +37,11 @@
 						if($arrData['status'] == 1){
 							$_SESSION['idUser'] = $arrData['idpersona'];
 							$_SESSION['login'] = true;
-							
+
+							//VARIABES PARA LIMITAR TIEMPO DE SESION
+							$_SESSION['timeout'] = true;
+							$_SESSION['inicio'] = time();
+
 							//Crea la variable de sesion
 							$arrData = $this->model->sessionLogin($_SESSION['idUser']);
 							sessionUser($_SESSION['idUser']);
