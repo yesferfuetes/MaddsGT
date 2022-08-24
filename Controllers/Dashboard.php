@@ -3,7 +3,7 @@
 	class Dashboard extends Controllers{
 		public function __construct()
 		{
-			sessionStart();
+			sessionStart();//se coloca antes del constructor para que no de error: no muestra nada
 			parent::__construct();
 			//session_start();
 			//session_regenerate_id(true);

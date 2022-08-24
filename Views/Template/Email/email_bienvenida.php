@@ -35,7 +35,7 @@
 		.x_title_blue {
 		    padding: 08px 0;
 		    line-height: 25px;
-		    text-transform: uppercase;
+		    /* text-transform: uppercase; */
 			border-bottom: 1px solid #CCC;
 		}
 		.x_title_blue h1{
@@ -84,7 +84,8 @@
 			<tr>
 				<td>
 					<div class="x_sgwrap x_title_blue">
-						<h1><?= NOMBRE_EMPESA ?></h1>
+						<h1>MaddsGT</h1>
+						<!-- <h1><?= NOMBRE_EMPESA ?></h1> -->
 					</div>
 				</td>
 			</tr>
@@ -94,7 +95,7 @@
 						<p>Hola <?= $data['nombreUsuario']; ?></p>
 					</div>
 					<p>Bienvenido a nuestra tienda en línea.</p>
-					<p>Ahora puedes ralizar tus compras en línea sin salir de casa.</p>
+					<p>Ahora comprar en MaddsGT sera mas facil!</p>
 					<p>Accede a tu cuenta con tus credenciales:</p>
 					<p>Usuario: <strong><?= $data['email']; ?></strong></p>
 					<p>Contraseña: <strong><?= $data['password']; ?></strong></p>

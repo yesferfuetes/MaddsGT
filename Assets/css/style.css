@@ -219,3 +219,7 @@
 .modal{
 	z-index: 9999;
 }
+
+.linkw:hover{
+	text-decoration: none;
+}
