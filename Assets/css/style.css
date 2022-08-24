@@ -220,6 +220,13 @@
 	z-index: 9999;
 }
 
+/* WIDGETS */
+.widget-small {
+	transition: all 300ms;
+}
+.widget-small:hover{
+	transform: translateY(-10px);
+}
 .linkw:hover{
 	text-decoration: none;
 }
