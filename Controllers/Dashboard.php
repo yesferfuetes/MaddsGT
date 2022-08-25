@@ -25,7 +25,19 @@
 			$data['clientes'] = $this->model->cantClientes();
 			$data['productos'] = $this->model->cantProductos();
 			$data['pedidos'] = $this->model->cantPedidos();
-			
+			$data['lastOrders'] = $this->model->lastOrders();
+
+			$anio = date('Y');
+			$mes = date('m');
+
+			$data['pagosMes'] = $this->model->selectPagosMes($anio,$mes);
+			//dep($data['pagosMes']);exit;
+			$data['ventasMDia'] = $this->model->selectVentasMes($anio,$mes);
+			//dep($data['ventasMDia']);exit;
+			$data['ventasAnio'] = $this->model->selectVentasAnio($anio);
+			//dep($data['ventasAnio']);exit;
+
+			/* dep($data['lastOrders']);exit; PARA VER QUE TRAE EL ARRAY*/
 			$this->views->getView($this,"dashboard",$data);
 		}
 

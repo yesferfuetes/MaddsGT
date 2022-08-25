@@ -44,7 +44,7 @@
 			$total = $request['total']; 
 			return $total;
 		}
-        
+
 		public function lastOrders(){
 			$rolid = $_SESSION['userData']['idrol'];
 			$idUser = $_SESSION['userData']['idpersona'];
@@ -62,6 +62,7 @@
 			$request = $this->select_all($sql);
 			return $request;
 		}	
+
 		public function selectPagosMes(int $anio, int $mes){
 
 			$sql = "SELECT p.tipopagoid, tp.tipopago, COUNT(p.tipopagoid) as cantidad, SUM(p.monto) as total 
@@ -70,14 +71,16 @@
 					ON p.tipopagoid = tp.idtipopago 
 					WHERE MONTH(p.fecha) = $mes AND YEAR(p.fecha) = $anio GROUP BY tipopagoid";
 			$pagos = $this->select_all($sql);
-			$meses = Meses();
-			$arrData = array('anio' => $anio, 'mes' => $meses[intval($mes-1)], 'tipospago' => $pagos );
+			$meses = Meses();//esta en HELPERS
+			$arrData = array('anio' => $anio, 'mes' => $meses[intval($mes - 1)], 'tipospago' => $pagos );
 			return $arrData;
 		}
+
 		public function selectVentasMes(int $anio, int $mes){
 			$rolid = $_SESSION['userData']['idrol'];
 			$idUser = $_SESSION['userData']['idpersona'];
 			$where = "";
+
 			if($rolid == RCLIENTES ){
 				$where = " AND personaid = ".$idUser;
 			}
@@ -89,20 +92,23 @@
 			for ($i=0; $i < $dias ; $i++) { 
 				$date = date_create($anio."-".$mes."-".$n_dia);
 				$fechaVenta = date_format($date,"Y-m-d");
+
 				$sql = "SELECT DAY(fecha) AS dia, COUNT(idpedido) AS cantidad, SUM(monto) AS total 
 						FROM pedido 
 						WHERE DATE(fecha) = '$fechaVenta' AND status = 'Completo' ".$where;
 				$ventaDia = $this->select($sql);
+
 				$ventaDia['dia'] = $n_dia;
 				$ventaDia['total'] = $ventaDia['total'] == "" ? 0 : $ventaDia['total'];
 				$totalVentasMes += $ventaDia['total'];
 				array_push($arrVentaDias, $ventaDia);
 				$n_dia++;
 			}
-			$meses = Meses();
+			$meses = Meses();//para obtener el mes en LETRAS
 			$arrData = array('anio' => $anio, 'mes' => $meses[intval($mes-1)], 'total' => $totalVentasMes,'ventas' => $arrVentaDias );
 			return $arrData;
 		}
+
 		public function selectVentasAnio(int $anio){
 			$arrMVentas = array();
 			$arrMeses = Meses();
@@ -129,10 +135,11 @@
 			$arrVentas = array('anio' => $anio, 'meses' => $arrMVentas);
 			return $arrVentas;
 		}
-		public function productosTen(){
+
+		/* public function productosTen(){
 			$sql = "SELECT * FROM producto WHERE status = 1 ORDER BY idproducto DESC LIMIT 1,10 ";
 			$request = $this->select_all($sql);
 			return $request;
-		}
+		} */
 	}
  ?>
