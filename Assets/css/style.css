@@ -4,7 +4,7 @@
     padding: 6px;
 }
 
-.app-header__logo{
+.app-header__logo, .app-footer__pie{
 	font-family: monospace;
 }
 .app-sidebar__toggle{

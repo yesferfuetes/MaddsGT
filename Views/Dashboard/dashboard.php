@@ -155,7 +155,7 @@
 <?php footerAdmin($data); ?>
 <div class="container">
       <p class="stext-107">
-       <a class="fa fa-copyright"> 2022 Copyright | <?= NOMBRE_EMPESA; ?> | Todos los Derechos Reservados | por YFDev.</a>
+       <a class="app-footer__pie"> 2022 Copyright | <?= NOMBRE_EMPESA; ?> | Todos los Derechos Reservados | por YFDev.</a>
       </p>
 </div>
 

@@ -26,6 +26,7 @@
 			$data['productos'] = $this->model->cantProductos();
 			$data['pedidos'] = $this->model->cantPedidos();
 			$data['lastOrders'] = $this->model->lastOrders();
+			$data['productosTen'] = $this->model->productosTen();
 
 			$anio = date('Y');
 			$mes = date('m');
@@ -38,7 +39,12 @@
 			//dep($data['ventasAnio']);exit;
 
 			/* dep($data['lastOrders']);exit; PARA VER QUE TRAE EL ARRAY*/
-			$this->views->getView($this,"dashboard",$data);
+
+			if( $_SESSION['userData']['idrol'] == RCLIENTES ){
+				$this->views->getView($this,"dashboardCliente",$data);
+			}else{
+				$this->views->getView($this,"dashboard",$data);
+			}
 		}
 
 		public function tipoPagoMes(){
@@ -49,6 +55,31 @@
 				$mes = $arrFecha[0];
 				$anio = $arrFecha[1];
 				$pagos = $this->model->selectPagosMes($anio,$mes);
+				$script = getFile("Template/Modals/graficas",$pagos);
+				echo $script;
+				die();
+			}
+		}
+
+		public function ventasMes(){
+			if($_POST){
+				$grafica = "ventasMes";
+				$nFecha = str_replace(" ","",$_POST['fecha']);
+				$arrFecha = explode('-',$nFecha);
+				$mes = $arrFecha[0];
+				$anio = $arrFecha[1];
+				$pagos = $this->model->selectVentasMes($anio,$mes);
+				$script = getFile("Template/Modals/graficas",$pagos);
+				echo $script;
+				die();
+			}
+		}
+
+		public function ventasAnio(){
+			if($_POST){
+				$grafica = "ventasAnio";
+				$anio = intval($_POST['anio']);
+				$pagos = $this->model->selectVentasAnio($anio);
 				$script = getFile("Template/Modals/graficas",$pagos);
 				echo $script;
 				die();

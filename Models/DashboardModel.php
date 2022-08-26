@@ -45,6 +45,7 @@
 			return $total;
 		}
 
+		//EXTRAER CANTIDAD DE PEDIDOS
 		public function lastOrders(){
 			$rolid = $_SESSION['userData']['idrol'];
 			$idUser = $_SESSION['userData']['idpersona'];
@@ -135,10 +136,10 @@
 			return $arrVentas;
 		}
 
-		/* public function productosTen(){
-			$sql = "SELECT * FROM producto WHERE status = 1 ORDER BY idproducto DESC LIMIT 1,10 ";
+		public function productosTen(){
+			$sql = "SELECT * FROM producto WHERE status = 1 AND stock !=0 ORDER BY idproducto DESC LIMIT 10 ";
 			$request = $this->select_all($sql);
 			return $request;
-		} */
+		}
 	}
  ?>
