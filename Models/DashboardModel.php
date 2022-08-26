@@ -120,7 +120,7 @@
 						GROUP BY MONTH(fecha) ";
 				$ventaMes = $this->select($sql);
 				$arrData['mes'] = $arrMeses[$i-1];
-				if(empty($ventaMes)){
+				if(empty($ventaMes)){ 
 					$arrData['anio'] = $anio;
 					$arrData['no_mes'] = $i;
 					$arrData['venta'] = 0;
@@ -130,7 +130,6 @@
 					$arrData['venta'] = $ventaMes['venta'];
 				}
 				array_push($arrMVentas, $arrData);
-				# code...
 			}
 			$arrVentas = array('anio' => $anio, 'meses' => $arrMVentas);
 			return $arrVentas;

@@ -41,5 +41,19 @@
 			$this->views->getView($this,"dashboard",$data);
 		}
 
+		public function tipoPagoMes(){
+			if($_POST){
+				$grafica = "tipoPagoMes";
+				$nFecha = str_replace(" ","",$_POST['fecha']);
+				$arrFecha = explode('-',$nFecha);
+				$mes = $arrFecha[0];
+				$anio = $arrFecha[1];
+				$pagos = $this->model->selectPagosMes($anio,$mes);
+				$script = getFile("Template/Modals/graficas",$pagos);
+				echo $script;
+				die();
+			}
+		}
+		
 	}
  ?>

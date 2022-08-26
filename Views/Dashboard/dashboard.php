@@ -112,10 +112,10 @@
           <div class="tile">
             <div class="container-title">     
               <h3 class="tile-title">Tipo de pagos por mes</h3>
-              <!-- <div class="dflex">
+              <div class="dflex">
                 <input class="date-picker pagoMes" name="pagoMes" placeholder="Mes y Año">
                 <button type="button" class="btnTipoVentaMes btn btn-info btn-sm" onclick="fntSearchPagos()"> <i class="fas fa-search"></i> </button>
-              </div>  --> 
+              </div>  
             </div>   
             <div id="pagosMesAnio"></div>   
           </div>
@@ -127,10 +127,10 @@
           <div class="tile">
             <div class="container-title">
               <h3 class="tile-title">Ventas por mes</h3>
-              <!-- <div class="dflex">
+              <div class="dflex">
                 <input class="date-picker ventasMes" name="ventasMes" placeholder="Mes y Año">
                 <button type="button" class="btnVentasMes btn btn-info btn-sm" onclick="fntSearchVMes()"> <i class="fas fa-search"></i> </button>
-              </div> -->
+              </div>
             </div>
             <!-- <?php dep($data['ventasMDia']) ?> -->
             <div id="graficaMes"></div>
@@ -141,10 +141,10 @@
           <div class="tile">
             <div class="container-title">
               <h3 class="tile-title">Ventas por año</h3>
-              <!-- <div class="dflex">
+              <div class="dflex">
                 <input class="ventasAnio" name="ventasAnio" placeholder="Año" minlength="4" maxlength="4" onkeypress="return controlTag(event);">
                 <button type="button" class="btnVentasAnio btn btn-info btn-sm" onclick="fntSearchVAnio()"> <i class="fas fa-search"></i> </button>
-              </div> -->
+              </div>
             </div>
             <div id="graficaAnio"></div>
           </div>
@@ -155,7 +155,7 @@
 <?php footerAdmin($data); ?>
 <div class="container">
       <p class="stext-107">
-       <a class="fa fa-copyright"> 2022 Copyright | <?= NOMBRE_EMPESA; ?> | Todos los Derechos Reservados | YFDev.</a>
+       <a class="fa fa-copyright"> 2022 Copyright | <?= NOMBRE_EMPESA; ?> | Todos los Derechos Reservados | por YFDev.</a>
       </p>
 </div>
 
@@ -243,6 +243,62 @@ Highcharts.chart('graficaMes', {
                 }
             ?>
           ]
+      }]
+  });
+
+  Highcharts.chart('graficaAnio', {
+      chart: {
+          type: 'column'
+      },
+      title: {
+          text: 'Ventas del año <?= $data['ventasAnio']['anio'] ?> '
+      },
+      subtitle: {
+          text: 'Esdística de ventas por mes'
+      },
+      xAxis: {
+          type: 'category',
+          labels: {
+              rotation: -45,
+              style: {
+                  fontSize: '13px',
+                  fontFamily: 'Verdana, sans-serif'
+              }
+          }
+      },
+      yAxis: {
+          min: 0,
+          title: {
+              text: ''
+          }
+      },
+      legend: {
+          enabled: false
+      },
+      tooltip: {
+          pointFormat: 'Population in: <b>Q {point.y:.1f}</b>'
+      },
+      series: [{
+          name: 'Population',
+          data: [
+            <?php 
+              foreach ($data['ventasAnio']['meses'] as $mes) {
+                echo "['".$mes['mes']."',".$mes['venta']."],";
+              }
+             ?>                 
+          ],
+          dataLabels: {
+              enabled: true,
+              rotation: -90,
+              color: '#FFFFFF',
+              align: 'right',
+              format: 'Q {point.y:.1f}', // .1 one decimal
+              y: 10, // 10 pixels down from the top
+              style: {
+                  fontSize: '13px',
+                  fontFamily: 'Verdana, sans-serif'
+              }
+          }
       }]
   });
 
