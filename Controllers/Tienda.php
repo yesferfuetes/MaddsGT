@@ -21,7 +21,15 @@
 			$data['page_tag'] = NOMBRE_EMPESA;
 			$data['page_title'] = "Tienda Virtual";
 			$data['page_name'] = "tienda";
-			$data['productos'] = $this->getProductosT();
+			//$data['productos'] = $this->getProductosT();
+			$pagina = 1;
+			$cantProductos = $this->cantProductos();
+			$total_registro = $cantProductos['total_registro'];
+			$desde = ($pagina-1) * PROPORPAGINA;
+			$total_paginas = ceil($total_registro / PROPORPAGINA);
+			$data['productos'] = $this->getProductosPage($desde,PROPORPAGINA);
+			$data['pagina'] = $pagina;
+			$data['total_paginas'] = $total_paginas;
 			$this->views->getView($this,"tienda",$data);			
 		}
 
@@ -424,5 +432,24 @@
 			}
 			unset($_SESSION['dataorden']);
 		}
+
+		public function page($pagina = null){
+
+			$pagina = is_numeric($pagina) ? $pagina : 1;
+			$cantProductos = $this->cantProductos();
+			$total_registro = $cantProductos['total_registro'];
+			$desde = ($pagina-1) * PROPORPAGINA;
+			$total_paginas = ceil($total_registro / PROPORPAGINA);
+			$data['productos'] = $this->getProductosPage($desde,PROPORPAGINA);
+			//dep($data['productos']);exit;
+			$data['page_tag'] = NOMBRE_EMPESA;
+			$data['page_title'] = "Tienda Virtual";
+			$data['page_name'] = "tienda";
+			$data['pagina'] = $pagina;
+			$data['total_paginas'] = $total_paginas;
+			/* $data['categorias'] = $this->getCategorias(); */
+			$this->views->getView($this,"tienda",$data);
+		}
+
 	}
  ?>

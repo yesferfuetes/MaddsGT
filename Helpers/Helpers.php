@@ -106,7 +106,7 @@
     //LIMITA TIEMPO DE SESSION ACTIVA
     function sessionStart(){
         session_start();
-        $inactive = 300;
+        $inactive = 600;
         if(isset($_SESSION['timeout'])){
             $session_in = time() - $_SESSION['inicio'];
             if($session_in > $inactive){

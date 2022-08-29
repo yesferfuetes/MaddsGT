@@ -51,4 +51,10 @@
 	const RCLIENTES = 7;
 
 	const STATUS = array('Completo','Aprobado','Cancelado','Reembolsado','Pendiente','Entregado');
+
+	//Productos por pagina
+	const CANTPORDHOME = 5;
+
+	//Para mostrar cuantos productos en la vista Tienda
+	const PROPORPAGINA = 3;
  ?>

@@ -2,13 +2,14 @@
 <html lang="es">
   <head>
     <meta charset="utf-8">
-    <meta name="description" content="Tienda Virtual MADDS_GT>
+    <meta name="description" content="Tienda Virtual. Venta de ropa de segunda y nueva en Guatemala. Prendas exclusivas!>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="YFDev">
-    <meta name="theme-color" content="#009688">
-    <link rel="shortcut icon" href="<?= media();?>/images/favicon.ico">
+    <meta name="theme-color" content="#c38a9e">
+    <link rel="shortcut icon" href="<?= media();?>/tienda/images/favicon.png">
     <title><?= $data['page_tag'] ?></title>
+    
     <!-- Main CSS-->
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/main.css">
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/bootstrap-select.min.css">
