@@ -47,6 +47,36 @@
 <!--===============================================================================================-->
 </head>
 <body class="animsition">
+
+	<!-- Modal PREGUNTAS FRECUENTES -->
+	<div class="modal fade" id="modalAyuda" tabindex="-1" aria-hidden="true">
+	  <div class="modal-dialog modal-lg">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title">Preguntas frecuentes</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+			<ul>
+				<li>-Recuerda no se aceptan cambios ni devoluciones.</li>
+				<li>-Si eres nuevo en la tienda y creas tu cuenta, tu contraseña te llegara a tu correo.</li>
+				<li>-Si tienes alguna duda con tu pedido, no dudes en ponerte en contacto con nosotros</li>
+			</ul>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<div id="divLoading" >
+      <div>
+        <img src="<?= media(); ?>/images/loading.svg" alt="Loading">
+      </div>
+   </div>
+
 	<div id="divLoading" >
             <div>
               <img src="<?= media(); ?>/images/loading.svg" alt="Loading">
@@ -61,21 +91,34 @@
 			<div class="top-bar">
 				<div class="content-topbar flex-sb-m h-full container">
 					<div class="left-top-bar">
-						Bienvenido usuario: Carlos Arana
+						<?php if(isset($_SESSION['login'])){ ?>
+						Bienvenido: <?= $_SESSION['userData']['nombres'].' '.$_SESSION['userData']['apellidos'] ?>
+						<?php } ?>
 					</div>
 
 					<div class="right-top-bar flex-w h-full">
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
-							Help & FAQs
+						<a href="#" class="flex-c-m trans-04 p-lr-25" data-toggle="modal" data-target="#modalAyuda">
+							Preguntas frecuentes
 						</a>
-
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
+					
+						<?php 
+							if(isset($_SESSION['login'])){
+						?>
+						<a href="<?= base_url() ?>/dashboard" class="flex-c-m trans-04 p-lr-25">
 							Mi cuenta
 						</a>
-
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
+						<?php } 
+							if(isset($_SESSION['login'])){
+						?>
+						<a href="<?= base_url() ?>/logout" class="flex-c-m trans-04 p-lr-25">
 							Salir
 						</a>
+						<?php }else{ ?>
+						<a href="<?= base_url() ?>/login" class="flex-c-m trans-04 p-lr-25" target="_blank">
+							Iniciar Sesión
+						</a>
+						<?php } ?>
+
 					</div>
 				</div>
 			</div>
@@ -163,23 +206,36 @@
 			<ul class="topbar-mobile">
 				<li>
 					<div class="left-top-bar">
-						Bienvenido Abel
+						<?php if(isset($_SESSION['login'])){ ?>
+						Bienvenido: <?= $_SESSION['userData']['nombres'].' '.$_SESSION['userData']['apellidos'] ?>
+						<?php } ?>
 					</div>
 				</li>
 
 				<li>
 					<div class="right-top-bar flex-w h-full">
-						<a href="#" class="flex-c-m p-lr-10 trans-04">
-							Help & FAQs
+						<a href="#" class="flex-c-m p-lr-10 trans-04" data-toggle="modal" data-target="#modalAyuda">
+							Preguntas Frecuentes
 						</a>
 
-						<a href="#" class="flex-c-m p-lr-10 trans-04">
+						<?php 
+							if(isset($_SESSION['login'])){
+						?>
+						<a href="<?= base_url() ?>/dashboard" class="flex-c-m trans-04 p-lr-25">
 							Mi cuenta
 						</a>
-
-						<a href="#" class="flex-c-m p-lr-10 trans-04">
+						<?php } 
+							if(isset($_SESSION['login'])){
+						?>
+						<a href="<?= base_url() ?>/logout" class="flex-c-m trans-04 p-lr-25">
 							Salir
 						</a>
+						<?php }else{ ?>
+						<a href="<?= base_url() ?>/login" class="flex-c-m trans-04 p-lr-25" target="_blank">
+							Iniciar Sesión
+						</a>
+						<?php } ?>
+
 					</div>
 				</li>
 			</ul>

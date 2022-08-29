@@ -1,10 +1,11 @@
+<!-- VISTA DE LOGIN DE PARTE ADMIN Y FRONTEND -->
 <!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="YBCode">
+    <meta name="author" content="YFDev">
     <meta name="theme-color" content="#009688">
     <link rel="shortcut icon" href="<?= media();?>/images/favicon.ico">
     <!-- Main CSS-->
@@ -22,7 +23,7 @@
     </section>
     <section class="login-content">
       <div class="logo">
-        <h1 class="logo_login"><?= $data['page_title']; ?></h1>
+        <h1 class="logo_login"><a href="<?= base_url(); ?>"><?= $data['page_title']; ?></a></h1>
       </div>
       <div class="login-box">
       <div id="divLoading" >
@@ -42,7 +43,7 @@
           </div>
           <div class="form-group">
             <div class="utility">
-              <p class="semibold-text mb-2"><a href="#" data-toggle="flip">¿Olvidaste tu contraseña?</a></p>
+              <p class="semibold-text mb-2"><a class = "reset_pass" href="#" data-toggle="flip">¿Olvidaste tu contraseña?</a></p>
             </div>
           </div>
           <div id="alertLogin" class="text-center"></div>

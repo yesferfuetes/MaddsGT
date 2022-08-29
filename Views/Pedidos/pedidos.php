@@ -19,8 +19,9 @@
               <div class="tile">
                 <div class="tile-body">
                   <div class="table-responsive">
+                    <br>
                     <table class="table table-hover table-bordered" id="tablePedidos"><!-- id de datatables -->
-                      <thead>
+                      <thead>                      
                         <tr>
                           <th>ID</th>
                           <th>Ref. / Transacción</th>

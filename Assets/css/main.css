@@ -162,14 +162,23 @@ sup {
 }
 
 a {
-  color: #404040;
+  color: rgb(255, 255, 255);
   text-decoration: none;
   background-color: transparent;
 }
 
 a:hover {
-  color: #004a43;
-  text-decoration: underline;
+  color: rgb(250, 240, 240);
+  text-decoration: none;
+}
+
+.reset_pass{
+  color: #343a40;
+}
+
+.reset_pass:hover{
+  color: rgb(12, 12, 12);
+  text-decoration: none;
 }
 
 a:not([href]):not([tabindex]) {
@@ -668,9 +677,9 @@ pre code {
 
 .col-4 {
   -webkit-box-flex: 0;
-      -ms-flex: 0 0 33.3333333333%;
+      /* -ms-flex: 0 0 33.3333333333%;
           flex: 0 0 33.3333333333%;
-  max-width: 33.3333333333%;
+  max-width: 33.3333333333%; */
 }
 
 .col-5 {
