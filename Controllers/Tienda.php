@@ -41,13 +41,28 @@
 				$arrParams = explode(",",$params);
 				$idcategoria = intval($arrParams[0]);
 				$ruta = strClean($arrParams[1]);
-				$infoCategoria = $this->getProductosCategoriaT($idcategoria,$ruta);
+				$pagina = 1;
+				if(count($arrParams) > 2 AND is_numeric($arrParams[2])){
+					$pagina = $arrParams[2];
+				}
+
+				$cantProductos = $this->cantProductos($idcategoria);
+				$total_registro = $cantProductos['total_registro'];
+
+				//PAGINADOR
+				$desde = ($pagina-1) * PROCATEGORIA;
+				$total_paginas = ceil($total_registro / PROCATEGORIA);
+
+				$infoCategoria = $this->getProductosCategoriaT($idcategoria,$ruta,$desde,PROCATEGORIA);
 
 				$categoria = strClean($params);
                 $data['page_tag'] = NOMBRE_EMPESA." - ".$infoCategoria['categoria'];
                 $data['page_title'] = $infoCategoria['categoria'];
                 $data['page_name'] = "categoria";
                 $data['productos'] = $infoCategoria['productos'];
+				$data['infoCategoria'] = $infoCategoria;
+				$data['pagina'] = $pagina;
+				$data['total_paginas'] = $total_paginas;
                 $this->views->getView($this,"categoria",$data);
 				
 			}

@@ -162,13 +162,13 @@ sup {
 }
 
 a {
-  color: rgb(255, 255, 255);
+  color: rgb(252, 252, 252);
   text-decoration: none;
   background-color: transparent;
 }
 
 a:hover {
-  color: rgb(250, 240, 240);
+  color: rgb(243, 223, 223);
   text-decoration: none;
 }
 
@@ -179,6 +179,10 @@ a:hover {
 .reset_pass:hover{
   color: rgb(12, 12, 12);
   text-decoration: none;
+}
+
+.fa-eye{
+  color: rgb(51, 51, 51);
 }
 
 a:not([href]):not([tabindex]) {
@@ -15000,9 +15004,9 @@ be a descendant of the grid when it is being dragged.
   font-size: 21px;
 }
 
-.app-sidebar__toggle:focus, .app-sidebar__toggle:hover {
+.app-sidebar__toggle:hover {
   color: #fff;
-  background-color: #00635a;
+  background-color: #ba6b6c;
   text-decoration: none;
 }
 

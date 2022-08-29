@@ -13,8 +13,9 @@
 <head>
 	<title><?= $data['page_tag']; ?></title>
 	<meta charset="UTF-8">
-	<meta name="description" content="Tienda Virtual. Venta de ropa de segunda y nueva en Guatemala. Prendas exclusivas!>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="content-language" content="es-gt">
+	<meta name="description" content="Tienda Virtual. Venta de ropa de segunda y nueva en Guatemala. Prendas exclusivas!">
 	<meta name="author" content="YFDev">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	

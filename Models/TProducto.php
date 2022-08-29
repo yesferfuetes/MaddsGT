@@ -82,16 +82,23 @@ trait TProducto{
 	}
 
 	/* MUESTRA LAS CATEGORIAS EN EL FRONTED/VIEWS/TIENDA.PHP */
-	public function getProductosCategoriaT(int $idcategoria, string $ruta){
+	public function getProductosCategoriaT(int $idcategoria, string $ruta, $desde = null, $porpagina = null){
 		$this->intIdcategoria = $idcategoria;
 		$this->strRuta = $ruta;
+
+		$where = "";
+		if(is_numeric($desde) AND is_numeric($porpagina)){
+			$where = " LIMIT ".$desde.",".$porpagina;
+		}
+
 		$this->con = new Mysql();
 
-		$sql_cat = "SELECT idcategoria,nombre FROM categoria WHERE idcategoria = '{$this->intIdcategoria}'";
+		$sql_cat = "SELECT idcategoria,nombre, ruta FROM categoria WHERE idcategoria = '{$this->intIdcategoria}'";
 		$request = $this->con->select($sql_cat);
 
 		if(!empty($request)){
 			$this->strCategoria = $request['nombre'];
+			$this->strRutaCategoria = $request['ruta'];
 
 			$sql = "SELECT p.idproducto,
 							p.codigo,
@@ -105,7 +112,8 @@ trait TProducto{
 					FROM producto p 
 					INNER JOIN categoria c
 					ON p.categoriaid = c.idcategoria
-					WHERE p.status != 0 AND p.stock >=1 AND p.categoriaid = $this->intIdcategoria AND c.ruta = '{$this->strRuta}'"; 
+					WHERE p.status != 0 AND p.stock >=1 AND p.categoriaid = $this->intIdcategoria AND c.ruta = '{$this->strRuta}'
+					ORDER BY p.idproducto DESC ".$where;
 					$request = $this->con->select_all($sql);
 					
 					if(count($request) > 0){
@@ -124,6 +132,7 @@ trait TProducto{
 						}
 					}
 					$request = array('idcategoria' => $this->intIdcategoria,
+									 'ruta' => $this->strRutaCategoria,
 									 'categoria' => $this->strCategoria,
 									 'productos' => $request
 				);
@@ -256,12 +265,12 @@ trait TProducto{
 	}
 
 	public function cantProductos($categoria = null){
-		/* $where = "";
+		$where = "";
 		if($categoria != null){
 			$where = " AND categoriaid = ".$categoria;
-		} */
+		}
 		$this->con = new Mysql();
-		$sql = "SELECT COUNT(*) as total_registro FROM producto WHERE status = 1 AND stock != 0 ";//.$where;
+		$sql = "SELECT COUNT(*) as total_registro FROM producto WHERE status = 1 AND stock != 0 ".$where;
 		$result_register = $this->con->select($sql);
 		$total_registro = $result_register;
 		return $total_registro;

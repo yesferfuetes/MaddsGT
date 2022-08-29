@@ -57,4 +57,7 @@
 
 	//Para mostrar cuantos productos en la vista Tienda
 	const PROPORPAGINA = 3;
+
+	//Para mostrar cuantos productos en la vista Categoria
+	const PROCATEGORIA = 2;
  ?>

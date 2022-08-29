@@ -272,12 +272,12 @@ $arrProductos = $data['productos'];
 					$nextPagina = $data['pagina'] + 1;
 			 ?>
 			<div class="flex-c-m flex-w w-full p-t-45">
-			<?php if($data['pagina'] > 1){ ?>
-				<a href="<?= base_url() ?>/tienda/page/<?= $prevPagina ?>" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04"> <i class="fas fa-chevron-left"></i>&nbsp; Anterior </a>&nbsp;&nbsp;
-			<?php } ?>
-			<?php if($data['pagina'] != $data['total_paginas']){ ?>
-				<a href="<?= base_url() ?>/tienda/page/<?= $nextPagina ?>" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04"> Siguiente &nbsp; <i class="fa-solid fa-angle-right"></i></a>
-			<?php } ?>
+				<?php if($data['pagina'] > 1){ ?>
+					<a href="<?= base_url() ?>/tienda/page/<?= $prevPagina ?>" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04"> <i class="fas fa-chevron-left"></i>&nbsp; Anterior </a>&nbsp;&nbsp;
+				<?php } ?>
+				<?php if($data['pagina'] != $data['total_paginas']){ ?>
+					<a href="<?= base_url() ?>/tienda/page/<?= $nextPagina ?>" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04"> Siguiente &nbsp; <i class="fa-solid fa-angle-right"></i></a>
+				<?php } ?>
 			</div>
 			<?php 
 				}
