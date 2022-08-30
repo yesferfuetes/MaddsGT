@@ -60,4 +60,7 @@
 
 	//Para mostrar cuantos productos en la vista Categoria
 	const PROCATEGORIA = 2;
+
+	//Para mostrar cuantos productos en la vista Buscar
+	const PROBUSCAR = 2;
  ?>

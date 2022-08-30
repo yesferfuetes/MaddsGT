@@ -466,5 +466,33 @@
 			$this->views->getView($this,"tienda",$data);
 		}
 
+		public function search(){
+			if(empty($_REQUEST['s'])){
+				header("Location: ".base_url());
+			}else{
+				$busqueda = strClean($_REQUEST['s']);
+			}
+
+			$pagina = empty($_REQUEST['p']) ? 1 : intval($_REQUEST['p']);
+			$cantProductos = $this->cantProdSearch($busqueda);
+
+			//PAGINADOR
+			$total_registro = $cantProductos['total_registro'];
+			$desde = ($pagina-1) * PROBUSCAR;
+			$total_paginas = ceil($total_registro / PROBUSCAR);
+
+			$data['productos'] = $this->getProdSearch($busqueda,$desde,PROBUSCAR);
+
+			$data['page_tag'] = NOMBRE_EMPESA;
+			$data['page_title'] = "Resultado de: ".$busqueda;
+			$data['page_name'] = "tienda";
+			$data['pagina'] = $pagina;
+			$data['total_paginas'] = $total_paginas;
+			$data['busqueda'] = $busqueda;
+			/* $data['categorias'] = $this->getCategorias(); */
+			$this->views->getView($this,"search",$data);
+
+		}
+
 	}
  ?>

@@ -274,11 +274,12 @@
 					<img src="<?= media()?>/tienda/images/icons/icon-close2.png" alt="CLOSE">
 				</button>
 
-				<form class="wrap-search-header flex-w p-l-15">
+				<form class="wrap-search-header flex-w p-l-15" method="get" action="<?= base_url() ?>/tienda/search">
 					<button class="flex-c-m trans-04">
 						<i class="zmdi zmdi-search"></i>
 					</button>
-					<input class="plh3" type="text" name="search" placeholder="Search...">
+					<input type="hidden" name="p" value="1">
+					<input class="plh3" type="text" name="s" placeholder="Buscar...">
 				</form>
 			</div>
 		</div>
