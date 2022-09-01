@@ -105,6 +105,19 @@
 			return $request;
 		}	
 
+		public function getCategoriasFooter(){
+			$sql = "SELECT idcategoria, nombre, descripcion, portada, ruta
+					FROM categoria WHERE  status = 1 AND idcategoria IN (".CAT_FOOTER.")";
+			$request = $this->select_all($sql);
+
+			/* ARMANDO URL DE LA PORTADA */
+			if(count($request) > 0){
+				for ($c=0; $c < count($request) ; $c++) { 
+					$request[$c]['portada'] = BASE_URL.'/Assets/images/uploads/'.$request[$c]['portada'];		
+				}
+			}
+			return $request;
+		}
 
 	}
  ?>

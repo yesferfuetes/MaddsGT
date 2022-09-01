@@ -251,4 +251,15 @@
         return $meses;
     }
 
+    function getCatFooter(){
+        require_once ("Models/CategoriasModel.php");
+
+        /* INSTANCIA DEL OBJETO */
+        $objCategoria = new CategoriasModel();
+        
+        $request = $objCategoria->getCategoriasFooter();
+
+        return $request;
+    }
+
  ?>

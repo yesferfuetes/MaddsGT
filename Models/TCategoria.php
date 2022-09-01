@@ -17,7 +17,8 @@ trait TCategoria{
 		return $request;
 	}
 
-	/* public function getCategorias(){
+	//PARA MOSTRAR CATEGORIAS EN EL BOTON CATEGORIAS
+	public function getCategorias(){
 		$this->con = new Mysql();
 		$sql = "SELECT c.idcategoria, c.nombre, c.portada, c.ruta, count(p.categoriaid) AS cantidad
 				FROM producto p 
@@ -32,7 +33,7 @@ trait TCategoria{
 			}
 		}
 		return $request;
-	} */
+	}
 }
 
  ?>

@@ -19,17 +19,21 @@
 		public function tienda()
 		{
 			$data['page_tag'] = NOMBRE_EMPESA;
-			$data['page_title'] = "Tienda Virtual";
+			$data['page_title'] = "Tienda Online";
 			$data['page_name'] = "tienda";
 			//$data['productos'] = $this->getProductosT();
 			$pagina = 1;
 			$cantProductos = $this->cantProductos();
 			$total_registro = $cantProductos['total_registro'];
+
+			//PAGINADOR
 			$desde = ($pagina-1) * PROPORPAGINA;
 			$total_paginas = ceil($total_registro / PROPORPAGINA);
+			
 			$data['productos'] = $this->getProductosPage($desde,PROPORPAGINA);
 			$data['pagina'] = $pagina;
 			$data['total_paginas'] = $total_paginas;
+			$data['categorias'] = $this->getCategorias();
 			$this->views->getView($this,"tienda",$data);			
 		}
 
@@ -63,6 +67,7 @@
 				$data['infoCategoria'] = $infoCategoria;
 				$data['pagina'] = $pagina;
 				$data['total_paginas'] = $total_paginas;
+				$data['categorias'] = $this->getCategorias();
                 $this->views->getView($this,"categoria",$data);
 				
 			}
@@ -462,7 +467,7 @@
 			$data['page_name'] = "tienda";
 			$data['pagina'] = $pagina;
 			$data['total_paginas'] = $total_paginas;
-			/* $data['categorias'] = $this->getCategorias(); */
+			$data['categorias'] = $this->getCategorias();
 			$this->views->getView($this,"tienda",$data);
 		}
 

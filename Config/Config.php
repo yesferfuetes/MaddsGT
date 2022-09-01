@@ -32,8 +32,10 @@
 	const EMAIL_EMPRESA = "info@maddsgt.com";
 	const EMAIL_PEDIDOS = "info@maddsgt.com";
 
+	//Datos para Banner, Slider Y Footer
 	const CAT_SLIDER = "12,13";
 	const CAT_BANNER = "12,13";
+	const CAT_FOOTER = "12,13";
 
 	//Datos para Encriptar / Desencriptar
 	const KEY = 'yesferdev';
@@ -56,11 +58,15 @@
 	const CANTPORDHOME = 5;
 
 	//Para mostrar cuantos productos en la vista Tienda
-	const PROPORPAGINA = 3;
+	const PROPORPAGINA = 2;
 
 	//Para mostrar cuantos productos en la vista Categoria
 	const PROCATEGORIA = 2;
 
 	//Para mostrar cuantos productos en la vista Buscar
 	const PROBUSCAR = 2;
+
+	//REDES SOLICIALES
+	const FACEBOOK = "https://facebook.com/maddsgt";
+	const INSTAGRAM = "https://instagram.com/maddsgt__";
  ?>

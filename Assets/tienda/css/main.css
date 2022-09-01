@@ -637,9 +637,9 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 }
 
 /*---------------------------------------------*/
-.main-menu > li.active-menu > a {
+/* .main-menu > li.active-menu > a {
   color: #6c7ae0;
-}
+} */
 
 
 
@@ -1223,9 +1223,10 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
   height: 100vh;
 }
 
+/* VISTA MOBIL */
 @media (max-width: 991px) {
   .item-slick1 {
-    height: calc(100vh - 70px) !important;
+    height: calc(100vh - 230px) !important;
   }
 }
 
@@ -3159,7 +3160,9 @@ input.num-product::-webkit-inner-spin-button {
   opacity: 1;
 }
 
-
+.linkFooter {
+  color: #fff;
+}
 
 
 /*==================================================================
