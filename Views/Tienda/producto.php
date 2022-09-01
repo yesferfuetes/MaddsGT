@@ -64,7 +64,7 @@ $rutacategoria = $arrProducto['categoriaid'].'/'.$arrProducto['ruta_categoria'];
 							<?= $arrProducto['nombre']; ?>
 						</h4>
 						<span class="mtext-106 cl2">
-							<?= SMONEY.formatMoney($arrProducto['precio']); ?>
+							<?= SMONEY." ".formatMoney($arrProducto['precio']); ?>
 						</span>
 						<!-- <p class="stext-102 cl3 p-t-23"></p> -->
 						
@@ -95,7 +95,7 @@ $rutacategoria = $arrProducto['categoriaid'].'/'.$arrProducto['ruta_categoria'];
 
 						<!-- ICONOS PARA COMPARTIR PRODUCTOS EN REDES -->
 						<div class="flex-w flex-m p-l-100 p-t-40 respon7">
-							<div class="flex-m bor9 p-r-10 m-r-11">
+							<!-- <div class="flex-m bor9 p-r-10 m-r-11">
 								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist">
 									<i class="zmdi zmdi-favorite"></i>
 								</a>
@@ -111,7 +111,7 @@ $rutacategoria = $arrProducto['categoriaid'].'/'.$arrProducto['ruta_categoria'];
 
 							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
 								<i class="fa fa-google-plus"></i>
-							</a>
+							</a> -->
 						</div>
 					</div>
 				</div>

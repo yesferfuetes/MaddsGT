@@ -53,7 +53,7 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
 			<div class="row">
 				<div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
 					<div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-l-25 m-r--38 m-lr-0-xl">
-						<div>
+						<div class="list">
                             <?php 
                                 //VERIFICANDO SI EXISTE VARIABLE DE SESION
                                 if(isset($_SESSION['login'])){

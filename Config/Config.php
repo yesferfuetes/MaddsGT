@@ -31,6 +31,7 @@
 	const TELEMPRESA = "36416799";
 	const EMAIL_EMPRESA = "info@maddsgt.com";
 	const EMAIL_PEDIDOS = "info@maddsgt.com";
+	const EMAIL_SUSCRIPCION = "info@maddsgt.com";
 
 	//Datos para Banner, Slider Y Footer
 	const CAT_SLIDER = "12,13";
@@ -46,7 +47,10 @@
 
 	//Modulos
 	const MCLIENTES = 3;
+	const MPRODUCTOS = 4;
 	const MPEDIDOS = 5;
+	const MCATEGORIAS = 6;
+	const MSUSCRIPTORES = 7;
 
 	//Roles
 	const RADMINISTRADOR = 1;

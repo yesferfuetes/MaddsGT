@@ -216,10 +216,6 @@
 	margin-bottom: 0;
 }
 
-.modal{
-	z-index: 9999;
-}
-
 /* WIDGETS */
 .widget-small {
 	transition: all 300ms;

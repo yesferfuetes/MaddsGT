@@ -499,5 +499,30 @@
 
 		}
 
+		public function suscripcion(){
+			if($_POST){
+				$nombre = ucwords(strtolower(strClean($_POST['nombreSuscripcion'])));
+				$email  = strtolower(strClean($_POST['emailSuscripcion']));
+
+				$suscripcion = $this->setSuscripcion($nombre,$email);
+
+				if($suscripcion > 0){
+					//creando array de respuesta
+					$arrResponse = array('status' => true, 'msg' => "Gracias por tu suscripción.");
+					//Enviar correo - descomentar en produccion
+					$dataUsuario = array('asunto' => "Nueva suscripción",
+										'email' => EMAIL_SUSCRIPCION,
+										'nombreSuscriptor' => $nombre,
+										'emailSuscriptor' => $email );
+					/* sendEmail($dataUsuario,"email_suscripcion"); */
+				}else{
+					$arrResponse = array('status' => false, 'msg' => "El email ya fue registrado.");
+				}
+				echo json_encode($arrResponse,JSON_UNESCAPED_UNICODE);
+
+			}
+			die();
+		}
+
 	}
  ?>
