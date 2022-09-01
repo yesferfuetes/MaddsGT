@@ -143,7 +143,11 @@ if(isset($_SESSION['arrCarrito']) and count($_SESSION['arrCarrito']) > 0){
 <?php }else{ ?>
 <br>
 <div class="container">
-	<p>No hay producto en el carrito <a href="<?= base_url() ?>/tienda"> Ver productos</a></p>
+	<div class="cart-empty-icon">
+		<i class="fa-solid fa-cart-shopping"></i>
+	</div>
+	<p class="cart-empty">No hay productos en el carrito!</p>
+	<p class="return-to-shop"><a href="<?= base_url() ?>/tienda"> Volver a la tienda</a></p>
 </div>
 <br>
 <?php 

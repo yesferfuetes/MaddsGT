@@ -250,3 +250,38 @@
 .ui-datepicker-calendar {
     display: none;
 }
+
+/* CARRITO VACIO */
+.cart-empty-icon {
+	text-align: center;
+	margin-bottom: 60px;
+	font-size: 100px;
+}
+
+.cart-empty {
+	font-size: 24px;
+	color: #252525;
+	font-weight: 600;
+	text-align: center;
+}
+
+.return-to-shop {
+	text-align: center;
+	margin-top: 30px;
+}
+
+.return-to-shop a{
+	text-decoration: none;
+	background: #ce5b7c;
+	color: #fff;
+	padding: 12px 24px;
+	display: inline-block;
+	border-radius: 25px;
+	font-size: 14px;
+	text-transform: uppercase;
+	transition: 0.4s;
+}
+
+.return-to-shop a:hover {
+	background: #fd79a8;
+}
