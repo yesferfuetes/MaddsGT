@@ -32,6 +32,7 @@
 	const EMAIL_EMPRESA = "info@maddsgt.com";
 	const EMAIL_PEDIDOS = "info@maddsgt.com";
 	const EMAIL_SUSCRIPCION = "info@maddsgt.com";
+	const EMAIL_CONTACTO = "info@maddsgt.com";
 
 	//Datos para Banner, Slider Y Footer
 	const CAT_SLIDER = "12,13";
