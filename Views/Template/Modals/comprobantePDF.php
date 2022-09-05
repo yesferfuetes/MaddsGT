@@ -123,6 +123,7 @@
 		<tbody>
 			<?php 
 				$subtotal = 0;
+				$total = 0;
 				foreach ($detalle as $producto) {
 					$importe = $producto['precio'] * $producto['cantidad'];
 					$subtotal = $subtotal + $importe;
@@ -146,7 +147,9 @@
 			</tr>
 			<tr>
 				<td colspan="3" class="text-right">Total:</td>
-				<td class="text-right"><?= SMONEY.' '.formatMoney($orden['monto']); ?></td>
+				<!-- <td class="text-right"><?= SMONEY.' '.formatMoney($orden['monto']); ?></td> -->
+				<?php $total = $subtotal + $orden['costo_envio']; ?>
+                <td class="text-right"><?= SMONEY.' '. formatMoney($total)?></td>
 			</tr>
 		</tfoot>
 	</table>

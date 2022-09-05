@@ -9,6 +9,7 @@ $(document).on('focusin', function(e) {
 });
 
 tableProductos = $('#tableProductos').dataTable( {
+    "responsive":true,
     "aProcessing":true,
     "aServerSide":true,
     "language": {

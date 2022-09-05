@@ -21,7 +21,7 @@
 				header("Location:".base_url().'/dashboard');
 			}
 			$data['page_tag'] = "Suscriptores";
-			$data['page_title'] = "SUSCRIPTORES <small>Tienda Online</small>";
+			$data['page_title'] = "SUSCRIPTORES";
 			$data['page_name'] = "suscriptores";
 			$data['page_functions_js'] = "functions_suscriptores.js";
 			$this->views->getView($this,"suscriptores",$data);

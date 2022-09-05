@@ -5,6 +5,7 @@ let divLoading = document.querySelector("#divLoading");
 document.addEventListener('DOMContentLoaded', function(){
 
     tableCategorias = $('#tableCategorias').dataTable( {
+        "responsive":true,
         "aProcessing":true,
         "aServerSide":true,
         "language": {

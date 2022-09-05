@@ -96,14 +96,14 @@
 
 
 	<!-- Banner -->
-	<div class="sec-banner bg0 p-t-80 p-b-50">
+	<div class="sec-banner bg0 p-t-95 p-b-55">
 		<div class="container">
 			<div class="row">
 				<?php 
 				for ($j=0; $j < count($arrBanner); $j++) {
 					$ruta = $arrBanner[$j]['ruta']; 
 				 ?>
-				<div class="col-md-6 col-xl-6 p-b-30 m-lr-auto">
+				<div class="col-md-6 p-b-30 m-lr-auto">
 					<!-- Block1 -->
 					<div class="block1 wrap-pic-w">
 						<img src="<?= $arrBanner[$j]['portada'] ?>" alt="<?= $arrBanner[$j]['nombre'] ?>">

@@ -21,10 +21,11 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
         </button>
       </div>
       <div class="modal-body">
-        <p>No se aceptan cambios ni devoluciones por tallas.</p>
-        <p>Se aceptan cambios unicamente si la prenda tiene daños que no se muestran en las fotos</p>
+        <ul>
+            <li>No se aceptan cambios ni devoluciones</li>
+        </ul>
         <br>
-        <p>MaddsGT!!</p>
+        <p>Team MaddsGT.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -96,6 +97,7 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
                                     <div class="tab-pane fade" id="registro" role="tabpanel" aria-labelledby="profile-tab">
                                         <br>
                                         <form id="formRegister"> 
+                                            <p>Recuerda, por seguridad tu contraseña estara llegando a tu correo electronico, puedes cambiarla despues en tu perfil.</p>
                                             <div class="row">
                                                 <div class="col col-md-6 form-group">
                                                     <label for="txtNombre">Nombres</label>

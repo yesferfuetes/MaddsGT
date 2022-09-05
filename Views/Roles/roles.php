@@ -14,8 +14,8 @@
         </h1>
         </div>
         <ul class="app-breadcrumb breadcrumb">
-          <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
-          <li class="breadcrumb-item"><a href="<?= base_url(); ?>/roles"></i> <?= $data['page_title'] ?></a></li>
+          <!-- <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>
+          <li class="breadcrumb-item"><a href="<?= base_url(); ?>/roles"></i> <?= $data['page_title'] ?></a></li> -->
         </ul>
       </div>
 
@@ -24,7 +24,7 @@
           <div class="tile">
             <div class="tile-body">
               <div class="table-responsive">
-                <table class="table table-hover table-bordered" id="tableRoles">
+                <table class="table table-hover table-bordered display nowrap" cellspacing="0" id="tableRoles">
                   <thead>
                     <tr>
                       <th>ID</th>

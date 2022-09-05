@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="YFDev">
-    <meta name="theme-color" content="#009688">
+    <meta name="theme-color" content="#c2899d">
     <link rel="shortcut icon" href="<?= media();?>/tienda/images/favicon.png">
     <!-- Main CSS-->
     <link rel="stylesheet" type="text/css" href="<?= media();?>/css/main.css">
@@ -20,7 +20,7 @@
     </section>
     <section class="login-content">
       <div class="logo">
-        <h1 class="logo_login"><a href="<?= base_url(); ?>"><?= $data['page_title']; ?></a></h1>
+        <h1 class="logo_login"><a href="<?= base_url(); ?>" target="_blank"><?= $data['page_title']; ?></a></h1>
       </div>
       <div class="login-box">
       <div id="divLoading" >

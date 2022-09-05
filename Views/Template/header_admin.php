@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/bootstrap-select.min.css">
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/js/datepicker/jquery-ui.min.css">
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.dataTables.min.css"/>
   </head>
   <body class="app sidebar-mini">
     <div id="divLoading" >

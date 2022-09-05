@@ -16,7 +16,11 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta http-equiv="content-language" content="es-gt">
 	<meta name="description" content="Tienda Virtual. Venta de ropa de segunda y nueva en Guatemala. Prendas exclusivas!">
-	<meta name="author" content="YFDev">
+	<meta name="author" content="yesferf">
+	<meta property="og:url" content="https://www.maddsgt.com/">
+	<meta property="og:site_name" content="MaddsGT">
+	<meta property="og:locale" content="es_GT">
+	<meta property="og:type" content="website">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
 	<link rel="icon" type="image/png" href="<?= media()?>/tienda/images/favicon.png"/>
@@ -64,9 +68,37 @@
 	      </div>
 	      <div class="modal-body">
 			<ul>
-				<li>-Recuerda no se aceptan cambios ni devoluciones.</li>
-				<li>-Si eres nuevo en la tienda y creas tu cuenta, tu contraseña te llegara a tu correo.</li>
-				<li>-Si tienes alguna duda con tu pedido, no dudes en ponerte en contacto con nosotros</li>
+				<p>¿Como realizo mi pedido?</p>
+				<li>Puedes ver el producto que mas te guste y agregarlo a tu carrito.</li>
+				<li>Dirígete a la sección carrito y procede a procesar tu pago</li>
+				<li>Se te pedira iniciar sesión o crear tu cuenta, si eres nuevo procede a crea tu cuenta</li>
+				<li>Se te pedira colocar tu dirreción de envio, por favor se especifico en esa parte</li>
+				<li>Acepta los terminos y condiciones(Favor de leerlos)</li>
+				<li>Selecciona tu metodo de pago.</li>
+				<li>Presiona Procesar pedido</li>
+				<li>Se te genera un no. de orden el cual puedes ver el estado en tu apartado mi cuenta y sección pedidos</li>
+			</ul>
+			<br>
+			<ul>
+				<p>¿Cuál es el costo de Envio?</p>
+				<li>El envió es adicional, es un costo de Q25 en la ciudad capital y municipios como Mixco, Villa Nueva, San Miguel Petapa y Carretera el Salvador el costo es de Q35.</li>
+				<li>Si es en la zona 3, el costo de envío es gratis!</li>
+			</ul>
+			<br>
+			<ul>
+				<p>¿Cuánto tiempo tardará en llegar mi pedido?</p>
+				<li>Si resides en la ciudad capital, la entrega se realizara en 1-2 días</li>
+				<li>Si eres de algun municipio de 1-3 días</li>
+			</ul>
+			<br>
+			<ul>
+				<p>¿Qué metodos de pago aceptan?</p>
+				<li>Por el momento solo pago en efectivo al momento de tu entrega</li>
+			</ul>
+			<br>
+			<ul>
+				<p>Recuerda puedes contactarnos si tienes alguna duda sobre de tu pedido</p>
+				<p>Team MaddsGt</p>
 			</ul>
 	      </div>
 	      <div class="modal-footer">

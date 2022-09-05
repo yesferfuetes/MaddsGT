@@ -306,7 +306,7 @@
 				$costo_envio = COSTOENVIO;
 				$existencia = 0;
 				$stock = 0;
-
+				
 				if(!empty($_SESSION['arrCarrito'])){
 
 					foreach ($_SESSION['arrCarrito'] as $pro) {

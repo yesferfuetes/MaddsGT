@@ -167,11 +167,6 @@ a {
   background-color: transparent;
 }
 
-a:hover {
-  color: rgb(243, 223, 223);
-  text-decoration: none;
-}
-
 .reset_pass{
   color: #343a40;
 }

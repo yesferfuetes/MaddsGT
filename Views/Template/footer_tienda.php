@@ -31,9 +31,9 @@
 					</h4>
 
 					<p class="stext-107 cl7 size-201">
-					<?= DIRECCION ?> <br>
-						Tel: <a class="linkFooter" href="tel:<?= TELEMPRESA ?>"><?= TELEMPRESA ?></a><br>
-						Email: <a class="linkFooter" href="mailto:<?= EMAIL_EMPRESA ?>"><?= EMAIL_EMPRESA ?></a>
+					<i class="fa-solid fa-location-dot"></i> <?= DIRECCION ?> <br>
+					<i class="fa-solid fa-phone"></i> Tel: <a class="linkFooter" href="tel:<?= TELEMPRESA ?>"><?= TELEMPRESA ?></a><br>
+					<i class="fa-solid fa-envelope"></i> Email: <a class="linkFooter" href="mailto:<?= EMAIL_EMPRESA ?>"><?= EMAIL_EMPRESA ?></a>
 					</p>
 
 					<div class="p-t-27">

@@ -2,6 +2,7 @@ let tablePedidos;
 let rowTable;
 
 tablePedidos = $('#tablePedidos').dataTable( {
+    "responsive":true,
     "aProcessing":true,
     "aServerSide":true,
     "language": {
