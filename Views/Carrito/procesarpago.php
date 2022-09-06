@@ -97,7 +97,7 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
                                     <div class="tab-pane fade" id="registro" role="tabpanel" aria-labelledby="profile-tab">
                                         <br>
                                         <form id="formRegister"> 
-                                            <p>Recuerda, por seguridad tu contraseña estara llegando a tu correo electronico, puedes cambiarla despues en tu perfil.</p>
+                                            <p>Recuerda, por seguridad y para validar tu cuenta la contraseña se genera automatica y te estara llegando a tu correo electronico, puedes cambiarla despues en tu perfil.</p>
                                             <div class="row">
                                                 <div class="col col-md-6 form-group">
                                                     <label for="txtNombre">Nombres</label>

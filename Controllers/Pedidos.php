@@ -6,9 +6,9 @@ class Pedidos extends Controllers{
 
     public function __construct()
     {
-		sessionStart();
+		//sessionStart();
         parent::__construct();
-        //session_start();//inicializando sesion
+        session_start();//inicializando sesion
         if(empty($_SESSION['login']))
         {
             header('Location: '.base_url().'/login');

@@ -206,7 +206,7 @@ trait TProducto{
 				FROM producto p 
 				INNER JOIN categoria c
 				ON p.categoriaid = c.idcategoria
-				WHERE p.status != 0 AND p.categoriaid = $this->intIdcategoria
+				WHERE p.status != 0 AND p.stock != 0 AND p.categoriaid = $this->intIdcategoria
 				ORDER BY $this->option LIMIT  $this->cant ";
 				$request = $this->con->select_all($sql);
 				if(count($request) > 0){

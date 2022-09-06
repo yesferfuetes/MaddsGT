@@ -33,7 +33,7 @@ if(isset($_SESSION['arrCarrito']) and count($_SESSION['arrCarrito']) > 0){
 									<th class="column-1">Producto</th>
 									<th class="column-2"></th>
 									<th class="column-3">Precio</th>
-									<th class="column-4">Cantidad</th>
+									<th class="column-4"></th>
 									<th class="column-5">Total</th>
 								</tr>
 							<?php 
@@ -52,7 +52,7 @@ if(isset($_SESSION['arrCarrito']) and count($_SESSION['arrCarrito']) > 0){
 									<td class="column-2"><?= $producto['producto'] ?></td>
 									<td class="column-3"><?= SMONEY.formatMoney($producto['precio']) ?></td>
 									<td class="column-4">
-										<div class="wrap-num-product flex-w m-l-auto m-r-0">
+										<div class="wrap-num-product flex-w m-l-auto m-r-0 notblock">
 											<!-- <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
 											idpr="<?= $idProducto ?>">
 												<i class="fs-16 zmdi zmdi-minus"></i>

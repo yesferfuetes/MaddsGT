@@ -10,7 +10,6 @@
 
 		public function __construct()
 		{
-			//sessionStart();
 			parent::__construct();
 			session_start();
 			$this->login = new LoginModel();

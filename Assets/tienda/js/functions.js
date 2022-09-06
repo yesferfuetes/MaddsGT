@@ -141,7 +141,7 @@ $('.js-pscroll').each(function(){
 	});
 } */
 
-/* FUNTION PARA REGISTRO DE CLIENTE */
+/* FUNTION PARA REGISTRO DE CLIENTE VISTA FRONTED */
 if(document.querySelector("#formRegister")){
     let formRegister = document.querySelector("#formRegister");
     formRegister.onsubmit = function(e) {

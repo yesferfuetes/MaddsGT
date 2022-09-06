@@ -40,6 +40,11 @@
           </div>
           <div class="form-group">
             <div class="utility">
+              <p class="semibold-text mb-2"><a href="<?= base_url() ?>/cuenta">¿No tienes cuenta? Crea una!</a></p>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="utility">
               <p class="semibold-text mb-2"><a class = "reset_pass" href="#" data-toggle="flip">¿Olvidaste tu contraseña?</a></p>
             </div>
           </div>
