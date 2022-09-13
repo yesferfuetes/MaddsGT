@@ -3,9 +3,10 @@
 	require_once("Models/TProducto.php");
 	require_once("Models/TTipoPago.php");
 	require_once("Models/TCliente.php");
+	require_once("Models/TTiposcostos.php");
 
 	class Carrito extends Controllers{
-		use TCategoria, TProducto, TTipoPago, TCliente;
+		use TCategoria, TProducto, TTipoPago, TCliente, TTiposcostos;
 		
 		public function __construct()
 		{
@@ -32,27 +33,14 @@
 			//dep($_SESSION);
 			//dep($mail);
 
-			/* if(isset($_SESSION['login'])){
-				$this->setDetalleTemp();
-			} */
 			$data['page_tag'] = NOMBRE_EMPESA.' - Procesar Pago';
 			$data['page_title'] = 'Procesar Pago';
 			$data['page_name'] = "procesarpago";
 
 			/* OBTENIENDO LOS DATOS DE TIPO DE PAGO */
 			$data['tiposPago'] = $this->getTiposPagoT();
+			//$data['costoszona'] = $this->getTiposcostosT();
 			$this->views->getView($this,"procesarpago",$data); 
 		}
-
-		/* OBTENIENDO DATOS PARA ALMACENARLOS EN TABLA TEMP */
-		/* public function setDetalleTemp(){
-			$sid = session_id();
-			$arrPedido = array('idcliente' => $_SESSION['idUser'],
-								'idtransaccion' =>$sid, //variable de sesion
-								'productos' => $_SESSION['arrCarrito']
-							);
-			$this->insertDetalleTemp($arrPedido);
-		} */
-
 	}
  ?>

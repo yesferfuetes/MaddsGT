@@ -10,8 +10,8 @@
 
 		public function __construct()
 		{
-			parent::__construct();
 			session_start();
+			parent::__construct();
 			$this->login = new LoginModel();
 		}
 
@@ -299,6 +299,7 @@
 				$personaid = $_SESSION['idUser'];
 				$monto = 0;
 				$tipopagoid = intval($_POST['inttipopago']);
+				$tipocostoid = intval($_POST['inttiposcostos']);
 				$direccionenvio = strClean($_POST['direccion']).', '.strClean($_POST['ciudad']);
 				$status = "Pendiente";
 				$subtotal = 0;
@@ -306,6 +307,13 @@
 				$existencia = 0;
 				$stock = 0;
 				
+				/* if($tipocostoid == 1 and $tipocostoid == 2 and $tipocostoid == 4 and $tipocostoid == 5 and $tipocostoid == 7 and $tipocostoid == 9 and $tipocostoid == 10 and $tipocostoid == 11 ){
+					$costo_envio = 25;
+				}else if($tipocostoid == 3){
+					$costo_envio = 0;
+				}
+				dep($costo_envio);
+				exit; */
 				if(!empty($_SESSION['arrCarrito'])){
 
 					foreach ($_SESSION['arrCarrito'] as $pro) {

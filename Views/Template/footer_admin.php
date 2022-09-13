@@ -35,6 +35,6 @@
     
     <script type="text/javascript" src="<?= media(); ?>/js/functions_admin.js"></script>
 
-    <script src="<?= media(); ?>/js/<?= $data['page_functions_js']; ?>"></script>
+    <script src="<?= media(); ?>/js/<?= $data['page_functions_js'];?>?2022091201"></script>
   </body>
 </html>

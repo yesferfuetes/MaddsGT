@@ -11,9 +11,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-	<title><?= $data['page_tag']; ?></title>
+
+<!-- Google tag (gtag.js) Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-13K4G84DNP"></script>
+	<script>
+  		window.dataLayer = window.dataLayer || [];
+  		function gtag(){dataLayer.push(arguments);}
+  		gtag('js', new Date());
+
+  		gtag('config', 'G-13K4G84DNP');
+	</script>
+<!-- End Google tag (gtag.js) Google Analytics -->
+
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="theme-color" content="">
+
+	<title><?= $data['page_tag']; ?></title>
 	<meta http-equiv="content-language" content="es-gt">
 	<meta name="description" content="Tienda Virtual. Venta de ropa de segunda y nueva en Guatemala. Prendas exclusivas!">
 	<meta name="author" content="yesferf">
@@ -21,7 +36,8 @@
 	<meta property="og:site_name" content="MaddsGT">
 	<meta property="og:locale" content="es_GT">
 	<meta property="og:type" content="website">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+
 <!--===============================================================================================-->	
 	<link rel="icon" type="image/png" href="<?= media()?>/tienda/images/favicon.png"/>
 <!--===============================================================================================-->
@@ -74,9 +90,9 @@
 				<li>Se te pedira iniciar sesión o crear tu cuenta, si eres nuevo procede a crea tu cuenta</li>
 				<li>Se te pedira colocar tu dirreción de envio, por favor se especifico en esa parte</li>
 				<li>Acepta los terminos y condiciones(Favor de leerlos)</li>
-				<li>Selecciona tu metodo de pago.</li>
+				<li>Selecciona tu metodo de pago</li>
 				<li>Presiona Procesar pedido</li>
-				<li>Se te genera un no. de orden el cual puedes ver el estado en tu apartado mi cuenta y sección pedidos</li>
+				<li>Se te generara un numero de orden, puedes ver el estado de tu pedido en tu cuenta, apartado pedidos</li>
 			</ul>
 			<br>
 			<ul>
@@ -97,7 +113,7 @@
 			</ul>
 			<br>
 			<ul>
-				<p>Recuerda puedes contactarnos si tienes alguna duda sobre de tu pedido</p>
+				<p>Recuerda puedes contactarnos si tienes alguna duda sobre de tu pedido o cualquier otra consulta</p>
 				<p>Team MaddsGt</p>
 			</ul>
 	      </div>

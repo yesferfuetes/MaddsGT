@@ -5,8 +5,8 @@
 		public function __construct()
 		{
 			//sessionStart();//se coloca antes del constructor para que no de error: no muestra nada
-			parent::__construct();
 			session_start();
+			parent::__construct();
 			//session_regenerate_id(true);
 			if(empty($_SESSION['login']))
 			{

@@ -2,14 +2,15 @@
 <html lang="es">
   <head>
     <meta charset="utf-8">
-    <meta name="description" content="Tienda Virtual. Venta de ropa de segunda y nueva en Guatemala. Prendas exclusivas!">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="YFDev">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title><?= $data['page_tag'] ?></title>
+    <meta name="description" content="Tienda Virtual. Venta de ropa de segunda y nueva en Guatemala. Prendas exclusivas!">
+    <meta name="author" content="Yesferf">
     <meta name="theme-color" content="#c38a9e">
     <link rel="shortcut icon" href="<?= media();?>/tienda/images/favicon.png">
-    <title><?= $data['page_tag'] ?></title>
-    
+
     <!-- Main CSS-->
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/main.css">
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/bootstrap-select.min.css">

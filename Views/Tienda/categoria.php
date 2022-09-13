@@ -97,7 +97,13 @@ $arrProductos = $data['productos'];
                 }
 			}else{
 				?>
-				<p>No hay productos para mostrar <a href="<?= base_url() ?>/tienda"> Ver productos</a></p>
+				<div class="container">
+					<div class="man-empty-icon">
+						<i class="fa-solid fa-person"></i>
+						<p>Por el momento no tenemos productos de esta categoría, espéralos pronto!</p>	
+					</div>	
+						
+				</div>
 			<?php
 			}
                 ?>
@@ -122,7 +128,8 @@ $arrProductos = $data['productos'];
 				}
 			 ?>
 		</div>
-	</div>   
+	</div>
+	<br>
 <?php 
 	footerTienda($data);
 ?>

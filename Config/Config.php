@@ -60,16 +60,16 @@
 	const STATUS = array('Completo','Aprobado','Cancelado','Reembolsado','Pendiente','Entregado');
 
 	//Productos por pagina
-	const CANTPORDHOME = 5;
+	const CANTPORDHOME = 10;
 
 	//Para mostrar cuantos productos en la vista Tienda
-	const PROPORPAGINA = 2;
+	const PROPORPAGINA = 10;
 
 	//Para mostrar cuantos productos en la vista Categoria
-	const PROCATEGORIA = 2;
+	const PROCATEGORIA = 10;
 
 	//Para mostrar cuantos productos en la vista Buscar
-	const PROBUSCAR = 2;
+	const PROBUSCAR = 10;
 
 	//REDES SOLICIALES
 	const FACEBOOK = "https://facebook.com/maddsgt";

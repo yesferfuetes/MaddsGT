@@ -8,9 +8,9 @@ class Cuenta extends Controllers{
 
     public function __construct()
     {
-        parent::__construct();
         session_start();
-
+        parent::__construct();
+        
         //instancia del modelo de login
         $this->login = new LoginModel();        
     }

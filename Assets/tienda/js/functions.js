@@ -336,7 +336,8 @@ if(document.querySelector("#btnComprar")){
 		let dir = document.querySelector("#txtDireccion").value;
 	    let ciudad = document.querySelector("#txtCiudad").value;
 	    let inttipopago = document.querySelector("#listtipopago").value; 
-	    if( txtDireccion == "" || txtCiudad == "" || inttipopago =="" ){
+		//let inttiposcostos = document.querySelector("#listtipocostos").value;
+	    if( txtDireccion == "" || txtCiudad == "" || inttipopago ==""){
 			swal("", "Complete datos de envío" , "error");
 			return;
 		}else{
@@ -351,6 +352,7 @@ if(document.querySelector("#btnComprar")){
 		    formData.append('direccion',dir);    
 		   	formData.append('ciudad',ciudad);
 			formData.append('inttipopago',inttipopago);
+			//formData.append('inttiposcostos',inttiposcostos);
 		   	request.open("POST",ajaxUrl,true);
 		    request.send(formData);
 		    request.onreadystatechange = function(){

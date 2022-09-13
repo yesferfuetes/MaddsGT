@@ -77,7 +77,8 @@ tableProductos = $('#tableProductos').dataTable( {
 
 window.addEventListener('load', function() {
 
-    //CREAR UN PRODUCTO
+    
+    /* CREAR UN PRODUCTO */
     if(document.querySelector("#formProductos")){
         let formProductos = document.querySelector("#formProductos");
         formProductos.onsubmit = function(e) {
@@ -115,7 +116,6 @@ window.addEventListener('load', function() {
                         swal("", objData.msg ,"success");
                         document.querySelector("#idProducto").value = objData.idproducto;
                         document.querySelector("#containerGallery").classList.remove("notblock");
-                       
                         if(rowTable == ""){
                             tableProductos.api().ajax.reload();
                         }else{
@@ -439,5 +439,6 @@ function openModal()
     document.querySelector("#containerGallery").classList.add("notblock");
     document.querySelector("#containerImages").innerHTML = "";
     $('#modalFormProductos').modal('show');
-
+    $('#listCategoria').selectpicker('render');
+    $('#listStatus').selectpicker('render');
 }

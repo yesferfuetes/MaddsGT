@@ -186,7 +186,27 @@ foreach ($_SESSION['arrCarrito'] as $producto) {
                                 <label for="condiciones"> Aceptar </label>
                                 <a href="#" data-toggle="modal" data-target="#modalTerminos" > Términos y Condiciones </a>
                             </div>
-                            
+
+                            <!-- <div id="divtipocostos">
+                                <br>
+                                        <label for="listtipocostos">Zonas</label>
+                                        <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
+                                            <select id="listtipocostos" class="js-select2" name="listtipocostos">
+                                            <?php 
+                                            if(count($data['costoszona']) > 0){ 
+                                                foreach ($data['costoszona'] as $tipocostos) {
+                                                    //condicional para mostrar tipos de pago
+                                            ?>
+                                            <option value="<?= $tipocostos['idzona']?>"><?= $tipocostos['zona']?></option>
+                                        <?php                                                   
+                                                }
+                                        } ?>
+                                            </select>
+                                            <div class="dropDownSelect2"></div>
+                                        </div>
+                                        <br>
+                            </div> -->
+
                             <div id="optMetodoPago" class="notblock">   
                                 <hr>                         
                                 <h4 class="mtext-109 cl2 p-b-30">

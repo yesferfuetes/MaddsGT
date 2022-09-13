@@ -1252,7 +1252,7 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 /* VISTA MOBIL */
 @media (max-width: 991px) {
   .item-slick1 {
-    height: calc(100vh - 230px) !important;
+    height: calc(100vh - 350px) !important;
   }
 }
 

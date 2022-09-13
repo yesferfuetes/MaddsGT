@@ -298,3 +298,16 @@
 	list-style: initial;
 	margin-left: 20px;
 }
+
+/* CATEGORIA HOMBRE VACIO */
+.man-empty-icon {
+	text-align: center;
+	margin-bottom: 10px;
+	font-size: 60px;
+}
+
+.man-empty-icon p {
+	font-size: 20px;
+	color: #252525;
+	text-align: center;
+}
